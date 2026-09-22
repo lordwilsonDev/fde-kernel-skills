@@ -9,6 +9,7 @@ import sys, os, hashlib, datetime, re
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import config
+import registry  # coverage of closed-family drift by newer registry families (covered_drift)
 
 RUNS = config.RUNS
 FILES = ["kernel.py", "driver.py", "simulator.py", "schema.sql"]
@@ -48,6 +49,33 @@ def safe_world(w):
 
 now = lambda: datetime.datetime.now(datetime.UTC).isoformat()
 path = lambda w: os.path.join(RUNS, f"PREREG_{safe_world(w)}.md")
+
+
+def _latest_freeze(world):
+    """(frozen-hashes, source label): the last addendum's full hashes if any, else the original registration."""
+    s = open(path(world)).read()
+    adds = re.findall(r"Frozen-hashes \(full\) at addendum: (.*)", s)
+    if adds:
+        return dict(kv.split("=", 1) for kv in adds[-1].split()), f"addendum #{len(adds)}"
+    return {f: (re.search(rf"- {re.escape(f)}: ([0-9a-f]{{64}})", s) or [None, None])[1] for f in files(world)}, "original registration"
+
+
+def _registered_at(world):
+    """ISO registration time; '' if unparseable = older than every registry record
+    (true by construction: the registry replaced prereg from M008 onward)."""
+    try:
+        return re.search(r"Registered ([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.+-]+)", open(path(world)).read()).group(1)
+    except (AttributeError, OSError):
+        return ""
+
+
+def _advanced_under(world, changed):
+    """Drift re-frozen VERBATIM by a NEWER registry family: {file: 'WORLD vN'}.
+    Closed families stay verifiable while the next family evolves shared code;
+    without such a registration every changed file stays a mismatch (red)."""
+    if not changed:
+        return {}
+    return registry.covered_drift(_registered_at(world), changed, {f: h(f) for f in changed}, runs=RUNS)
 
 
 def new(world, arms, predictions):
@@ -95,43 +123,35 @@ def addendum(world, text, refreeze=False):
 
 
 def _mismatches(world):
-    s = open(path(world)).read()
-    adds = re.findall(r"Frozen-hashes \(full\) at addendum: (.*)", s)
-    frozen = (
-        dict(kv.split("=", 1) for kv in adds[-1].split())
-        if adds
-        else {
-            f: (re.search(rf"- {re.escape(f)}: ([0-9a-f]{{64}})", s) or [None, None])[1]
-            for f in files(world)
-        }
-    )
-    return [f for f in files(world) if frozen.get(f) != h(f)]
+    """Files not matching the latest freeze, MINUS drift covered by a newer registry family."""
+    frozen, _ = _latest_freeze(world)
+    changed = [f for f in files(world) if frozen.get(f) != h(f)]
+    cov = _advanced_under(world, changed)
+    return [f for f in changed if f not in cov]
 
 
 def verify(world):
-    """Checks the code against the LATEST freeze: the last addendum's full hashes if any, else the original registration."""
+    """Checks the code against the LATEST freeze: the last addendum's full hashes if any, else the original registration.
+    Drift whose current hash is re-frozen by a NEWER registry family prints as advanced-under and exits 0; everything else still exits 1."""
     if not os.path.exists(path(world)):
         sys.exit(f"no registration for {world}")
-    s = open(path(world)).read()
-    bad = []
-    adds = re.findall(r"Frozen-hashes \(full\) at addendum: (.*)", s)
-    if adds:
-        frozen = dict(kv.split("=", 1) for kv in adds[-1].split())
-        src = f"addendum #{len(adds)}"
-    else:
-        frozen = {
-            f: (re.search(rf"- {re.escape(f)}: ([0-9a-f]{{64}})", s) or [None, None])[1]
-            for f in files(world)
-        }
-        src = "original registration"
-    for f in files(world):
-        if not frozen.get(f):
-            bad.append(f"{f}: not registered")
-            continue
-        if frozen[f] != h(f):
-            bad.append(f"{f}: CHANGED since {src}")
-    print(f"OK: code matches {src}" if not bad else "MISMATCH:\n  " + "\n  ".join(bad))
-    sys.exit(1 if bad else 0)
+    frozen, src = _latest_freeze(world)
+    unknown = [f for f in files(world) if not frozen.get(f)]
+    changed = [f for f in files(world) if frozen.get(f) and frozen[f] != h(f)]
+    cov = _advanced_under(world, changed)
+    bad = [f"{f}: not registered" for f in unknown] + [
+        f"{f}: CHANGED since {src}" for f in changed if f not in cov
+    ]
+    if bad:
+        print("MISMATCH:\n  " + "\n  ".join(bad))
+        sys.exit(1)
+    via = (
+        f" (tree advanced under {', '.join(sorted(set(cov.values())))}: {', '.join(sorted(cov))})"
+        if cov
+        else ""
+    )
+    print(f"OK: code matches {src}{via}")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

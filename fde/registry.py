@@ -5,6 +5,7 @@ Layout:  runs/registrations/<WORLD>/v<N>/{registration.json, PREREG.md, PREDICTI
 - Addenda are hash-chained (each carries the previous record's hash) and can only CLARIFY or REPORT A DEVIATION. They never change the freeze:
   any change to a frozen file, the arms, thresholds, predictions, scoring, stopping rules or guard is a NEW version (register vN+1), which supersedes vN.
 - verify checks: known world, contiguous versions, record hashes, chain, body/prediction hashes, every frozen file hash, and that the version is not superseded.
+- file drift is red UNLESS a NEWER active registration re-freezes the current hash verbatim (covered_drift): that is how a completed family stays verifiable while the next family evolves shared code. Older records never cover; before the newer registration exists the drift stays visible (no silent window).
 Usage:
   registry.py register <WORLD> <N> --body <md> --predictions <md> --files a,b,c [--supersedes-reason "text"]     (files relative to fde/)
   registry.py amend <WORLD> <N> clarification|deviation "text"
@@ -16,7 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import config
 
-REGISTERED_WORLDS = {"M003", "M004", "M005", "M006", "M007", "M008"}
+REGISTERED_WORLDS = {"M003", "M004", "M005", "M006", "M007", "M008", "M009"}  # M009: next family (design drafted; no registration exists yet -> verify raises NO_REGISTRATION, not UNKNOWN_WORLD)
 WORLD_RE = re.compile(r"^M[0-9]{3}$", re.ASCII)
 sha = lambda b: hashlib.sha256(b).hexdigest()
 now = lambda: datetime.datetime.now(datetime.UTC).isoformat()
@@ -80,10 +81,48 @@ def _seal(rec):
     return rec
 
 
-def _record_ok(rec):
-    return rec.get("record_sha256") == sha(
-        canon({k: v for k, v in rec.items() if k != "record_sha256"})
-    )
+def _record_ok(rec): return rec.get("record_sha256") == sha(canon({k: v for k, v in rec.items() if k != "record_sha256"}))
+
+
+def covered_drift(created_utc, bad, cur, runs=None):
+    """{file: "WORLD vN"} for each file in `bad` whose CURRENT hash (from `cur`) is
+    re-frozen verbatim by a NEWER active registration of any world.
+
+    Only a freeze created after this record can legitimize a change made after this
+    record; older registrations never cover, so nothing is whitewashed retroactively.
+    Before any newer registration exists the drift stays uncovered (red): the
+    tamper-evidence never opens a silent window, and one `register` by the next
+    family closes it legitimately. Ordering is per-second — a registration in the
+    same second as `created_utc` does not cover (conservative on ties).
+    """
+    bad = list(bad); mine = created_utc or ""
+    root = os.path.join(runs or config.RUNS, "registrations")
+    covering: dict = {}
+    if not bad or not os.path.isdir(root):
+        return covering
+    for w in sorted(os.listdir(root)):
+        wd = os.path.join(root, w)
+        if not WORLD_RE.fullmatch(w) or not os.path.isdir(wd):
+            continue
+        vs = sorted(int(d[1:]) for d in os.listdir(wd) if re.fullmatch(r"v[0-9]+", d))
+        if not vs:
+            continue
+        d = os.path.join(wd, f"v{vs[-1]}")
+        if os.path.exists(os.path.join(d, "superseded_by.json")):
+            continue  # superseded records do not legitimize anything
+        try:
+            r = json.load(open(os.path.join(d, "registration.json")))
+        except Exception:
+            continue  # unreadable record = no claim (stays red, never crashes verify)
+        if not _record_ok(r) or r.get("world") != w or (r.get("created_utc") or "") <= mine:
+            continue
+        files_ = r.get("files") or {}
+        for f in bad:
+            if f not in covering and cur.get(f) is not None and files_.get(f) == cur[f]:
+                covering[f] = f"{w} v{vs[-1]}"
+        if len(covering) == len(bad):
+            break
+    return covering
 
 
 def register(world, n, body, predictions, files, runs=None, supersedes_reason=None):
@@ -280,10 +319,20 @@ def verify(world, n=None, runs=None, allow_file_drift=False):
         cur = file_hashes(list(rec["files"]))
         bad = [f for f in rec["files"] if cur[f] != rec["files"][f]]
         if bad:
-            raise RegistryError(
-                "FROZEN_FILE_CHANGED",
-                f"changed since registration: {bad}. A change to the freeze needs a new version (register N+1), not an addendum.",
-            )
+            cov = covered_drift(rec.get("created_utc"), bad, cur, runs)
+            uncovered = [f for f in bad if f not in cov]
+            if uncovered:
+                extra = (
+                    f" Drift already re-frozen by a newer registration (not an excuse for the rest): {sorted(cov)}."
+                    if cov
+                    else ""
+                )
+                raise RegistryError(
+                    "FROZEN_FILE_CHANGED",
+                    f"changed since registration: {uncovered}. A change to the freeze needs a new version (register N+1), not an addendum.{extra}",
+                )
+            rec = dict(rec)
+            rec["covered_drift_by"] = cov
     return rec
 
 
@@ -353,7 +402,12 @@ def _cli(a):
         elif c == "status" and len(a) == 3:
             try:
                 r = verify(a[2])
-                print(f"{a[2]} v{r['version']}: ACTIVE, intact ({r['record_sha256'][:12]})")
+                via = (
+                    f", tree advanced under {', '.join(sorted(set(r['covered_drift_by'].values())))}"
+                    if r.get("covered_drift_by")
+                    else ""
+                )
+                print(f"{a[2]} v{r['version']}: ACTIVE, intact ({r['record_sha256'][:12]}){via}")
             except RegistryError as e:
                 print(f"{a[2]}: NOT ACTIVE ({e.code}: {e.msg})")
         else:

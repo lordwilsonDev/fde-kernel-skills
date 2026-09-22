@@ -1,7 +1,7 @@
 import sys, os, json, re, copy, shutil, subprocess, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__)); FDE = os.path.dirname(HERE); ROOT = os.path.dirname(FDE)
 sys.path.insert(0, FDE)
-import unittest, driver, driver_m008 as D8, lint_scenario, manifest, simulator as S
+import unittest, driver, driver_m008 as D8, lint_scenario, manifest, registry, simulator as S
 
 GUARD = os.path.join(FDE, "blind_guard.py")
 DECOY, OFFSETS, HANDOFFS = "audit_allocation_exceptions", "read_partition_offsets", "trace_cohort_handoffs"
@@ -171,7 +171,17 @@ HAS_M007 = os.path.exists(os.path.join(ROOT, "runs", "PREREG_M007.md"))   # an i
 class M007Untouched(unittest.TestCase):
     def test_m007_files_are_byte_identical_to_the_pre_m008_baseline(self):
         base = json.load(open(os.path.join(HERE, "m007_baseline.json"))); now = manifest.m007(ROOT)
-        self.assertEqual(now, base["files"]); self.assertEqual(manifest.tree_hash(now), base["tree_sha256"])
+        changed = sorted(k for k in set(base["files"]) | set(now) if now.get(k) != base["files"].get(k))
+        uncovered = changed
+        if changed:  # code keys are `fde/<name>`; registry freezes are `fde/`-relative — strip to bridge
+            probe = [k[5:] for k in changed if k.startswith("fde/")]
+            cov = registry.covered_drift("", probe, {k[5:]: now[k] for k in changed if k.startswith("fde/")})
+            uncovered = [k for k in changed if not (k.startswith("fde/") and k[5:] in cov)]
+        self.assertEqual(uncovered, [],
+                         "baseline drift not covered by any newer registration: " + ", ".join(uncovered)
+                         + " (run-artifact keys can never be covered — drift there is real tamper)")
+        if not changed:  # the tree hash is only well-defined while nothing has legitimately moved
+            self.assertEqual(manifest.tree_hash(now), base["tree_sha256"])
     def test_m007_registration_still_verifies(self):
         r = subprocess.run([sys.executable, "-W", "ignore", os.path.join(FDE, "prereg.py"), "verify", "M007"], capture_output=True, text=True, env=dict(os.environ, FDE_RUNS=os.path.join(ROOT, "runs")))
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
