@@ -11,7 +11,7 @@ import sys, os, re, json, glob, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import config, kernel as K, driver, report
 try: import driver_m008   # M008 scoring needs the orchestrator-side private evaluator
-except ImportError: driver_m008 = None
+except ImportError: driver_m008 = None  # type: ignore[assignment]  # optional M008 module
 
 today = lambda: datetime.date.today().isoformat()
 
