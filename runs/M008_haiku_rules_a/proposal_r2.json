@@ -1,0 +1,98 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "Carrier Operations implies knowledge of a lag on the affected feed and requires slot corrections before replay allocations can run safely.",
+      "kind": "observation",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "corroboration": "Carrier Ops statement uses language 'affected feed and its lag' and prescribes slot correction before allocation replay, suggesting they have identified a lag condition.",
+      "limitation": "Carrier Ops does not explicitly state what the lag is, where it originates (dock congestion, carrier capacity, feed processing delay), or whether it's specific to split-reservation format orders. Requires dock capacity check to isolate the blockage point."
+    },
+    {
+      "claim_id": "C9",
+      "statement": "East-node carrier feed experiences a lag or blockage preventing pickup of EXC-0921 orders; this lag appears correlated with v18 deployment but may be independent infrastructure issue.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_e02", "m8_r_exceptions"],
+      "corroboration": "Timing (v18 at 22:00, lag apparent at 06:00), geography (east-node only), and Carrier Ops language all point to feed lag. Inventory control and dock schedule visual check found nothing obvious, but observability gap (m8_e09) means we cannot yet see carrier-side confirmation.",
+      "limitation": "Lag exists but root cause unknown: is it (a) v18 split-reservation format incompatible with carrier protocol, triggering their lag, (b) east-node dock is saturated, or (c) independent carrier feed issue coincidentally timed with v18? Dock capacity check will discriminate."
+    },
+    {
+      "claim_id": "C10",
+      "statement": "Root cause is carrier-feed lag on east-node lanes preventing pickup of v18-allocated split-reservation orders, trigger unknown.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_r_exceptions", "m8_e02"],
+      "corroboration": "All evidence converges on lag: Carrier Ops prescribes slot corrections, observability alert is geographic (east-node only), inventory counts reconcile, and Inventory Control audit shows 100% of EXC-0921 orders are held.",
+      "limitation": "Lag is confirmed but root cause within the lag is not. Is it dock congestion, carrier capacity, or split-reservation incompatibility? Dock capacity check needed to determine whether to revert v18 or apply slot corrections."
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "Regression suite was green and change review passed for v18.",
+      "claim_b": "v18 deployment correlates with carrier feed lag on east-node lanes.",
+      "description": "Regression suite may not have tested carrier-feed lag scenarios or may have used test data that did not expose the pattern. Or the lag is truly independent and timing is coincidental.",
+      "discriminating_evidence_needed": "Dock capacity check will discriminate: if dock is saturated, lag may be independent of v18; if dock is normal, split-reservation format or east-node allocation pattern from v18 likely triggered lag."
+    }
+  ],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2_refined",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5_split",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "East-node dock capacity, queue depth, and congestion status during 06:00-current window.",
+      "reason": "Discriminates whether lag is dock-saturation (independent of v18) or carrier-integration (v18-triggered). If dock is normal, split-reservation format likely caused carrier rejection; if dock is saturated, may be unrelated infrastructure issue."
+    },
+    {
+      "capability": "Carrier-side confirmation: do they see and accept split-reservation format, or do they reject it?",
+      "reason": "Would discriminate C6 (format incompatibility) from C9 (feed lag). Currently uncertain whether carriers cannot see orders, cannot process format, or simply have logistical lag."
+    }
+  ],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Verify east-node dock capacity, queue depth, and congestion during the 06:00-current window. If dock is at capacity or backed up, lag is likely infrastructure-limited and independent of v18; if dock is normal, v18's split-reservation pattern likely triggered carrier feed lag. This discriminates root cause: revert v18 (if carrier format incompatibility) vs. apply slot corrections (if dock saturation)",
+    "expected_information_gain": "High. Dock capacity check isolates the root cause mechanism within the confirmed carrier-feed lag, enabling decision between revert_allocation_ruleset and apply_slot_correction mitigations."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_slot_correction_failed",
+      "statement": "Slot correction mitigation ran but was applied to the wrong feed before affected feed was identified; orders remain stuck in 'allocated, awaiting pickup'.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "inf_precondition_violation",
+      "statement": "Mitigation executed without satisfying m8_r_owner precondition: 'corrections must run only after the affected feed and its lag are identified.' This caused wrong-feed application and failure.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff", "m8_r_owner"],
+      "limitation": "Mitigation was reversible per m8_r_owner; failure is procedural not technical."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Identify the specific carrier feed affected by EXC-0921 orders and confirm its lag characteristics. This diagnostic satisfies the precondition (identify affected feed and its lag) that must be met before re-attempting slot correction. Once feed lag is confirmed, slot correction can be applied to the correct feed with expected outcome."
+  }
+}

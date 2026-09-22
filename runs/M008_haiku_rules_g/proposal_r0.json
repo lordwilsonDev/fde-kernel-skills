@@ -1,0 +1,57 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Orders allocated to east node overnight are stuck in 'allocated, awaiting pickup' state since 06:00.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e02", "m8_e10"],
+      "corroboration": "m8_e02 (tier-1 observability alert) confirms 9% of overnight allocations stuck; m8_e10 (tier-2 fulfillment report) confirms every affected order routed to east node with split-reservation flags.",
+      "limitation": "Alert cannot attribute cause; no visibility into carrier-side confirmation status."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "Allocation rule set v18 (east-node-first reservation for multi-node orders) went live at 22:00 and all stuck orders are routed to east node with split-reservation exception flags.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "corroboration": "m8_e03 (tier-1 verified change record) confirms v18 deployment time and scope; m8_e10 confirms split-reservation flags correlate with east-node routing.",
+      "limitation": "Temporal correlation alone does not establish causation; regression suite was green; 6+ hour delay between deployment (22:00) and symptom onset (06:00) is atypical for a hard allocation defect."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Carrier operations has visibility into their own feed lag, pickup scheduling, and order confirmation status.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01"],
+      "corroboration": "Carrier ops on-call stated 'looking at the dock schedule; nothing obvious' at 07:31, indicating they have access to their own systems.",
+      "limitation": "No diagnostic data provided yet; only preliminary look reported."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Carrier ops can directly answer whether they received all 186 orders, whether they scheduled pickup, and what status they show on their end. This discriminates between (a) an allocation defect creating orders they never received or cannot process, (b) a feed lag or slot conflict preventing scheduled pickups, or (c) a timing/coordination issue outside our system. Their feedback will guide whether to audit allocation exceptions, check dock capacity, or escalate as a carrier-side issue.",
+    "expected_information_gain": "Definitive answer on carrier receipt, scheduling status, and any errors/blockers on their side; will eliminate at least 2 of 3 primary hypotheses."
+  }
+}

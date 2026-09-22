@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "c4",
+      "statement": "Allocation rule v18 contains a defect in split-reservation exception handling or carrier handoff",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions", "m8_r_handoffs"],
+      "limitation": "Specifically: v18 books pickup slots 30 minutes after allocation, but carrier confirmations arrive median 47 minutes after booking. Slot closes before confirmation arrives, causing permanent hold. Discriminated from east-node infrastructure by: (1) non-EXC-0921 east-node orders confirm successfully, (2) one re-booked order got valid slot."
+    },
+    {
+      "claim_id": "c5",
+      "statement": "Carrier integration may not be receiving pickup confirmations; observability gap prevents verification",
+      "kind": "observation",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Refined: carrier IS receiving and confirming, but median 47-minute confirmation lag exceeds 30-minute slot window. Not a failure; a timing mismatch exposed by v18 change."
+    },
+    {
+      "claim_id": "c7",
+      "statement": "East-node infrastructure issue (dock capacity, carrier pickup, or lane-specific problem) affecting split-reservation orders",
+      "kind": "observation",
+      "status": "refuted",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Discriminating evidence: non-EXC-0921 east-node orders booked before 05:58 confirmed successfully; one re-booked EXC-0921 order received valid slot. Infrastructure is functional; defect is in v18 slot-booking timing."
+    },
+    {
+      "claim_id": "c8",
+      "statement": "Allocation rule v18 books carrier pickup slots 30 minutes after order allocation, but carrier confirmation system operates on ~47-minute latency, causing slots to close before carrier confirms.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_handoffs"],
+      "limitation": "Root cause fully discriminated by evidence: timing mismatch between rule v18 booking window and carrier confirmation SLA."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Root cause established: v18 booking window (30 min) is shorter than carrier confirmation latency (median 47 min). Reverting to previous rule set will restore booking window alignment with carrier SLA. This is the single reversible action authorized by incident commander and human gate. Alternative of adjusting slot timing in v18 requires code change and re-test; revert is fastest remediation with zero risk."
+  }
+}

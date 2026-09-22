@@ -1,0 +1,46 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause fully identified with discriminating evidence: carrier partition 2 feed consumer lag since 05:58 caused pickup slots to be booked against yesterday's carrier availability. All 186 held orders belong to this affected feed. The mitigation is reversible and within scope per m8_r_owner: 'reversible; scoped to the affected carrier feed's pickup slots only; run only after the lag on that feed is confirmed.' The lag has been confirmed (m8_r_offsets). Gate conditions are met: root_cause C7 at status inferred, cites discriminating evidence, no contradictions, action is reversible and scoped.",
+    "expected_information_gain": "Will correct the slot bookings for partition 2, allowing replay_held_allocations to proceed in the next round."
+  }
+}

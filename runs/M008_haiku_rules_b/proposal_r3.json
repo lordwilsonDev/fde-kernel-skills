@@ -1,0 +1,76 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "Rule set v18 passed pre-release testing against 14 days of historical orders with no defect found in the allocation logic; however, the replay testing explicitly did not exercise carrier scheduling",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_rulehist"],
+      "corroboration": "Tier-1 verified replay results from Inventory Control; explicit acknowledgment that carrier scheduling was not tested",
+      "limitation": "The rule logic is correct, but the interaction between split-reservation and carrier scheduling was not validated pre-release"
+    },
+    {
+      "claim_id": "C9",
+      "statement": "The combination of: (1) all 186 held orders being v18-affected EXC-0921, (2) v18 logic passing testing but carrier scheduling not exercised, and (3) Carrier Ops stating corrections must follow lag identification, points to a carrier-scheduling interaction issue rather than a pure allocation logic defect",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_exceptions", "m8_r_rulehist", "m8_r_owner"],
+      "corroboration": "Three distinct tier-1 sources (Inventory Control twice, Carrier Ops) converge on this pattern",
+      "limitation": "This is inference; requires discriminating evidence from deeper investigation of the handoff or dock interactions"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "trace_cohort_handoffs",
+      "reason": "Need to understand the exact state transitions and handoff points where EXC-0921 orders interact with the carrier scheduling system; this will identify whether the bottleneck is in allocation-to-carrier-feed handoff, dock assignment, or carrier-side lag"
+    }
+  ],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "C8 establishes that carrier scheduling was untested in v18 regression. C9 infers that the issue is at the intersection of v18 split-reservation and carrier scheduling. Tracing the cohort handoffs will show precisely where EXC-0921 orders stall and with what system they interact at that point.",
+    "expected_information_gain": "Reveal whether the bottleneck is: (a) the allocation-to-carrier-feed transition, (b) dock capacity/assignment logic, or (c) confirmed carrier-side lag; this will discriminate whether reverting v18 or correcting slots is the appropriate mitigation"
+  }
+}

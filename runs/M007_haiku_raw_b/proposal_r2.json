@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c007",
+      "statement": "Root cause: The customer-records app maintains a local entitlement cache that serves version 41. After the directory role sync updated users to version 42 at 02:10, the app's cache was not invalidated or refreshed, causing a persistent version mismatch. Authorization checks comparing version 41 (from cache) against required version 42 (from claims/policy) resulted in denials for all 214 affected support agents, manifesting as 31% authorization failures from 08:30 onward. Mitigation: Evicting the stale cache entries forced the app to re-fetch entitlements, retrieving version 42 and restoring access within 3 minutes to 99% of users. The incident is resolved.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e03", "m7_r_traces", "m7_r_evict", "m7_e02", "m7_e11"],
+      "limitation": "None; established via verified observability data, directory records, and successful remediation outcome"
+    },
+    {
+      "claim_id": "c008",
+      "statement": "The underlying cause (why the app's cache invalidation/refresh mechanism did not trigger after the directory sync) requires investigation by the Platform Access team, the owner of the customer-records app authorization behavior",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "other",
+      "sources": ["m7_e06"],
+      "limitation": "Escalation item for on-call team; not in scope for this incident assessment's authority"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "confirm_with_owner",
+    "kind": "final_assessment",
+    "rationale": "The incident is resolved: authorization failures have dropped to 1% following successful cache eviction. The root cause (stale entitlement cache, version mismatch between version 41 in app cache and version 42 in directory) is definitively established and proven. The highest-information authorized action has been taken and validated. The remaining investigation—why the app's cache refresh mechanism failed to trigger after the 02:10 directory sync—is an escalation item for the Platform Access team (app owner). Confirming with the owner serves to hand off this finding and request root-cause investigation into the cache invalidation failure to prevent recurrence."
+  }
+}

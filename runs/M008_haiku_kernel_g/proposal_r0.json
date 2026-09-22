@@ -1,0 +1,49 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule v18 (east-node-first for multi-node orders) went live at 22:00 and preceded the stuck orders",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "corroboration": "Supported by m8_e10 (every held order routed to east node and flagged as split-reservation exception) and m8_e02 (all held orders on east-node lanes)",
+      "limitation": "Temporal correlation does not establish causation; rule passed change review and regression suite"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "186 orders allocated overnight to east node are held in 'allocated, awaiting pickup' since 06:00; all flagged as split-reservation exceptions",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e02", "m8_e10"],
+      "corroboration": "m8_e01 confirms 186 orders stuck; m8_e02 shows 9% of overnight east-node allocations held >90 minutes",
+      "limitation": "Alert cannot attribute cause; no visibility into carrier's pickup confirmation"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Inventory Control reports allocation totals reconcile and nothing looks wrong on their side",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "inventory_count_drift",
+      "sources": ["m8_e01"],
+      "corroboration": "Single non-authoritative source; needs tier-1 corroboration",
+      "limitation": "Incident chat is tier 2; need authoritative inventory count audit"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Carrier-side pickup confirmation visibility",
+      "reason": "m8_e09 documents observability gap: dashboards cannot show relationship between booked pickup and carrier's own confirmation"
+    }
+  ],
+  "next_action": {
+    "action": "inspect_inventory_counts",
+    "kind": "diagnostic",
+    "rationale": "The stuck orders are all flagged as split-reservation exceptions, suggesting inventory allocation/count issues at east node. Authoritative inventory audit will discriminate between a dock capacity problem, a count drift issue, or a rule-induced over-reservation. This is the highest-information diagnostic to test the allocation rule v18 hypothesis.",
+    "expected_information_gain": "Will reveal if east-node inventory counts match what the allocation rule expects, or if there is drift/over-reservation causing the split-exception pattern"
+  }
+}

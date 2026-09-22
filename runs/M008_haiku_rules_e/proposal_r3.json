@@ -1,0 +1,48 @@
+{
+  "claims": [
+    {
+      "claim_id": "C11",
+      "statement": "Carrier Operations is ready to apply reversible corrections scoped to a single carrier feed, contingent on identifying which feed is lagged and confirming the lag",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "corroboration": "Tier-1 verified confirmation from carrier ops; replicates the mitigation gate requirements (apply_slot_correction scope)",
+      "limitation": "Does not yet identify which specific carrier feed or lane is lagged; diagnostic needed to pinpoint the affected feed"
+    },
+    {
+      "claim_id": "C12",
+      "statement": "A specific carrier feed assigned to east-node v18-routed orders is exhibiting partition/feed lag",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_e01"],
+      "corroboration": "Carrier ops confirms lag exists and is tied to a single feed (C11); incident timeline shows carrier ops investigating dock schedule without finding obvious issue, suggesting non-obvious feed lag",
+      "limitation": "Specific feed identity and lag magnitude not yet determined; need partition offset inspection"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "identify which specific carrier feed is lagged for east-node v18-routed orders",
+      "reason": "Human gate precondition for apply_slot_correction requires identifying the affected feed and confirming its lag; partition offset inspection will reveal which feed is behind"
+    }
+  ],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Root cause is established as carrier feed lag (C9, inferred). To enable mitigation, I must identify which specific carrier feed is lagged and confirm the lag magnitude. Partition offset inspection will show which feeds assigned to east-node v18-routed orders (EXC-0921) are behind their expected position, directly identifying the affected feed.",
+    "expected_information_gain": "Partition offsets will pinpoint which carrier feed has lag, confirming C12 and enabling the mitigation pathway (apply_slot_correction) once the specific feed and lag are identified"
+  }
+}

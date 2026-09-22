@@ -1,0 +1,105 @@
+{
+  "claims": [
+    {
+      "claim_id": "C9",
+      "statement": "Reverting to allocation rule v17 did not clear the stuck 186 orders; they remain held",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_revert"],
+      "corroboration": "Revert outcome (tier-1, Observability) explicitly states held orders unchanged at 186 after v17 restoration",
+      "limitation": "None"
+    },
+    {
+      "claim_id": "C10",
+      "statement": "After reverting to v17, newly allocated orders routed to east node are also held; the issue is not order-specific but location-specific (east node)",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_revert"],
+      "corroboration": "Revert outcome (tier-1, Observability) states new east-node allocations are still held after v17 restoration",
+      "limitation": "Does not identify whether issue is dock capacity, carrier, or inventory at east node"
+    },
+    {
+      "claim_id": "ROOT1_DISPROVEN",
+      "statement": "ROOT1 (allocation rule v18 is root cause) is disproven by revert outcome: orders remain stuck after reverting to v17, and new v17-allocated east-node orders are also stuck",
+      "kind": "root_cause",
+      "status": "disproven",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_revert"],
+      "corroboration": "Revert mitigation (tier-1, Observability) shows v18 is not the root cause; the issue persists after reverting to v17; new allocations to east node also exhibit the same hold behavior",
+      "limitation": "None; causality is clear from failure of revert mitigation"
+    },
+    {
+      "claim_id": "H2_REFINED",
+      "statement": "Carrier pickup integration at east node is unable to execute or accept orders; either carrier feed is lagging only for east-node lanes, or carrier explicitly blocks east-node pickups",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_r_revert"],
+      "corroboration": "All stuck orders are east-node routed regardless of allocation rule (v17 or v18); other nodes are normal (m8_e02); observability gap (m8_e09) prevents carrier confirmation visibility",
+      "limitation": "Requires carrier ops confirmation; could also be dock capacity or inventory shortage at east node"
+    },
+    {
+      "claim_id": "H3_REFINED",
+      "statement": "East node dock or staging capacity is saturated; 186 orders + subsequent allocations cannot proceed because physical dock space is unavailable",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_r_exceptions", "m8_r_revert"],
+      "corroboration": "Large cohort of 186 orders at east node; new allocations also held at east node; other nodes normal; timing suggests sustained capacity constraint rather than transient",
+      "limitation": "Requires real-time dock capacity audit to confirm"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "ROOT1: v18 is root cause",
+      "claim_b": "C9: reverting v18 did not clear orders",
+      "description": "If v18 were the root cause, reverting it should clear the stuck orders. The fact that they remain stuck and new v17 orders are also stuck disproves ROOT1",
+      "discriminating_evidence_needed": "None; contradiction is resolved by m8_r_revert outcome"
+    }
+  ],
+  "resolutions": [
+    {
+      "contradiction_id": "X1",
+      "evidence_refs": ["m8_r_revert"],
+      "outcome": "ROOT1 disproven; root cause is not allocation rule change but rather an east-node specific issue (carrier, dock, or inventory)",
+      "rationale": "Revert mitigation is a definitive test: if v18 were the cause, reverting must clear orders. It did not. Therefore v18 is not the root cause. The pattern shows all east-node allocations are stuck regardless of rule version"
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "ROOT1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "H1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "H2",
+      "action": "refine"
+    },
+    {
+      "claim_id": "H3",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Real-time east node dock capacity and utilization",
+      "reason": "Critical to determine if dock is at or over capacity, blocking carrier pickup execution"
+    },
+    {
+      "capability": "Carrier ops confirmation: did carrier receive and attempt execution of east-node pickup requests for both original and re-allocated orders?",
+      "reason": "Would discriminate carrier-side block from dock/inventory issues"
+    }
+  ],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "ROOT1 is now disproven: reverting v18 to v17 did not clear orders, and new v17-allocated east-node orders are also held. This rules out allocation rule change as root cause. The pattern is location-specific: ALL east-node allocations are stuck regardless of rule version. This narrows root cause to east node itself: either (a) dock capacity exhausted, preventing carrier pickup staging, (b) carrier feed issue specific to east-node lanes, or (c) inventory shortage at east node. Checking dock capacity first will quickly determine if the dock is the blocker; if capacity is available, then carrier or inventory is the issue",
+    "expected_information_gain": "Determine whether east node dock is at/over capacity (immediate blocker) or if capacity is available (points to carrier or inventory issue)"
+  }
+}

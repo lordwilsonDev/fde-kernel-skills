@@ -1,0 +1,91 @@
+{
+  "claims": [
+    {
+      "claim_id": "C13",
+      "statement": "The prior slot correction mitigation failed because it was applied to the wrong carrier feed; the specific carrier feed(s) serving the 186 orders had not been identified.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "corroboration": "Tier-1 observability outcome explicitly states correction was applied to wrong feed.",
+      "limitation": "The evidence identifies the failure but not which feed is correct; requires follow-up diagnostic."
+    },
+    {
+      "claim_id": "C14",
+      "statement": "The 186 orders in EXC-0921 are bound for one or more specific carrier feeds at the east node; the 47-minute confirmation lag is specific to one or more of these feeds.",
+      "kind": "observation",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "m8_r_handoffs identified the 47-minute lag for east-node orders in EXC-0921; but multiple carriers may serve the east-node dock.",
+      "limitation": "The specific carrier feed(s) have not yet been identified; multiple carriers may be involved."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C11",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C12",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C13",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C14",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The prior mitigation failed because it was applied to the wrong carrier feed. Carrier Operations must identify which specific carrier feed(s) the 186 EXC-0921 orders are bound for and confirm which one(s) have the 47-minute confirmation lag. Once the feed(s) are identified by name/id, apply_slot_correction can be re-run on the correct feed only.",
+    "expected_information_gain": "Identification of the specific carrier feed(s) responsible for the 47-minute lag and the correct scope for the next mitigation attempt."
+  }
+}

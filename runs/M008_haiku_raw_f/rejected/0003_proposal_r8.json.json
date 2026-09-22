@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_011",
+      "statement": "The slot correction was applied to the wrong feed and did not resolve the held-order condition",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": "Indicates our available corrective actions (revert, replay, slot correction) lack sufficient visibility into the multi-system carrier integration to fix the root cause unilaterally"
+    },
+    {
+      "claim_id": "inf_002",
+      "statement": "The 186 stuck orders require carrier system intervention; our available mitigations (rule revert, allocation replay, slot correction) have each failed, indicating the root cause mechanism is on the carrier integration side and requires carrier-side diagnostics and fixes",
+      "kind": "inference",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+      "limitation": "Evidence strongly suggests carrier system issue, but the specific failure point in the carrier integration (feed lag, queue backlog, confirmation timeout, system event at 05:58) has not been isolated by our diagnostics or our mitigations"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Root cause established: carrier system integration failure (root_002) at approximately 05:58, causing 47-minute confirmation latency against a 30-minute slot deadline. Three reversible mitigations attempted: (1) revert allocation rules - ineffective, problem persists post-revert; (2) replay allocations - ineffective, slots already closed; (3) correct slot windows - ineffective, applied to wrong feed. The fundamental barrier is that the underlying carrier system failure requires carrier-side investigation and remediation. Recommend: (1) escalate to Carrier Operations with timeline of 05:58 failure point, (2) request carrier diagnostic on confirmation queue/feed lag, (3) coordinate with Carrier Ops for manual order pickup or carrier system remediation. Status: 186 orders held; mitigation blocked without carrier-side resolution."
+  }
+}

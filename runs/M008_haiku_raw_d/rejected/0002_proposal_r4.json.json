@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c_r4_01",
+      "statement": "Revert of rule set v18 to v17 did not resolve the held-order condition. 186 original orders remained held, and new allocations re-routed to east node are also held.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert"],
+      "limitation": "Revert outcome shows the problem is not v18-specific; the root cause is in the east-node carrier integration itself."
+    },
+    {
+      "claim_id": "c_r4_02",
+      "statement": "Disposition for c_r3_03 (downgrade and refine): The root cause is not rule set v18 but the east-node carrier system's elevated confirmation latency (47+ minutes). Rule v18 disproportionately routes split-reservation orders to east node, exposing this underlying latency issue. The latency issue exists independently and affects all east-node orders when confirmation timing is critical.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_handoffs"],
+      "limitation": "The revert outcome reveals that east-node carrier latency is the primary issue; v18 is a secondary factor that triggers the symptom."
+    },
+    {
+      "claim_id": "c_r4_03",
+      "statement": "Root cause (refined): East-node carrier confirmation system experiences elevated latency (median 47 minutes) that exceeds the pickup slot window duration (30 minutes), causing orders to expire their booking window before carrier confirmation is received. This affects all orders routed to east node when the confirmation latency is critical to the pickup window.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_handoffs", "m8_e01"],
+      "limitation": "The specific cause of elevated east-node carrier latency (system issue, carrier service degradation, configuration problem) is not determined and requires Carrier Operations investigation."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "final_assessment",
+    "rationale": "Root cause is established and confirmed by revert evidence: East-node carrier confirmation latency (median 47 minutes) exceeds the pickup slot window (30 minutes), causing orders to expire before carrier confirmation. Rule v18 is not the defect but a trigger that routes more orders to the affected east-node path. Mitigation: Escalate to Carrier Operations to investigate and resolve the elevated confirmation latency on the east-node carrier system. Once resolved, rule v18 can be safely re-deployed and the 186 original orders can be re-allocated."
+  }
+}

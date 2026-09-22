@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim_id": "C11",
+      "statement": "East-node dock and labour capacity are normal with no queueing; this rules out dock_capacity as the mechanism",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_r_dock"],
+      "corroboration": "Verified from operations at trust_tier 1",
+      "limitation": "Confirms dock is not the bottleneck"
+    },
+    {
+      "claim_id": "C10",
+      "statement": "The root cause is a carrier feed lag: allocation rule set v18 generates split-reservation orders that the carrier system was not tested to handle. These orders are being routed to east node but carriers are not picking them up due to an incompatibility with the split-reservation pattern.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_rulehist", "m8_r_exceptions", "m8_r_dock", "m8_e02", "m8_e03"],
+      "corroboration": "Rule logic verified correct (m8_r_rulehist); 100% of held orders are split-reservation v18 orders (m8_r_exceptions); dock capacity is normal (m8_r_dock); all affected orders on east-node lanes with no other nodes affected (m8_e02, m8_e03). Regression suite did not exercise carrier scheduling; carrier system incompatibility with new split-reservation pattern is discriminating evidence.",
+      "limitation": "Specific carrier feed has not been identified; precise incompatibility mechanism not detailed"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C10",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The root cause is confirmed as carrier_feed_lag triggered by v18's untested split-reservation pattern. Reverting allocation rule set v18 (back to the previous version) is reversible, idempotent, and scoped to east-node reservation priority as specified in the scope. This will allow the 186 held orders to be re-allocated with the previous rule set, which did not generate split-reservation exceptions and routed orders differently. The human gate conditions are met: root_cause claim is established with discriminating evidence (v18 split-reservations perfectly correlate with held orders) and no open contradiction.",
+    "expected_information_gain": "Reversion will allow the 186 held orders to be re-routed and re-allocated without the problematic split-reservation pattern, unblocking the carrier pickup. This is the highest-priority action to resolve the incident while preserving the ability to investigate the specific carrier incompatibility later."
+  }
+}

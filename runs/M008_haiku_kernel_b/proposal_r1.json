@@ -1,0 +1,52 @@
+{
+  "claims": [
+    {
+      "claim_id": "C4",
+      "statement": "Allocation rule set v18's split-reservation mechanism directly produced the held-order cohort: 100% of 186 held orders are scope EXC-0921 (v18 split-reservation allocations); no held order exists outside this scope.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "corroboration": "m8_r_exceptions is a tier-1 discriminating artifact confirming perfect correlation between v18 allocation scope and held orders. m8_e03 establishes v18 is the only allocation-related change in the deployment window.",
+      "limitation": "Correlation established, but root cause mechanism remains open: v18 may contain a defect in its split-reservation logic, or it may be correct but interacting with a pre-existing issue on east-node carrier feed (lag, capacity, or slot confirmation problem)."
+    },
+    {
+      "claim_id": "C5",
+      "statement": "The held orders have not reached the carrier for pickup; inventory levels reconcile within our system, suggesting the problem is downstream of allocation (carrier-side lag, slot rejection, or dock capacity).",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01", "m8_e09", "m8_r_exceptions"],
+      "corroboration": "Inventory Control (m8_e01) confirms totals reconcile. m8_e09 documents observability gap preventing direct visibility into carrier confirmation. m8_r_exceptions confirms allocation was executed correctly for this cohort (v18 split-reservation is working as intended), not a defect in reservation logic.",
+      "limitation": "This is speculative pending carrier-side handoff trace. No direct evidence that carrier received or rejected slots yet."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Carrier-side pickup slot receipt and confirmation status",
+      "reason": "Critical to discriminate between rule-defect (slots sent but carrier system rejected them) vs. carrier-feed-lag (slots not sent or delayed). Need trace_cohort_handoffs to confirm order reached carrier system, and confirm_with_carrier_ops to verify carrier's view of the slots."
+    }
+  ],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "With C4 established (v18 split-reservation directly produced this cohort), and inventory confirmed reconciled, the next highest-information diagnostic is the full handoff trace from allocation → carrier queue → carrier confirmation. This will reveal whether the allocation was handed off to carrier ops and whether carrier acknowledged or rejected the pickup slots.",
+    "expected_information_gain": "Proof that orders reached carrier feed; confirmation of slot acceptance/rejection; timing of handoff relative to 06:00 held-order detection; any error or exception on carrier side."
+  }
+}

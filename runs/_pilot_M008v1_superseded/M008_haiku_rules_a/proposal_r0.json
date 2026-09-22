@@ -1,0 +1,107 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "186 orders allocated overnight to east node are stuck in 'allocated, awaiting pickup' state since 06:00; carriers are not collecting them",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "corroboration": "Incident channel (tier-2, reviewed) + Observability alert (tier-1, verified, distinct owner) confirm 9% of overnight allocations held on east node only since 06:00",
+      "limitation": "Alert cannot attribute cause; observability gap prevents carrier confirmation visibility"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "All 186 held orders are flagged by the allocator as split-reservation exceptions",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e10"],
+      "corroboration": "Fulfillment report (tier-2, reviewed) states every held order flagged as split-reservation exception; reports began 06:00 and continue",
+      "limitation": "Does not explain causality: is split-reservation intended to hold orders, or is holding a secondary defect?"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Allocation rule set v18 went live at 22:00 last night; it changed multi-node order reservation to prioritize east node first",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e03"],
+      "corroboration": "Change record (tier-1, verified) confirms v18 live 22:00; regression suite passed",
+      "limitation": "Passed regression does not guarantee production correctness on split-reservation edge cases or scaling effects"
+    },
+    {
+      "claim_id": "C4",
+      "statement": "System observability gap: internal dashboards lack visibility into carrier's pickup confirmation state; Inventory Control cannot see carrier-side records",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e09"],
+      "corroboration": "Observability assessment (tier-1, verified) explicitly names the gap",
+      "limitation": "Gap prevents discriminating allocation defect from carrier-side failures"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "No recent warehouse system changes impacting allocation or scheduling",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e04"],
+      "corroboration": "Release w41 (tier-1, verified) lists only printer drivers and report exports",
+      "limitation": "None for this claim"
+    },
+    {
+      "claim_id": "H1",
+      "statement": "Allocation rule v18's east-node-first reservation logic is triggering split-reservation exceptions that incorrectly hold orders from carrier pickup",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e02", "m8_e10"],
+      "corroboration": "Temporal correlation: v18 deployed 22:00, stuck orders began 06:00 (8 hours later, after overnight allocation window); all affected orders on reserved node; all flagged with split-reservation exception",
+      "limitation": "Correlation does not prove causation; requires audit of split-reservation logic and its interaction with v18"
+    },
+    {
+      "claim_id": "H2",
+      "statement": "Carrier pickup feed is lagging, has failed to receive requests for the 186 orders, or is unable to execute due to dock/staging constraints",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e09", "m8_e01"],
+      "corroboration": "Observability gap prevents confirmation; Carrier ops on-call found nothing obvious in dock schedule but lacks visibility into order state details",
+      "limitation": "Cannot confirm without carrier confirmation data or dock capacity audit"
+    },
+    {
+      "claim_id": "H3",
+      "statement": "East node dock staging capacity is saturated; 186 orders arriving in one cohort exceeds available dock slots, blocking carrier pickup execution",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "dock_capacity",
+      "sources": [],
+      "corroboration": "Large single-node cohort at single time correlates with v18 change that routes multi-node orders to east first",
+      "limitation": "No direct evidence; requires real-time dock capacity audit"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Carrier confirmation state for affected orders: did pickup requests reach carrier system, and why were they not executed?",
+      "reason": "Observability gap (m8_e09) blocks this; critical to discriminate allocation defect from carrier execution failure"
+    },
+    {
+      "capability": "Split-reservation exception definition and v18 interaction: when is it applied, is it expected on v18, does it intentionally block pickup?",
+      "reason": "All 186 orders carry this flag; causality unknown"
+    },
+    {
+      "capability": "East node dock and staging real-time capacity and utilization",
+      "reason": "Needed to rule out dock overflow as blocker"
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "All 186 stuck orders carry the split-reservation exception flag. Auditing allocation exceptions for east-node orders since 06:00 will determine: (1) is split-reservation a new behavior in v18 or pre-existing, (2) do all split-reservation exceptions hold orders or only these 186, (3) what stock condition triggers the flag. This is the highest-confidence discriminator: if split-reservation is new in v18 and correlates with stock issues only after v18, then H1 is likely; if the flag is pre-existing and all such orders normally clear pickup, then something downstream (H2/H3) is different.",
+    "expected_information_gain": "Clarify whether v18 is creating split-reservation flagging incorrectly, and whether split-reservation is intended to block pickup or is a secondary defect"
+  }
+}

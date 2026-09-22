@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_replay_precondition_violation",
+      "statement": "Replay executed before pickup slots were corrected; orders re-booked into closed (expired) slots and remain held. This confirms m8_r_owner precondition: 'Replaying held allocations is safe only after their pickup slots have been corrected.'",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_replay_ineff"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "root_cause_confirmed_partition_2",
+      "statement": "Root cause fully established: Carrier partition 2 (east-node) feed consumer stopped at 05:58, 47 minutes behind. Slots booked against stale data. EXC-0921 orders have expired windows. Slot correction cannot proceed while consumer is stuck; consumer restart is required precondition for correcting partition 2 slots.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "inf_blocker_outside_authority",
+      "statement": "Partition 2 feed consumer restart is a platform/infrastructure action outside incident assessor authority (requires DevOps or Carrier Operations backend access per m8_e07). Mitigation blocked until external team resumes consumer.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "other",
+      "sources": ["m8_e07", "m8_r_offsets"],
+      "limitation": ""
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "escalation",
+    "rationale": "Root cause: Partition 2 feed consumer stuck at 05:58. Mitigation path clear (resume consumer → correct slots → replay allocations) but consumer restart is outside incident assessor authority per m8_e07. Escalate to Carrier Operations / DevOps to restart partition 2 feed consumer. Once resumed, apply_slot_correction and replay_held_allocations will succeed (verified by re-booking evidence in m8_r_handoffs). This is the highest-information next step within authority boundary."
+  }
+}

@@ -1,0 +1,222 @@
+{
+ "world": "M008",
+ "mode": "kernel",
+ "enforce": true,
+ "round": 6,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "carrier-side pickup confirmation status"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Highest-value diagnostic to discriminate allocation_rule_defect from carrier_feed_lag. Will show whether orders are stuck at allocation\u2192carrier-handoff boundary or within carrier's pickup queue. This is the discriminating test: if split-reservation exceptions fail at handoff, points to rule defect; if they reach carrier and sit there, points to carrier-side lag or dock conflict.",
+    "expected_information_gain": "Direct evidence of whether the failure is in allocation rule logic (orders malformed/incomplete at handoff) or downstream (orders valid but carrier not picking up)"
+   },
+   "sim": {
+    "released": "m8_r_handoffs_wait",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "Establish the affected cohort with order identifiers and quantify impact. This is required before trace_cohort_handoffs can operate and will satisfy the impact_estimate requirement. Knowing the exact order IDs and their current states will enable targeted analysis of what went wrong.",
+    "expected_information_gain": "Order cohort definition (IDs, states, timestamps), quantified impact metric (count, duration, business impact), prerequisite data for subsequent diagnostics"
+   },
+   "sim": {
+    "released": "m8_r_impact",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Discriminating test to distinguish allocation_rule_defect from carrier_feed_lag. Inspect the structure and completeness of the 186 split-reservation exception records: are they valid, complete orders ready for carrier handoff, or are they malformed/incomplete (indicating v18 rule defect)? This is the critical discriminating evidence.",
+    "expected_information_gain": "Detailed exception structure: field completeness, validation errors, timestamp alignment with rule change, carrier-ready status. Will prove or disprove whether split-reservation exceptions are themselves broken."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Final discriminating step: confirm whether the east-node carrier feed is operational and accepting order records. If carrier ops reports normal operation and no missing orders, the defect is in allocation rule logic. If carrier reports missing or malformed order records, confirms handoff failure. This determines whether mitigation is rule revert or slot correction.",
+    "expected_information_gain": "Carrier-side operational status, order receipt confirmation, slot/dock availability, any feedback on order record format or content from the carrier perspective"
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "All conditions met for human gate approval: root_cause C5 established at inferred status, citing discriminating evidence m8_r_exceptions (100% correlation to v18 allocations), no contradictions. The mitigation directly addresses the root cause: reverting v18's east-node reservation priority removes the split-reservation mechanism that is causing all 186 held orders. Reversible and idempotent per scope.",
+    "expected_information_gain": "Human gate decision on rule revert; if approved, orders allocated under v18 will be re-allocated under v17 rules, allowing pickup assignment to proceed"
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C5"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause established (C5: allocation rule v18 defect in split-reservation mechanism, status inferred, backed by discriminating evidence m8_r_exceptions), impact quantified (C4: 186 orders, 9% of allocations, no stock loss), mitigation approved and executed (revert_allocation_ruleset). All pending claims reviewed and preserved. Mission objective met: explained why orders are stuck (rule v18 split-reservation mechanism) and decided highest-information authorized next step (reversible rule revert, approved by human gate).",
+    "expected_information_gain": "Final confirmation of mission completion"
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

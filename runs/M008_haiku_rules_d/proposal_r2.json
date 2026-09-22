@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "C9",
+      "statement": "East-node carrier feed has a lag that prevents timely pickup scheduling for orders",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_e02"],
+      "corroboration": "Carrier Ops explicitly references 'affected feed and its lag' and 'pickup slots have been corrected' as preconditions for fixes; stuck orders all on east-node lanes per observability alert",
+      "limitation": "Carrier Ops response is procedural (describing corrections) rather than explicit state confirmation, but the mention of feed-specific lag and slot corrections is the discriminating evidence this is a carrier-side issue"
+    },
+    {
+      "claim_id": "C10",
+      "statement": "Allocation rule set v18 is functioning correctly: regression suite passed, inventory reconciliation correct, and exception flagging is working as designed",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e03"],
+      "corroboration": "Change review passed, regression suite green, inventory reconciliation matches",
+      "limitation": "Correct allocation behavior does not explain stuck state; root cause is downstream"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [
+    {
+      "contradiction_id": "X1",
+      "evidence_refs": ["m8_r_owner", "m8_e03"],
+      "outcome": "resolved",
+      "rationale": "v18 is working correctly (green regression, correct reconciliation per C10), but orders cannot progress because the carrier feed on the east node has a pickup scheduling lag (per Carrier Ops mention of feed-specific corrections in m8_r_owner). The allocation rule change correctly identifies multi-node orders and reserves east node first; the stuck state is caused by downstream carrier feed lag, not an allocation rule defect. Split-reservation exception flagging is correct behavior; the issue is carrier-side pickup scheduling."
+    }
+  ],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "check_dock_capacity",
+      "reason": "Before proposing carrier feed corrections, should verify dock readiness and capacity at east node to ensure the lag is not due to dock saturation or unavailability (secondary check)"
+    }
+  ],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Carrier Ops has identified a feed lag on the affected carrier lane. Before proposing corrections (apply_slot_correction), need to verify the lag is not caused by dock capacity issues or unavailability at the east node. If dock is at capacity or down, slot corrections would not resolve the issue.",
+    "expected_information_gain": "Confirms whether dock readiness is adequate for pickup operations, or if dock saturation is the underlying cause of the carrier feed lag."
+  }
+}

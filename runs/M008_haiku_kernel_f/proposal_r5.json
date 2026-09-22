@@ -1,0 +1,41 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [
+    {
+      "contradiction_id": "X001",
+      "evidence_refs": ["m8_r_counts", "m8_r_revert"],
+      "outcome": "C003 disproven; C005 confirmed as correct root cause (carrier-side blocker)",
+      "rationale": "m8_r_counts confirms no inventory drift on east node. m8_r_revert confirms revert to v17 didn't fix the issue. Together, these rule out allocation-logic defect and inventory drift, leaving only carrier feed lag or dock capacity as possible causes. C005 is the correct root cause."
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "C001",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C002",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C003",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C004",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C005",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Final discriminating evidence: determine if east-node dock is at capacity or if there is a carrier-side pickup lag. This isolates the specific downstream mechanism (dock_capacity vs carrier_feed_lag).",
+    "expected_information_gain": "Dock status will confirm either dock capacity constraint or carrier-side lag as the final root cause mechanism"
+  }
+}

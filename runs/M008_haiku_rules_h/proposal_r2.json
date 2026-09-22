@@ -1,0 +1,74 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule set v18 (deployed 22:00, live at order-processing time) introduced a multi-node east-node-first reservation priority that may be causing split-reservation exceptions on east node lanes.",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_r_exceptions"],
+      "corroboration": "Perfect correlation: 100% of held orders are in scope EXC-0921 (v18 rule-affected orders), and 0% of non-v18 orders are held.",
+      "limitation": "Refined by m8_r_handoffs: the rule defect is not a logic error in allocation, but a timing issue in how split-reservation orders are booked relative to carrier confirmation windows."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "The east-node-specific carrier pickup feed may have a lag or scheduling gap that prevents carriers from collecting orders that the system believes are ready.",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_e09", "m8_r_handoffs"],
+      "corroboration": "m8_r_handoffs shows east-node carrier confirmations for EXC-0921 arrive median 47 minutes after booking, while slot window closes after 30 minutes. This is a 17-minute gap: confirmation arrives too late.",
+      "limitation": "This is a symptom of the v18 split-reservation timing issue, not a primary carrier ops failure. East-node orders outside EXC-0921 confirm properly within their slots."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Orders are properly allocated and inventoried; the system state is consistent on the fulfillment side.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "Inventory Control states allocation totals reconcile.",
+      "limitation": "Does not address the booking-to-confirmation timing issue."
+    },
+    {
+      "claim_id": "C4",
+      "statement": "Allocation rule set v18's split-reservation logic introduces a booking timing issue: EXC-0921 orders are booked with a 30-minute slot window, but carrier confirmations arrive 47 minutes after booking, causing confirmations to miss their slots and leaving orders stuck in 'allocated, awaiting pickup'.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_handoffs"],
+      "corroboration": "m8_r_handoffs provides discriminating evidence: (1) EXC-0921 orders have 47-min confirmation lag vs 30-min slot window (17-min gap); (2) East-node orders outside EXC-0921 confirm properly in their slots; (3) One re-booked order after data refresh received a valid slot. This proves v18 split-reservation timing is the defect, not east-node hardware or carrier ops performance.",
+      "limitation": "Does not explain why split-reservation logic changed the booking timing, but the evidence is sufficient to establish the root cause."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [
+    {
+      "contradiction_id": "X1",
+      "evidence_refs": ["m8_r_handoffs"],
+      "outcome": "resolved: both C1 and C2 are true aspects of a single root cause (C4)",
+      "rationale": "C1 (rule defect) and C2 (carrier feed lag) are not contradictory. C1 is the root cause: v18 split-reservation timing. C2 is the manifestation: orders miss their confirmation window, creating a de facto carrier feed lag. The root cause is C4 (timing issue in v18 split-reservation logic)."
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause C4 is established with discriminating evidence (m8_r_handoffs). The evidence shows one order that was re-booked after carrier data refresh received a valid slot, proving that slot correction (extending the window to accommodate the 47-minute confirmation lag) will allow carriers to confirm EXC-0921 orders. apply_slot_correction is reversible, scoped to east-node affected feed only, and matches the evidence that re-booking/slot correction fixes the problem. This is less disruptive than reverting the entire v18 rule set.",
+    "expected_information_gain": "N/A - this is the mitigation. Expected outcome: EXC-0921 orders will receive updated slot windows, carrier confirmations will arrive within windows, orders will clear 'allocated, awaiting pickup' state."
+  }
+}

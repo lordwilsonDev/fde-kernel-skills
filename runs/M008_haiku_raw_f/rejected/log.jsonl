@@ -1,0 +1,4 @@
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "unknown top-level field(s) ['round']", "path": "$", "n": 1, "at": "2026-09-22T12:31:37.301820+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "kind must be one of ['hypothesis', 'impact', 'inference', 'observation', 'quarantine_reference', 'root_cause']", "path": "$.claims[1].kind", "n": 2, "at": "2026-09-22T12:33:20.753776+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "next_action.action is not in the authority list", "path": "$.next_action.action", "n": 3, "at": "2026-09-22T12:35:05.745223+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "a final_assessment uses action 'none' or 'other'", "path": "$.next_action.action", "n": 4, "at": "2026-09-22T12:35:17.735609+00:00"}

@@ -1,0 +1,83 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Orders allocated overnight to east node are held in 'allocated, awaiting pickup' state since 06:00",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e02", "m8_e10"],
+      "corroboration": "Both observability alert (tier-1) and fulfilment report (tier-2) confirm same cohort and timing",
+      "limitation": "Alert shows 9% of overnight allocations; does not quantify total held volume"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "Allocation rule set v18 deployed at 22:00, introducing multi-node reservation priority to east node",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "corroboration": "Tier-1 verified change record from inventory control",
+      "limitation": "Regression suite was green; does not confirm runtime defect"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "All held orders are flagged as 'split-reservation exception' by the allocation system",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "corroboration": "Tier-2 fulfilment report; reports began at 06:00 and continue",
+      "limitation": "Unknown whether exceptions are valid (multi-node required) or indicative of v18 rule defect"
+    },
+    {
+      "claim_id": "C4",
+      "statement": "We cannot observe whether carriers have confirmed pickup for booked orders",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e09"],
+      "corroboration": "Tier-1 observability gap from observability owner",
+      "limitation": "Prevents discrimination between invalid allocations and carrier-side pickup delay"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "Allocation rule set v18 introduced a rule defect causing invalid split-reservations",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "corroboration": "Timing (v18 deployment → 06:00 incident) and all orders marked split-reservation exception",
+      "limitation": "Requires discriminating evidence: audit of exception details to confirm defect vs. valid multi-node splits"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "Carrier feed or pickup scheduling is lagged or offline, preventing collection of valid allocations",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01", "m8_e09"],
+      "corroboration": "Carrier ops found nothing obvious in dock schedule; observability gap prevents confirmation",
+      "limitation": "Requires discriminating evidence: confirmation with carrier ops on pickup status and feed health"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "distinguish v18 rule defect from valid multi-node splits",
+      "reason": "split-reservation exception flagging is nonspecific; need audit of exception content and rule state transitions"
+    },
+    {
+      "capability": "observe carrier-side pickup confirmation status",
+      "reason": "observability gap (C4) prevents confirmation that orders are actually being picked up or queued"
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exceptions (C3) are the highest-signal evidence and directly test whether v18 introduced a rule defect. Auditing exception details will discriminate between hypothesis C5 (rule defect) and C6 (carrier-side issue), enabling a root-cause claim.",
+    "expected_information_gain": "Exception details will show whether splits are required by order content (valid) or erroneously marked by v18 logic (defect); this directly tests the mechanism"
+  }
+}

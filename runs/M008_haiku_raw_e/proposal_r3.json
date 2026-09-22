@@ -1,0 +1,64 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_008",
+      "statement": "For EXC-0921 split-reservation orders, carrier confirmations arrive a median of 47 minutes after booking, but pickup slots close after 30 minutes",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Median arrival time; some confirmations may arrive earlier or later"
+    },
+    {
+      "claim_id": "obs_009",
+      "statement": "East-node orders outside EXC-0921 that were booked before 05:58 were confirmed within their 30-minute slot window",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Comparison group; suggests the issue is specific to split-reservation orders or their routing"
+    },
+    {
+      "claim_id": "obs_010",
+      "statement": "One EXC-0921 order that was re-booked after carrier data refreshed received a valid slot and was confirmed",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Single case, but confirms that extended slots or re-booking resolves the issue"
+    },
+    {
+      "claim_id": "root_cause_001",
+      "statement": "Rule v18's split-reservation orders take a median of 47 minutes for carrier confirmation after booking, which exceeds the 30-minute pickup slot validity window, causing orders to remain stuck in 'allocated, awaiting pickup'",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e10"],
+      "limitation": "The underlying cause of the 47-minute confirmation lag is not yet determined; could be carrier-side delay, data transmission, or integration queue depth"
+    },
+    {
+      "claim_id": "hyp_002_downgrade",
+      "statement": "Carrier feed or pickup scheduling has a lag or failure in recognizing the east-node-prioritized allocations from rule v18",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Confirmed by timing data; the 47-minute confirmation lag is the specific failure mode"
+    },
+    {
+      "claim_id": "impact_001",
+      "statement": "186 orders (100% of overnight EXC-0921 allocations) are held indefinitely because their carrier confirmations cannot arrive before slot closure",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions"],
+      "limitation": "Impact will persist until slot window is extended or confirmation latency is reduced"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The root cause is a timing mismatch: split-reservation order confirmations require 47 minutes (median) but slots close after 30 minutes. The most direct, reversible mitigation is to extend the pickup slot window for EXC-0921 orders from 30 to 50+ minutes, allowing confirmations to arrive before slot closure. This is authorized as a single reversible action and requires no upstream rule changes or rollbacks."
+  }
+}

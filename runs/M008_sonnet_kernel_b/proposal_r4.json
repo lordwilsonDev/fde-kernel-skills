@@ -1,0 +1,22 @@
+{
+ "claims": [],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C6", "action": "preserve"},
+  {"claim_id": "C7", "action": "preserve"},
+  {"claim_id": "C8", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "count_stranded_orders",
+  "kind": "diagnostic",
+  "rationale": "Two approval-gated mitigations (apply_slot_correction, then replay_held_allocations) have now been applied on the strength of C8. Neither the gate approval nor the driver's acknowledgement confirms real-world efficacy -- approval only means the action was authorized, not that it resolved the stuck cohort. Before declaring the incident closed or citing an unverified impact figure, a read-only count of currently stranded orders is needed to confirm whether EXC-0921 orders actually cleared 'allocated, awaiting pickup', or whether the mismatch persists and C8 needs to be revised/split.",
+  "expected_information_gain": "Confirms or refutes that the mitigations actually resolved the stuck cohort: a count near zero corroborates C8 as sufficient root cause and closes the loop; a count that remains near 186 would contradict the sufficiency of C8's fix and require re-opening the investigation (e.g., a second mechanism, or the correction/replay not covering the full cohort) before final_assessment."
+ }
+}

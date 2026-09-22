@@ -1,0 +1,73 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "Allocation rule set v18 defect is creating invalid or problematic split-reservations",
+      "kind": "hypothesis",
+      "status": "disproven",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_rulehist"],
+      "corroboration": "Rule replay test against 14 days of historical orders passed with 'no defect found'; rule path matches specification; only multi-node priority changed",
+      "limitation": "Replay testing does not exercise carrier scheduling downstream, so it cannot validate end-to-end order fulfillment"
+    },
+    {
+      "claim_id": "C9",
+      "statement": "East-node carrier feed or pickup scheduling has degraded or failed specifically for v18-routed split-reservation orders",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01", "m8_r_exceptions", "m8_r_rulehist"],
+      "corroboration": "v18 logic disproven as root cause (m8_r_rulehist); all held orders exclusive to v18 scope EXC-0921 (m8_r_exceptions); 100% correlation between v18 deployment and order hold timing; replay limitation confirms carrier scheduling untested (m8_r_rulehist); carrier ops found 'nothing obvious' on dock schedule, suggesting a non-obvious carrier-side issue (m8_e01)",
+      "limitation": "No direct confirmation from carrier ops yet; observability gap prevents seeing carrier's pickup queue status or feed health"
+    },
+    {
+      "claim_id": "C10",
+      "statement": "The carrier feed or pickup scheduling defect is specific to split-reservation orders or to orders allocated via v18 east-node-first priority",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_exceptions", "m8_r_rulehist"],
+      "corroboration": "100% of held orders match v18 scope (m8_r_exceptions); no non-v18 orders are held; replay shows v18 logic valid (m8_r_rulehist), so the defect is downstream in carrier integration, not in allocation logic",
+      "limitation": "Cannot determine whether the defect is triggered by split-reservation orders per se, or by v18's specific routing/prioritization behavior"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "C8 (v18 rule defect)",
+      "claim_b": "C9 (carrier-side issue)",
+      "description": "Resolved: m8_r_rulehist replay testing disproves C8 by showing v18 logic is correct and passes validation; contradiction resolved in favor of C9",
+      "discriminating_evidence_needed": "none; contradiction resolved"
+    }
+  ],
+  "resolutions": [
+    {
+      "contradiction_id": "X1",
+      "evidence_refs": ["m8_r_rulehist"],
+      "outcome": "Contradiction resolved; C8 (rule defect) disproven; C9 (carrier-side issue) elevated to root_cause at inferred status",
+      "rationale": "m8_r_rulehist shows v18 passed 14-day replay with no defects found and rule logic matches specification. The explicit limitation that replay does not exercise carrier scheduling indicates the defect lies downstream in carrier feed/pickup scheduling, not in allocation logic. Combined with C7 (100% of held orders are v18-routed), this establishes a clear causal chain: v18 logic is valid, but something in the carrier scheduling system breaks when handling v18's split-reservation orders."
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "C5",
+      "action": "downgrade"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "confirm exact nature of carrier feed/scheduling failure",
+      "reason": "Need direct confirmation from carrier ops on whether their pickup queue has the EXC-0921 orders, what status they show, and any lag/latency in their feed"
+    },
+    {
+      "capability": "understand whether the carrier issue is generic or specific to split-reservation orders",
+      "reason": "C10 narrows the defect to split-reservations or v18 routing, but need confirmation from carrier ops on whether they've handled split-reservations before and if there's a new integration issue"
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Root cause is now established as carrier-side issue (C9, inferred). Final diagnostic confirms: (1) whether carrier's pickup queue has EXC-0921 orders and their status, (2) any lag in carrier feed processing, (3) whether this is a known issue with split-reservation order handling. This will validate C9 and prepare for potential mitigation if carrier confirms the orders exist in their system but are stuck.",
+    "expected_information_gain": "Carrier confirmation will either validate that orders are queued but not being picked up (supporting mitigation need) or reveal they're not in the carrier's system at all (indicating a different handoff failure point)"
+  }
+}

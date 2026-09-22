@@ -1,0 +1,40 @@
+{
+ "claims": [
+  {
+   "claim_id": "C5",
+   "statement": "Root cause: the pickup-window feed consumer for carrier partition 2 (east-node carriers) stopped advancing at 05:58 and is running 47 minutes behind and growing, while partitions 0 and 1 (other east-node/carrier traffic) remain current. Because partition 2 is stalled, slots for the EXC-0921 cohort (186 east-node orders with a split reservation under v18) are booked against yesterday's stale carrier availability, so the booked pickup slot closes before a real carrier confirmation for these orders can land, and the order is left 'allocated, awaiting pickup' with no carrier collection. East-node orders outside the cohort booked before 05:58 (before the stall) confirmed inside their slots; one cohort order re-booked after carrier data refreshed received a valid slot. This is a stalled carrier-feed-consumer (partition 2) issue, not a general east-node dock or allocation-total defect.",
+   "kind": "root_cause",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_e02", "m8_r_exceptions", "m8_r_handoffs", "m8_r_offsets"],
+   "corroboration": "Two independent tier-1 owners now agree on the specific mechanism: Observability's handoff trace (m8_r_handoffs: 47min confirmation lag vs 30min slot, control group unaffected) and Carrier Operations' own feed-offset record (m8_r_offsets: partition 2 stalled exactly at 05:58, 47min and growing, partitions 0/1 current). Carrier Operations is the process owner for carrier integration and pickup scheduling (m8_e06), so this satisfies established (>=2 distinct-owner tier<=2, here both tier-1) plus discriminating evidence with no open contradiction.",
+   "limitation": "Does not establish why partition 2's consumer stalled at 05:58 (upstream trigger unknown - may or may not relate to v18's 22:00 change); the claim covers the mechanism blocking pickup, not the ultimate trigger of the stall."
+  },
+  {
+   "claim_id": "C8",
+   "statement": "The specific stalled feed is carrier partition 2 (east-node carriers): its pickup-window consumer stopped advancing at 05:58, matching the cohort's onset time, and is 47 minutes behind and growing. Partitions 0 and 1 are current, matching the observation that non-cohort east-node orders are unaffected.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_offsets"],
+   "corroboration": "Tier-1 verified feed_offsets record from Carrier Operations, the owning team for carrier integration/pickup scheduling.",
+   "limitation": "Single artifact, but tier-1 and from the process owner; used to correctly scope the mitigation this round after the first mis-targeted attempt (C7)."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C7", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "apply_slot_correction",
+  "kind": "mitigation",
+  "rationale": "C5 is now an established root_cause claim citing discriminating evidence (m8_r_handoffs, m8_r_offsets) with no open contradiction, and C8 pinpoints the exact affected feed as carrier partition 2 (east-node carriers), stalled at 05:58. This corrects the scope error from the first attempt (C7: wrong feed, lag not reconfirmed at execution). apply_slot_correction is reversible and scoped to the affected carrier feed's pickup slots only, and its precondition (lag on that specific feed confirmed) is now satisfied by both an independent Observability trace and Carrier Operations' own partition-2 offset data - this time the target is explicitly carrier partition 2 (east-node carriers), not a generic 'affected feed'.",
+  "expected_information_gain": "A correctly-scoped correction to carrier partition 2's pickup slots should let EXC-0921 orders re-align to real carrier availability and begin clearing, directly testing and remediating the now-established root cause; if held orders still do not clear, that would itself be new discriminating evidence against the current mechanism."
+ }
+}

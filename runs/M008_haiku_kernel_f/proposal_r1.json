@@ -1,0 +1,43 @@
+{
+  "claims": [
+    {
+      "claim_id": "C003",
+      "statement": "Split-reservation logic in allocation rule v18 is the root cause of order holdups: 100% of 186 held orders are in the EXC-0921 scope (v18 split-reserved orders routed to east node); no held orders exist outside this scope",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e03"],
+      "corroboration": "Exception audit confirms perfect correlation: EXC-0921 scope = all held orders. Rule v18 is the only production change since last week. Timing aligns (v18 live 22:00, issues reported 06:00+). Limitation: cannot yet distinguish v18-logic defect from carrier-side rejection of valid split reservations or inventory-count drift on east node.",
+      "limitation": "Awaiting carrier ops confirmation and inventory count inspection to rule out carrier-side or inventory causes"
+    },
+    {
+      "claim_id": "C004",
+      "statement": "Customer impact: 186 orders with delayed delivery, generating ongoing support escalations; exact SLA/revenue impact requires quantification",
+      "kind": "impact",
+      "status": "inferred",
+      "mechanism_tag": "other",
+      "sources": ["m8_e02", "m8_r_exceptions"],
+      "corroboration": "Monitor shows 9% of overnight allocations held for >90min on east node. Support reports continuous arrivals. EXC-0921 audit confirms scope and ownership.",
+      "limitation": "Total revenue/SLA impact not yet quantified; cannot estimate escalation cascade without impact_estimate artifact"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C001",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C002",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Discriminating evidence: are east-node carriers rejecting or not receiving the split-reserved orders? This distinguishes between allocation-defect (bad reservations), carrier-lag (rejecting valid ones), and inventory-drift (unable to fulfill).",
+    "expected_information_gain": "Carrier-side confirmation will rule out or confirm carrier_feed_lag mechanism and establish whether the issue is inbound (reservation logic) or outbound (carrier acceptance)"
+  }
+}

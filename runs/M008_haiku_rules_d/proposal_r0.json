@@ -1,0 +1,99 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "186 orders allocated overnight to east node are stuck in 'allocated, awaiting pickup' since 06:00",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e02", "m8_e10"],
+      "corroboration": "Confirmed by both observability alert (9% of overnight allocations) and fulfillment report (every held order was routed to east node)",
+      "limitation": "Observation confirms the state, not the cause"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "All 186 stuck orders are flagged as split-reservation exceptions",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "corroboration": "Fulfillment report explicitly states all held orders flagged by overnight allocator as split-reservation exception",
+      "limitation": "Exception flag existence confirmed; does not explain why they remain stuck (downstream processing issue vs. root rule defect)"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Allocation rule set v18 went live at 22:00 and reserves stock from east node first for multi-node orders",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "corroboration": "Verified from allocation rule change record; change review passed and regression suite was green",
+      "limitation": "Timing correlation (v18 live → stuck orders 6 hours later) is suggestive but not discriminating"
+    },
+    {
+      "claim_id": "C4",
+      "statement": "Inventory Control reconciliation shows allocation totals are correct; no obvious issues on their side",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "Direct statement from Inventory Control incident channel response",
+      "limitation": "Tier 2 trust; 'nothing looks wrong' does not rule out downstream processing failure or carrier integration lag"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "Other nodes are operating normally; only east node is affected",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02"],
+      "corroboration": "Alert explicitly states 'Other nodes normal'",
+      "limitation": "Confirms node-specific issue; consistent with v18's east-node-first behavior being the trigger"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "There is an observability gap: dashboards cannot show how a booked pickup relates to carrier confirmation",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e09"],
+      "corroboration": "Observability team verified that Inventory Control cannot see carrier-side records",
+      "limitation": "Identifies a diagnostic blind spot; does not explain current stuck state but limits root cause attribution"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "Allocation reconciliation is correct (C4) and regression suite was green (C3)",
+      "claim_b": "All stuck orders are split-reservation exceptions flagged by v18 (C2)",
+      "description": "If v18 is working correctly (green regression, reconciliation correct), why are split-reservation exceptions causing orders to jam the system? Possible resolutions: (a) regression suite did not cover multi-node split scenarios, (b) exception handling downstream of allocation has a bug, (c) carrier integration is not completing handoff for exception-flagged orders, (d) v18 behavior is correct but the downstream queue processing is broken",
+      "discriminating_evidence_needed": "Diagnostic data on: (1) allocation exception queue depth and age, (2) whether exception-flagged orders reach carrier feed/pickup scheduling, (3) carrier-side confirmation status for these 186 orders, (4) dock readiness and capacity at east node"
+    }
+  ],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "inspect_inventory_counts",
+      "reason": "Need to verify whether inventory drift could explain the exception flagging, despite Inventory Control's reconciliation claim"
+    },
+    {
+      "capability": "audit_allocation_exceptions",
+      "reason": "Need to understand the exception queue: are these orders stuck in exception handling, or past it?"
+    },
+    {
+      "capability": "check_dock_capacity",
+      "reason": "Need to verify east node dock readiness and capacity; 'nothing obvious' from Carrier Ops is insufficient given the scale (186 orders)"
+    },
+    {
+      "capability": "confirm_with_carrier_ops",
+      "reason": "Need to verify whether our 'allocated awaiting pickup' matches carrier's state (pickup booked vs. pending vs. rejected)"
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The core contradiction is whether the allocation rule is functioning correctly (regression passed, reconciliation correct) or whether v18 has a latent bug in multi-node split handling. Auditing allocation exceptions will show whether exception-flagged orders are queued upstream or progressing downstream. This discriminates between an allocation-layer bug (stuck in queue) vs. a carrier integration or dock issue (past allocation, stuck at handoff).",
+    "expected_information_gain": "Determines whether the root cause is in allocation rule processing or in downstream carrier integration/dock handling"
+  }
+}

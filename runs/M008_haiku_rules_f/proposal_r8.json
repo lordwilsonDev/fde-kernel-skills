@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim_id": "C15",
+      "statement": "The pickup-window feed consumer for carrier partition 2 (east-node carriers) stopped advancing at 05:58 and is 47 minutes behind. Orders booked after 05:58 have slots that close before this partition processes carrier confirmations, creating an unresolvable state.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets"],
+      "corroboration": "Verified from carrier_ops at trust_tier 1; the 05:58 timestamp matches the incident start time exactly; the 47-minute lag matches the observed carrier confirmation delay",
+      "limitation": "Specific reason why partition 2 consumer stopped not detailed; must assume it can resume after slot correction"
+    },
+    {
+      "claim_id": "C10",
+      "statement": "The root cause is a carrier partition 2 consumer outage: the pickup-window feed consumer for partition 2 (east-node carriers) stopped advancing at 05:58, leaving a 47-minute lag. Orders booked after 05:58 have expiring slots while waiting for partition 2 to process their confirmations. The mitigation is to extend slot windows specifically on partition 2 to accommodate this lag.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_r_handoffs", "m8_e02"],
+      "corroboration": "Partition 2 consumer stopped advancing at 05:58 (m8_r_offsets); carrier confirmations take 47 minutes (m8_r_handoffs); incident onset at 06:00 (m8_e02); orders booked after 05:58 are held",
+      "limitation": "Specific cause of partition 2 consumer stoppage not determined; focus is on remediating the slot timing impact"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C10",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The root cause is now fully identified: carrier partition 2's pickup-window consumer stopped at 05:58 and is 47 minutes behind. The previous slot correction attempt failed because it was applied to the wrong partition. Now with the specific feed identified (partition 2), applying slot correction to extend the booking windows on partition 2 will allow the 186 held orders to have valid pickup slots when partition 2 eventually processes their confirmations. This is reversible, scoped to the affected partition (2) only, and the lag is fully confirmed (47 minutes, consumer stopped at 05:58).",
+    "expected_information_gain": "Applying slot correction to partition 2 will resolve the slot-timing mismatch and allow carrier confirmations for the 186 held orders to arrive within valid pickup windows, unblocking the incident."
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "claims": [
+    {
+      "claim_id": "C17",
+      "statement": "Pickup slots for carrier partition 2 have been corrected and realigned to current carrier availability; new bookings are confirmed within their slots.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot"],
+      "corroboration": "Tier-1 observability outcome confirms slot correction was successful.",
+      "limitation": "The 186 held orders remain held until their allocation windows are replayed."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C11",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C12",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C13",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C14",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C15",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C16",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C17",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "Slot correction for partition 2 is complete and confirmed. The 186 held orders in EXC-0921 with allocation windows from 06:00 onward now overlap with the corrected slots and can be successfully replayed. This action will move the held orders from 'allocated, awaiting pickup' to confirmed status, allowing carriers to collect them. This is reversible and idempotent as required.",
+    "expected_information_gain": "Complete resolution of the 186 held orders; they will transition to confirmed status and become available for carrier pickup."
+  }
+}

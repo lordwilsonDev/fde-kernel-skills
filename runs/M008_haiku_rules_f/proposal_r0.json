@@ -1,0 +1,79 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule set v18 went live at 22:00 and changed multi-node order reservation to prioritize east node first",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "corroboration": "Verified source from inventory_control at trust_tier 1",
+      "limitation": "Does not yet prove causation with held orders"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "All 186 held orders were routed to east node and flagged as split-reservation exception; reports began at 06:00, approximately 8 hours after v18 went live",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10", "m8_e02"],
+      "corroboration": "m8_e10 from customer_support (trust 2, reviewed); m8_e02 from observability (trust 1, verified)",
+      "limitation": "Temporal correlation is strong but causation not yet confirmed"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Allocation rule set v18 may have a defect that causes split-reservation exceptions when reserving from east node for multi-node orders",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "corroboration": "Pattern of split-reservation exceptions on east-node routed orders correlates with v18 deployment",
+      "limitation": "No diagnostic evidence yet; alternative causes (carrier feed lag, inventory drift) not ruled out"
+    },
+    {
+      "claim_id": "C4",
+      "statement": "Inventory control reports allocation totals reconcile and nothing looks wrong on inventory side",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "From incident channel (trust 2), does not rule out subtle inventory count issues",
+      "limitation": "Limited scope check; does not address split-reservation or carrier-side discrepancies"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "Carrier operations on-call sees nothing obvious on dock schedule",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "From incident channel (trust 2)",
+      "limitation": "Does not rule out carrier feed lag; lack of visibility into carrier's own confirmation queue noted in m8_e09"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "A critical observability gap exists: dashboards cannot show how booked pickups relate to carrier-side confirmation",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e09"],
+      "corroboration": "Verified from observability (trust 1)",
+      "limitation": "Confirms gap exists but does not diagnose whether carrier lag is the actual cause"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Visibility into carrier confirmation queue and pickup acceptance status",
+      "reason": "Current dashboards only show order state; cannot correlate booked pickups with carrier's own booking confirmations"
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception flag on all 186 held orders is the strongest discriminating signal. Auditing allocation exceptions will reveal whether v18's east-node-first logic is generating malformed reservations (indicating allocation_rule_defect) or whether reservations are correct but carriers are not picking them up (indicating carrier_feed_lag). This is the highest-information diagnostic.",
+    "expected_information_gain": "Will show whether split-reservation exceptions are structural artifacts of v18's reservation logic or symptoms of downstream carrier problems. Discriminates between allocation_rule_defect and carrier_feed_lag mechanisms."
+  }
+}

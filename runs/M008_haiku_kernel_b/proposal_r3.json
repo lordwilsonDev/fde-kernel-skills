@@ -1,0 +1,54 @@
+{
+  "claims": [
+    {
+      "claim_id": "C7",
+      "statement": "The initial slot correction was applied to the wrong carrier feed; the root cause (carrier feed lag on east-node lanes) is confirmed, but the specific feed must be identified for effective mitigation.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff", "m8_r_handoffs", "m8_r_exceptions"],
+      "corroboration": "m8_r_slot_ineff confirms the mitigation was misdirected. m8_r_handoffs provides the mechanism (47-minute lag on east-node pickup confirmations). m8_r_exceptions confirms the cohort routing.",
+      "limitation": "The feed identification requires direct confirmation with Carrier Operations on which specific east-node feed has the lag."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Identification of the specific east-node carrier feed with the lag",
+      "reason": "The root cause is established (carrier feed lag), but the wrong feed was corrected. Need to confirm with carrier ops which east-node feed is affected to scope the next correction attempt."
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The slot correction failed because it targeted the wrong feed. With the root cause confirmed as carrier feed lag (specifically a 47-minute booking-to-confirmation lag on east-node lanes), confirming with carrier ops is critical to identify which specific east-node feed(s) experience this lag. This information will enable a correctly-scoped second slot correction attempt.",
+    "expected_information_gain": "Specific identification of the affected east-node carrier feed(s), confirmation that they are experiencing the 47-minute lag, and validation that re-correction to the correct feed(s) will resolve the held orders."
+  }
+}

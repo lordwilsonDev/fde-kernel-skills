@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_011",
+      "statement": "The slot correction was applied to the wrong feed and did not resolve the held-order condition",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": "Indicates our available corrective actions (revert, replay, slot correction) lack sufficient visibility into the multi-system carrier integration to fix the root cause unilaterally"
+    },
+    {
+      "claim_id": "inf_002",
+      "statement": "The 186 stuck orders require carrier system intervention; our available mitigations (rule revert, allocation replay, slot correction) have each failed, indicating the root cause mechanism is on the carrier integration side and requires carrier-side diagnostics and fixes",
+      "kind": "inference",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+      "limitation": "Evidence strongly suggests carrier system issue, but the specific failure point in the carrier integration has not been isolated"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "final_assessment",
+    "rationale": "Root cause: carrier system integration failure (root_002) at approximately 05:58, causing 47-minute confirmation latency against 30-minute slot deadline. Three reversible mitigations attempted and failed: (1) revert allocation rules - ineffective, (2) replay allocations - ineffective, slots closed, (3) correct slot windows - ineffective, wrong feed. The carrier system failure requires carrier-side investigation. Final assessment: 186 orders held; root cause carrier_feed_lag established; mitigation requires Carrier Operations investigation of 05:58 failure point, confirmation queue diagnostics, and carrier system remediation. Escalate to Carrier Ops with evidence of timing and latency metrics."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c9",
+      "statement": "Allocation exception audit confirms 100% of the 186 held orders fall within scope EXC-0921 (v18 split-reservation, east-node routed), and no held order falls outside that scope.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Preserved from round 1; unchanged by new evidence."
+    },
+    {
+      "claim_id": "c11",
+      "statement": "Carrier Operations (the process owner for pickup scheduling per m8_e06) confirms the mechanism is a carrier-feed issue: a correction on their side is reversible and scoped to a single carrier feed, but must run only after that specific feed and its lag are identified. They further state replaying held allocations is safe only after pickup slots have been corrected -- i.e. slot correction must precede any replay.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "limitation": "Owner-side confirmation corroborates c10 (carrier_feed_lag root cause) with a distinct-owner tier-1 source, but does not yet name which specific carrier feed is lagging -- that identification is a stated precondition for their correction and for any safe replay."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Carrier Operations (m8_r_owner) states their correction is scoped to a single carrier feed and must run only after that feed and its lag are identified, and that replaying held allocations is only safe after slots are corrected. We have cohort-level timing (c10: 47-min median confirmation vs 30-min slot) but not yet the specific lagging feed/partition. Reading partition offsets is a read-only diagnostic that can identify which carrier feed is behind and by how much, satisfying the owner's stated precondition before any slot-correction mitigation is proposed. This stays within authorized read-only bounds (m8_e07)."
+  }
+}

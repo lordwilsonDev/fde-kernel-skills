@@ -1,0 +1,30 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C1_refined",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Check if the east-node carrier feed is lagged. If the partition is caught up, C2 (feed lag) becomes unlikely, and C1 (rule defect) or C3 (dock capacity) is more probable. If lag is present, C2 is supported, suggesting split-reservation exceptions are not blocking pickup but a feed disconnection is.",
+    "expected_information_gain": "High: directly tests whether carrier feed lag is the issue."
+  }
+}

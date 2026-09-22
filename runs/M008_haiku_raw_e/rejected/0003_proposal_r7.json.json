@@ -1,0 +1,44 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_015",
+      "statement": "Carrier Operations confirms that corrections must target the correct single carrier feed and that replay is safe only after slot correction",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "limitation": "Operational guidance; does not identify which feed is the correct one for the east-node carrier"
+    },
+    {
+      "claim_id": "conclusion_001",
+      "statement": "The root cause is a 47-minute confirmation latency at the east-node carrier, exceeding the 30-minute pickup slot window. This latency affects all orders routed to the east node, whether under rule v18 or v17, and appears to have started or degraded around 06:00 when rule v18 allocations began arriving.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_revert", "obs_014"],
+      "limitation": "The underlying cause of the carrier degradation (overload, system issue, or pre-existing lag) is not determined, but the timing correlation with rule v18's 06:00 spike is evident"
+    },
+    {
+      "claim_id": "conclusion_002",
+      "statement": "Multiple mitigation attempts failed due to operational complexity: slot correction targeted the wrong feed, allocation replay occurred before slots were corrected, and rule reversion caused collateral damage (3,900 orders reshuffled, duplicates) without resolving the 186 held orders.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff", "m8_r_replay_ineff", "m8_r_revert"],
+      "limitation": "Failures indicate the issue requires careful coordination and precise feed identification, which is beyond the assessment phase"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "contra_002",
+      "claim_a": "root_cause_001",
+      "claim_b": "conclusion_001",
+      "description": "root_cause_001 attributed the issue to rule v18's split-reservation structure; conclusion_001 shows the root cause is the east-node carrier's 47-minute latency affecting all orders to that node, not a rule v18 defect. root_cause_001 is disproven."
+    }
+  ],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Investigation has identified the root cause and constraints clearly: the east-node carrier confirmation latency (47 minutes) exceeds the 30-minute slot window, affecting all orders routed there since ~06:00. The degradation is independent of allocation rules. Mitigations require precise identification of the correct carrier feed and careful sequencing (slot correction first, replay after), which is operational work requiring Carrier Operations and Inventory Control coordination. The 186 held orders are now blocked by the need for proper feed identification and simultaneous slot/replay correction. No further diagnostic work by the assessment layer is productive at this point."
+  }
+}

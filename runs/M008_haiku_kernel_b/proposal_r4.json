@@ -1,0 +1,47 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Customer impact quantification",
+      "reason": "Mission checklist requires an impact_estimate artifact; customer impact is currently unquantified. Need to count stranded orders to establish the scope of the incident."
+    }
+  ],
+  "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "To close the incident assessment, need to quantify the customer impact of the 186 held orders. This will provide the impact_estimate artifact required before a final_assessment can be accepted.",
+    "expected_information_gain": "Total count of stranded orders, impact duration, and any escalation to customers or internal teams."
+  }
+}

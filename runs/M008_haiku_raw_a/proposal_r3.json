@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c3_01",
+      "statement": "100% of held orders (186) are in EXC-0921 scope: v18-routed split-reservation multi-node orders to east node; no other orders are held",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Perfect correlation establishes systematic link but does not isolate whether issue is allocation logic, carrier capacity, or feed incompatibility"
+    },
+    {
+      "claim_id": "c3_02",
+      "statement": "v18 routing change concentrated a new order type (split-reservation multi-node) exclusively to east node, creating a novel load pattern that carrier integration may not be designed to handle",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "limitation": "Root cause could be capacity, feed format incompatibility, or scheduling mismatch"
+    },
+    {
+      "claim_id": "c3_03",
+      "statement": "East-node carrier system may be at or exceeding capacity due to concentrated v18 split-reservation order load",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_e01", "m8_r_exceptions"],
+      "limitation": "Carrier ops reported 'nothing obvious' but may not have looked for subtle capacity constraints"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Perfect correlation between EXC-0921 and held orders indicates v18 created a load pattern the system can't handle. East-node dock capacity is the most likely physical constraint. Checking dock utilization, available slots, and queue depth will determine if this is a capacity-based root cause or if we need to investigate feed compatibility or carrier pickup scheduling defect."
+  }
+}

@@ -1,0 +1,239 @@
+{
+ "world": "M008",
+ "mode": "kernel",
+ "enforce": true,
+ "round": 5,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Directly tests the specific, falsifiable claim in C3/C4 (held orders carry a split-reservation exception from the overnight allocator) against an authoritative system record rather than a support summary or chat. This will either promote C3/C4 toward established/root_cause with discriminating evidence, or refute it and redirect toward the carrier-side hypothesis (C5), and it resolves contradiction X1.",
+    "expected_information_gain": "High: distinguishes allocation_rule_defect from carrier-side mechanisms and upgrades or disproves the only concrete mechanism claim currently on the table."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C3",
+      "from": "reported",
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C4",
+      "from": "hypothesized",
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [
+     {
+      "contradiction": "X1",
+      "result": "resolved"
+     }
+    ],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "The confound flagged by m8_r_exceptions (rule-defect effect vs east-node-specific effect) is the key open question, and cohort EXC-0921 is now a concrete, queryable scope. Tracing the handoff steps for this cohort will show whether orders are stuck before ever being released by the allocation/exception process (supporting allocation_rule_defect, C4) or whether they were released and handed to carrier pickup but not collected (supporting the carrier-side hypothesis, C5). This directly resolves the confound the exception audit could not.",
+    "expected_information_gain": "High: distinguishes where in the pipeline (allocation-side vs carrier-side) the block actually occurs, which the exception audit alone cannot do."
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C4",
+      "from": "hypothesized",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C5",
+      "from": "hypothesized",
+      "to": "disproven",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "Root cause is now inferred with discriminating evidence, but customer impact is still unquantified beyond the incident-chat proxy figure (186) and the exception-audit cohort size. An authoritative, current count of stranded orders establishes a defensible impact_estimate before deciding mitigation urgency/scope and before final assessment.",
+    "expected_information_gain": "Moderate-high: converts a proxy/point-in-time figure into an authoritative current impact_estimate artifact, which the checklist flags as still missing."
+   },
+   "sim": {
+    "released": "m8_r_impact",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C6",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root-cause claim C4 (status=inferred, discriminating evidence m8_r_handoffs, no open contradiction) shows the east-node carrier feed's confirmation lag (median 47 min) exceeds the booked pickup slot's close window (30 min) for the v18 split-reservation cohort EXC-0921, so slots lapse before confirmation lands. apply_slot_correction's scope is 'reversible; scoped to the affected carrier feed's pickup slots only; run only after the lag on that feed is confirmed' - that lag is now confirmed for exactly this feed/cohort. This is more surgical than revert_allocation_ruleset (which would remove the intended east-node-priority business logic entirely, not just fix the timing defect) and is a precondition for replay_held_allocations (which requires slots to be corrected first). One cohort order that was re-booked after carrier data refreshed already received a valid slot, supporting that correcting the slot timing resolves the block.",
+    "expected_information_gain": "N/A (mitigation): directly remediates the confirmed timing defect for the affected feed/cohort within the human-gate's approved scope, without touching order/queue data."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C6"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C4"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause (C4, kind=root_cause, status=inferred) is supported by two independent tier-1 discriminating sources with no open contradiction: the exception audit (m8_r_exceptions) shows 100% of held orders fall in the v18 split-reservation cohort EXC-0921, and the handoff trace (m8_r_handoffs) shows carrier confirmations for that cohort arrive a median 47 minutes after booking against a 30-minute slot-close window, with a re-booked order confirming the mechanism once carrier data refreshed. A competing dock-capacity/general-carrier hypothesis (C5) was disproven by the same handoff trace. Impact is quantified via an authoritative count (C6: 186 orders, ~9% of overnight allocations, delayed not cancelled/lost, not a support-contact proxy). The reversible, scoped mitigation apply_slot_correction was proposed once its precondition (confirmed feed lag) was met and was approved by the human gate. All pending_review claims are addressed by disposition; no open contradictions remain; no prohibited action was taken.",
+    "expected_information_gain": "N/A - closing the mission."
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

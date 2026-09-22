@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "C004",
+      "statement": "The customer-records app's authorization cache holds stale entitlements (version 41) for the 214 affected users, while the directory holds updated entitlements (version 42), causing the 403 errors since 08:30",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces", "m7_e03", "m7_e02", "m7_e11"],
+      "corroboration": "Trace sample (m7_r_traces, tier 1, discriminating) directly shows denied requests carry version 41 while directory holds version 42 for the same users. Manual refresh for one user caused the same request to succeed with version 42. This is corroborated by: directory job successfully updated 214 roles at 02:10 (m7_e03), authorization failures began 08:30 affecting exactly those 214 users (m7_e02, m7_e11).",
+      "limitation": "Traces show the version mismatch but do not explain why the cache was not refreshed after the 02:10 directory update. This may indicate a cache invalidation logic issue or a missing sync signal."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C001",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C002",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C003",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "evict_entitlement_entries",
+    "kind": "mitigation",
+    "rationale": "A version mismatch between directory (v42) and app cache (v41) has been confirmed by discriminating trace evidence. The scope for evict_entitlement_entries explicitly allows action 'after a version mismatch between the directory and the service is confirmed'. Evicting the stale cache entries will force the app to refresh on the next authorization check. The manual refresh test (m7_r_traces) validates that the new version resolves access. Action is reversible (cache re-population is idempotent) and scoped to the 214 affected users only.",
+    "expected_information_gain": "If approved by human gate, this will restore access for the 214 users immediately upon next request, resolving the 31% failure rate on customer-records authorization. No further diagnostics needed; root cause is established with discriminating evidence."
+  }
+}

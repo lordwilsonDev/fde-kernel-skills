@@ -1,0 +1,54 @@
+{
+ "claims": [
+  {
+   "claim_id": "C1",
+   "statement": "Allocation rule set v18 went live at 22:00 the night before the incident, changing multi-node orders to reserve stock from the east node first.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03"],
+   "corroboration": "Single tier-1 verified source (owner: Inventory Control), change review passed, regression suite green.",
+   "limitation": "Regression suite passing does not rule out a defect that only manifests under production traffic patterns."
+  },
+  {
+   "claim_id": "C2",
+   "statement": "Since 06:00, orders held in 'allocated, awaiting pickup' for more than 90 minutes reached 9% of overnight allocations, and this is confined to east-node lanes; other nodes are normal.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_e02"],
+   "corroboration": "Tier-1 verified monitor alert from Observability.",
+   "limitation": "The alert itself states it cannot attribute a cause; it only shows correlation with east-node lanes."
+  },
+  {
+   "claim_id": "C3",
+   "statement": "Every held order was routed to the east node and flagged by the overnight allocator as a split-reservation exception; reports began about 06:00 and are ongoing.",
+   "kind": "observation",
+   "status": "reported",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10"],
+   "corroboration": "Single tier-2 source (Customer Support), flagged non-authoritative by the system.",
+   "limitation": "Support-reported pattern only; not yet corroborated by an authoritative allocation-system source. Proxy counts (support contacts) cannot establish total impact."
+  },
+  {
+   "claim_id": "C4",
+   "statement": "v18's east-node-first reservation priority is a plausible driver of the split-reservation exceptions now stalling east-node pickups, but this is not yet established as causal versus merely time-correlated.",
+   "kind": "hypothesis",
+   "mechanism_tag": "allocation_rule_defect",
+   "status": "hypothesized",
+   "sources": ["m8_e03", "m8_e02", "m8_e10"],
+   "corroboration": "Timing correlation (v18 live 22:00, exceptions/holds beginning ~06:00) plus lane confinement to east node.",
+   "limitation": "No discriminating evidence yet distinguishes an allocation-rule defect from carrier_feed_lag, dock_capacity, or inventory_count_drift as the actual blocker on pickup. A 2023 stale runbook (m8_e05) suggests rollback for a similar symptom but is single-source and stale, so it is not used as support here."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "audit_allocation_exceptions",
+  "kind": "diagnostic",
+  "rationale": "Support reports (C3) say held orders are flagged as split-reservation exceptions by the overnight allocator. Auditing the allocation exceptions directly (authoritative, Inventory Control-owned data) will confirm or refute whether these exceptions are real, scoped to east-node/v18-affected orders, and whether they mechanically explain why carriers aren't picking the orders up - distinguishing an allocation_rule_defect mechanism from carrier_feed_lag or dock_capacity before committing to a root-cause claim.",
+  "expected_information_gain": "Authoritative confirmation (or refutation) of the split-reservation-exception pattern and its scope, upgrading C3 from reported toward established and narrowing the mechanism_tag candidates for a future root_cause claim."
+ }
+}

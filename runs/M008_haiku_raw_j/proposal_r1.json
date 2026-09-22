@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "c3",
+      "statement": "All held orders routed to east node and flagged by allocator as split-reservation exceptions",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10", "m8_r_exceptions"],
+      "limitation": "100% correlation confirmed by inventory_control audit; cannot yet separate rule-change defect from east-node infrastructure issue"
+    },
+    {
+      "claim_id": "c6",
+      "statement": "All 186 held orders are within scope EXC-0921 (split-reservation orders under rule v18); no held orders fall outside this scope",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Perfect correlation but does not isolate whether defect is in v18 logic or east-node processing"
+    },
+    {
+      "claim_id": "c4",
+      "statement": "Allocation rule v18 contains a defect in split-reservation exception handling or carrier handoff",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "limitation": "Strong evidence of correlation timing and scope; causation requires tracing where orders get stuck"
+    },
+    {
+      "claim_id": "c7",
+      "statement": "East-node infrastructure issue (dock capacity, carrier pickup, or lane-specific problem) affecting split-reservation orders",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Alternative hypothesis; diagnostic trace needed to discriminate from rule defect"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Perfect 100% correlation between held orders and scope EXC-0921 (rule v18 split-reservation orders routed to east node). Tracing the cohort handoffs will reveal where orders get stuck: (1) internal allocation/warehouse queue = rule defect, (2) carrier-side = integration or dock capacity issue. This discriminates between allocation rule defect vs east-node/carrier infrastructure problem and guides mitigation authority."
+  }
+}

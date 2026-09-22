@@ -1,0 +1,34 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule v18 (east-node-first reservation for multi-node orders, live 22:00 on 2026-09-20) correlates temporally and mechanically with the 06:00 pickup failure",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_e02"],
+      "corroboration": "All 186 held orders are east-node routed and flagged as split-reservation exceptions by the overnight allocator. Alert shows only east-node lanes affected. Timeline: rule live 22:00, orders stuck 06:00+.",
+      "limitation": "The rule passed change review and regression suite. No current state diagnostic yet on how split-reservation exceptions interact with carrier pickup."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "186 overnight-allocated orders remain stuck in 'allocated, awaiting pickup' since 06:00",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02", "m8_e10"],
+      "corroboration": "Incident channel reports 186 orders. Monitor alert shows 9% of overnight allocations (consistent scale). All routed to east node.",
+      "limitation": "Exact current count and impact duration need confirmation from live diagnostics."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Directly test whether split-reservation exceptions (flagged on every held order) are blocking carrier pickup. This discriminates between rule-logic failure and carrier-side integration issues.",
+    "expected_information_gain": "Will reveal if exception records explain the pickup lag and whether carrier-side confirmation is missing for these orders."
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule v18 (east-first multi-node reservation) went live at 22:00 and correlates temporally with the 06:00 pickup failure onset",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "corroboration": "m8_e02 shows east-node specific >90min hold at 06:00; no release notes (m8_e04) list other allocation changes",
+      "limitation": "temporal correlation only; does not establish mechanism"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "All 186 held orders were routed to east node and flagged as split-reservation exceptions by the allocator",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "corroboration": "m8_e02 confirms isolation to east-node lanes; m8_e01 reports inventory reconciles (no stock shortage)",
+      "limitation": "single non-authoritative source (tier 2); 'split-reservation exception' semantics unknown without rule inspection"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "The pattern is discriminating: 100% of held orders are east-node, 100% are split-reservation exceptions, 100% post-rule-change, other nodes unaffected",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_e02"],
+      "corroboration": "m8_e04 rules out competing releases; m8_e09 notes observability gap but does not contradict",
+      "limitation": "correlation strong but mechanism (rule defect vs. downstream carrier feed lag) requires diagnostic"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "carrier-side pickup confirmation status",
+      "reason": "m8_e09 observability gap: dashboards do not show how booked pickups relate to carrier confirmation; cannot distinguish allocation defect from carrier-side lag without seeing carrier state"
+    }
+  ],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Highest-value diagnostic to discriminate allocation_rule_defect from carrier_feed_lag. Will show whether orders are stuck at allocation→carrier-handoff boundary or within carrier's pickup queue. This is the discriminating test: if split-reservation exceptions fail at handoff, points to rule defect; if they reach carrier and sit there, points to carrier-side lag or dock conflict.",
+    "expected_information_gain": "Direct evidence of whether the failure is in allocation rule logic (orders malformed/incomplete at handoff) or downstream (orders valid but carrier not picking up)"
+  }
+}

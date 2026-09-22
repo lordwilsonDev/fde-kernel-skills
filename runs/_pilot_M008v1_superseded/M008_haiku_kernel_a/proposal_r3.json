@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C_ROOT",
+      "statement": "Carrier partition 2 (east-node) pickup-window feed consumer stopped advancing at 05:58. Allocation system correctly processed rule-v18 split reservations and booked pickups, but the lagged feed never sent notifications to carriers, causing 186 orders to remain awaiting pickup while carriers see no such bookings.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_e03", "m8_r_exceptions", "m8_e02"],
+      "corroboration": "m8_r_offsets (tier-1, discriminating) shows partition 2 stopped at 05:58, 47+ min behind; m8_e02 shows orders began holding at 06:00 on east-node lanes only; m8_r_exceptions confirms all held orders are rule-v18-routed to east node (EXC-0921 scope); m8_e03 confirms rule change was at 22:00 (well before feed failure); m8_r_owner confirms reversible corrections exist.",
+      "limitation": "No direct evidence of what caused the feed consumer to stop (could be crash, queue full, downstream service down). But the feed lag is the sufficient explanation for the symptom (orders stuck, carriers unaware)."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C1_refined",
+      "action": "downgrade"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "With root cause established (partition 2 feed lag), apply the reversible slot correction scoped to east-node carrier feed only. This will re-synchronize bookings against current carrier availability (not yesterday's). Then replay_held_allocations will notify carriers of today's orders.",
+    "expected_information_gain": "Mitigation approval will depend on human gate evaluation of the root-cause claim and its discriminating evidence."
+  }
+}

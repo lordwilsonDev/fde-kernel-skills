@@ -1,0 +1,47 @@
+{
+  "claims": [
+    {
+      "claim_id": "C14",
+      "statement": "Pickup slots for carrier partition 2 have been realigned to current carrier availability; new bookings are confirmed inside corrected slots",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot"],
+      "corroboration": "Tier-1 verified: observability confirms slots have been corrected and new bookings now fit within slots",
+      "limitation": "Held orders (allocated during the lag window) remain in 'allocated, awaiting pickup' until allocation windows are replayed"
+    },
+    {
+      "claim_id": "C15",
+      "statement": "Replaying allocation windows for EXC-0921 (held orders from the lag window) will reassign them to corrected partition 2 slots and enable carrier pickup",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_r_slot"],
+      "corroboration": "m8_r_owner states 'Replaying held allocations is safe only after their pickup slots have been corrected' (precondition now met via C14); m8_r_slot confirms slots are corrected and holding is temporary pending replay",
+      "limitation": "Replay outcome not yet observed; contingent on allocation replay engine functioning correctly"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C12",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "First mitigation step (apply_slot_correction) completed successfully (C14, established; m8_r_slot verified). Preconditions for second step (replay_held_allocations) are now satisfied per m8_r_owner: affected feed identified (partition 2), lag confirmed (m8_r_offsets), slots corrected (m8_r_slot). Replay allocation windows for EXC-0921 (the 186 held orders allocated during the lag window) to reassign them against corrected partition 2 slots. This will move orders from 'allocated, awaiting pickup' to a state where carriers can pick them up. Reversible and scoped to EXC-0921 allocation windows only.",
+    "expected_information_gain": "Replay will reassign held orders to corrected slots, resolving the hold state and enabling carrier pickup. Expected outcome: 186 orders transition from 'allocated, awaiting pickup' to 'in transit' or 'picked up' state once carriers retrieve them."
+  }
+}

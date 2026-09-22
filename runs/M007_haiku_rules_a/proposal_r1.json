@@ -1,0 +1,86 @@
+{
+  "claims": [
+    {
+      "claim_id": "C3",
+      "statement": "Six-hour gap exists between directory sync completion (02:10) and authorization failures (08:30)",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e02", "m7_e03"],
+      "corroboration": "Direct timestamp correlation",
+      "limitation": "Timing alone does not establish cause; rules out immediate sync failure"
+    },
+    {
+      "claim_id": "C4",
+      "statement": "Customer-records app is caching entitlements locally rather than querying directory in real time",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces"],
+      "corroboration": "Trace analysis shows version 41 cache serving denied requests while directory holds version 42; independent verification of contractor's observation",
+      "limitation": "Traces show cache is in use; do not show refresh mechanism or why it failed"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "Entitlement cache version mismatch: app using version 41 while directory holds version 42 for affected users",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces"],
+      "corroboration": "Verified tier-1 trace data: denied requests carry version 41; directory version 42 confirmed for same users; manual refresh resulted in version 42 and request success",
+      "limitation": "Traces do not indicate why cache was not updated; do not show all 214 users (sample only)"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "Release r7's dependency updates may have altered entitlement cache refresh behavior",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e04"],
+      "corroboration": "Release r7 shipped last week with dependency updates; timing plausible",
+      "limitation": "No functional changes listed; speculative link to cache refresh mechanism; stale evidence from last week"
+    },
+    {
+      "claim_id": "C7",
+      "statement": "Manual refresh of entitlement cache for a sample user resolved authorization failure, proving stale cache is the direct cause",
+      "kind": "inference",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces"],
+      "corroboration": "Trace shows same user denied with version 41; after manual refresh succeeded with version 42",
+      "limitation": "Single-user sample; confirms cache refresh as fix but does not explain why refresh did not occur automatically"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C4",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C5",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Cache refresh mechanism inspection",
+      "reason": "Cannot determine if automatic refresh is disabled, broken, or never triggered; would need service settings or recent deploy diff"
+    },
+    {
+      "capability": "Release r7 detailed changelog",
+      "reason": "Summary lists no functional changes; full diff needed to assess cache-related dependency updates"
+    }
+  ],
+  "next_action": {
+    "action": "evict_entitlement_entries",
+    "kind": "mitigation",
+    "rationale": "Root cause is confirmed: stale entitlement cache version 41 vs. directory version 42. Eviction will force the app to refresh from the directory for the 214 affected users on their next access, matching the behavior proven by manual refresh. This is the most direct, reversible fix within incident authority. Alternative (rerun_role_sync) is less precise and broader in scope.",
+    "expected_information_gain": "If successful, affected users will regain access within their next request window; authorization should shift from 403 to success. Confirms that cache eviction is the correct fix and establishes confidence in the root-cause diagnosis."
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Directory role sync completed successfully at 02:10 and updated 214 role assignments without errors",
+      "kind": "established",
+      "status": "established",
+      "mechanism_tag": "role_sync_error",
+      "sources": ["m7_e03"],
+      "corroboration": "Verified status from IT Identity authority",
+      "limitation": "Confirms sync success; does not confirm application received or cached the updates"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "Authorization failures on customer-records app reached 31% of record-open requests starting at 08:30, affecting all 214 users with overnight role changes",
+      "kind": "established",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e02", "m7_e11"],
+      "corroboration": "Alert data (verified) plus all support reporters are within the 214-user cohort",
+      "limitation": "Failure counts; does not indicate cause"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Six-hour gap exists between directory sync completion (02:10) and authorization failures (08:30)",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e02", "m7_e03"],
+      "corroboration": "Direct correlation from timestamps",
+      "limitation": "Timing alone does not establish cause; rules out immediate sync failure"
+    },
+    {
+      "claim_id": "C4",
+      "statement": "Customer-records app is caching entitlements locally rather than querying directory in real time",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e08"],
+      "corroboration": "Contractor log references 'served from local store'",
+      "limitation": "Contractor evidence is tier-4 (untrusted) and unverified; requires independent confirmation"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "Entitlement cache version mismatch: app using version 41 while directory holds newer entitlements for the 214 users",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e08"],
+      "corroboration": "Contractor log notes 'version 41' for denied users",
+      "limitation": "Tier-4 untrusted source; no directory-side version data; no app-side version confirmation"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "Release r7's dependency updates may have altered entitlement cache behavior, causing it to retain stale data",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e04"],
+      "corroboration": "Release shipped 'last week', 'dependency updates' included; timing plausible but not direct",
+      "limitation": "No functional changes listed; speculative connection to authorization logic"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Entitlement cache version check",
+      "reason": "Cannot directly inspect app's cached version without service diagnostics; contractor log is untrusted"
+    },
+    {
+      "capability": "Directory version state at 02:10 and current",
+      "reason": "Observability gap: directory team cannot see what app has stored; no version tracking visible"
+    }
+  ],
+  "next_action": {
+    "action": "pull_sampled_traces",
+    "kind": "diagnostic",
+    "rationale": "Sampled traces from record-open requests during the 08:30 window will show which entitlement version the app is checking against. This will discriminate between: (a) app is using stale cache version 41, (b) app never received the directory update, (c) something else entirely. Traces are read-only and authorized.",
+    "expected_information_gain": "Confirm whether app-side cache version matches directory state; if mismatch confirmed, establishes version-mismatch as root cause and justifies a reversible mitigation (evict_entitlement_entries or rerun_role_sync)"
+  }
+}

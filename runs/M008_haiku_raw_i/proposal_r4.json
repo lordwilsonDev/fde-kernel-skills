@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "claim_id": "c11_cohort_identified",
+      "statement": "All 186 held orders belong to the exception scope EXC-0921: orders allocated under rule set v18 with a split reservation and routed to the east node. 100% of held orders are in this scope; no held orders exist outside it. The scope is now on record and can be used for targeted diagnostics.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "The scoping cannot separate whether the root cause is the rule change itself, the split-reservation exception state, or an issue specific to the east-node destination, since v18 only routes rule-affected orders to the east node."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Now that the EXC-0921 scope is defined, trace the handoffs to see exactly where and when these orders become stuck. The trace will show: (1) whether pickup signals are generated for EXC-0921 orders, (2) if signals reach the carrier system or get blocked, (3) at which handoff boundary the orders stop progressing. This will distinguish whether the root cause is in the allocation-to-carrier interface, the carrier's handling of split-reservation orders, or an east-node-specific problem."
+  }
+}

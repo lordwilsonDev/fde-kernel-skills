@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "inf_v18_causally_linked",
+      "statement": "All 186 held orders are in scope EXC-0921 (split reservation created by v18); all orders in EXC-0921 are held; no other orders are held. This establishes v18 rule change as causally linked to the hold state.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e10"],
+      "limitation": "Cannot yet distinguish whether v18 logic is defective or whether east-node lanes handle split reservations differently. Only rule-affected orders routed to east node."
+    },
+    {
+      "claim_id": "hyp_root_cause_rule_defect",
+      "statement": "Hypothesis: Allocation rule set v18 contains a defect in split-reservation logic that causes orders to be marked held and not advanced to carrier pickup scheduling.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e03"],
+      "limitation": "Requires confirmation: carrier ops may or may not have received pickup orders; state machine may be blocked downstream."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Determine whether Carrier Operations received the 186 EXC-0921 orders and booked pickups for them. If received and scheduled: root cause is in our state machine between allocation and scheduling. If not received: root cause is in our carrier feed/integration. If received but rejected: order data issue (e.g., split reservation format unrecognizable). This diagnostic directly tests the boundary between Inventory Control (allocation) and Carrier Operations (scheduling)."
+  }
+}

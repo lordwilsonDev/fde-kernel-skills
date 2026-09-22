@@ -1,0 +1,54 @@
+{
+  "claims": [
+    {
+      "claim_id": "C5",
+      "statement": "Entitlement cache version mismatch: app using version 41 while directory holds version 42 for affected users",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces", "m7_r_evict"],
+      "corroboration": "Traces confirmed version 41 vs 42 mismatch; eviction proved cache refresh resolves the failures (31% → 1% success rate in 3 minutes)",
+      "limitation": "Root cause confirms mechanism but does not explain why automatic cache refresh failed after directory sync"
+    },
+    {
+      "claim_id": "C8",
+      "statement": "Authorization failures decreased from 31% to 1% following entitlement cache eviction",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_evict"],
+      "corroboration": "Verified tier-1 observability data; outcome within 3 minutes",
+      "limitation": "Remaining 1% may reflect unrelated authorization issues or slow cache propagation"
+    },
+    {
+      "claim_id": "C9",
+      "statement": "Root cause fully mitigated and reversibility confirmed",
+      "kind": "inference",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_evict"],
+      "corroboration": "Eviction result explicitly states 'reversible'; impact (C8) proves fix works",
+      "limitation": "Does not address underlying cause of cache refresh failure; does not prevent recurrence"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C5",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Root cause of cache refresh failure",
+      "reason": "Cannot determine if release r7 dependencies broke automatic refresh, if refresh is disabled, or if it never triggered; requires service code review or dependency audit"
+    }
+  ],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Incident assessment complete. Root cause established: stale entitlement cache (version 41 vs directory version 42) caused 31% authorization failures for 214 users with overnight role changes. Mitigation (cache eviction) approved by human gate and successfully executed; failures reduced to 1% within 3 minutes. All authorized diagnostics performed; no further action available within incident authority.",
+    "expected_information_gain": "Assessment closed. Root cause: stale_authz_cache. Status: mitigated and reversible. Recommendations for follow-up: investigate why automatic cache refresh failed after directory sync (likely release r7 dependency impact); implement version-mismatch alerting to detect similar incidents faster."
+  }
+}

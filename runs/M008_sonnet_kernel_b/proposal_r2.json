@@ -1,0 +1,32 @@
+{
+ "claims": [
+  {
+   "claim_id": "C8",
+   "statement": "Root cause: allocation rule v18's east-node-first multi-node reservation produces split-reservation orders (scope EXC-0921) that are booked into a pickup slot closing 30 minutes after booking, but carrier confirmation for these split-reservation orders arrives a median of 47 minutes after booking -- systematically longer than the slot window. The slot therefore closes before the carrier confirms, leaving the order stuck 'allocated, awaiting pickup'. Non-cohort east-node orders (single-reservation, booked before 05:58) confirmed inside their slot normally, and one order that was re-booked after carrier data refreshed received a valid slot -- both isolate the defect to the split-reservation slot-timing mismatch rather than a general east-node carrier or dock problem.",
+   "kind": "root_cause",
+   "status": "inferred",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03", "m8_e02"],
+   "corroboration": "m8_r_handoffs (tier-1, observability, flagged discriminating) directly compares slot-close time (30min) to carrier confirmation latency (47min median) for the exact affected cohort (EXC-0921, from m8_r_exceptions, tier-1 Inventory Control), and shows non-cohort east-node orders and one re-booked order behave as the mechanism predicts -- ruling out generic carrier_feed_lag and dock_capacity (C4/C5 found nothing wrong on those fronts) as the primary mechanism.",
+   "limitation": "Does not trace why carrier confirmation itself takes ~47 minutes for split-reservation orders (e.g., cross-node coordination on the carrier's side) -- that deeper mechanism is not characterized, only the timing mismatch it causes. Based on one snapshot of the cohort; does not confirm whether the mismatch would recur for future split-reservation orders absent correction."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C6", "action": "preserve"},
+  {"claim_id": "C7", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "apply_slot_correction",
+  "kind": "mitigation",
+  "rationale": "C8 (root_cause, status=inferred) is supported by discriminating evidence m8_r_handoffs with no open contradiction: the east-node carrier feed's pickup slot (30min) is confirmed shorter than the cohort's median carrier confirmation latency (47min). apply_slot_correction's eligible scope -- 'reversible; scoped to the affected carrier feed's pickup slots only; run only after the lag on that feed is confirmed' -- is now satisfied: the lag on that specific feed is confirmed by m8_r_handoffs.",
+  "expected_information_gain": "Corrects the pickup-slot duration for the affected east-node carrier feed so it accommodates the confirmed ~47-minute median confirmation latency, addressing the mechanism directly without reverting v18's reservation logic wholesale; reversible and scoped only to that feed's slots per the stated authorization. Held orders themselves still need a follow-up replay_held_allocations once slots are corrected."
+ }
+}

@@ -1,0 +1,754 @@
+{
+ "world": "M008",
+ "mode": "raw",
+ "enforce": false,
+ "round": 8,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "obs_001",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "obs_002",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "obs_003",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "obs_004",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_001",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_002",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception flag on all 186 held orders is the strongest signal that rule v18's multi-node reservation logic is involved. Inspecting why every order is flagged as an exception will discriminate between (a) a rule defect that creates unpickable orders, (b) normal behavior that the carrier feed is failing to process, or (c) an inventory count issue that makes stock unavailable despite reconciliation."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "obs_005",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "obs_006",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "ref_001",
+      "from": null,
+      "to": "stale",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_001_refined",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_003",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002"
+    ]
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "Rule v18 is the sole differentiator for all 186 held orders. Reviewing its design change, test results, and any known issues in its deployment history will determine whether the split-reservation logic has a documented defect or works as designed. This discriminates between a rule implementation problem (which suggests rollback or correction) and a carrier/scheduling problem (which suggests integration diagnostic or east-node investigation)."
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "obs_007",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "inf_001",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_001_downgrade",
+      "from": null,
+      "to": "disproven",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_004",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_005",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003"
+    ]
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Rule v18 logic is sound, but its output (split-reservation orders) is not reaching carrier pickup. Tracing how EXC-0921 orders flow from allocation through the handoff pipeline to carrier scheduling will pinpoint where the orders stop or fail\u2014either in the metadata transmission, dock queuing, carrier feed integration, or scheduling logic. This isolates the root cause to a specific subsystem (allocation\u2192carrier, dock capacity, or carrier integration)."
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "obs_008",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "obs_009",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "obs_010",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "root_cause_001",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_002_downgrade",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "impact_001",
+      "from": null,
+      "to": "established",
+      "result": "violation:impact requires an impact_estimate artifact, not proxies",
+      "reason": "violation:impact requires an impact_estimate artifact, not proxies"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005"
+    ]
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The root cause is a timing mismatch: split-reservation order confirmations require 47 minutes (median) but slots close after 30 minutes. The most direct, reversible mitigation is to extend the pickup slot window for EXC-0921 orders from 30 to 50+ minutes, allowing confirmations to arrive before slot closure. This is authorized as a single reversible action and requires no upstream rule changes or rollbacks."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005",
+     "obs_008",
+     "obs_009",
+     "obs_010",
+     "root_cause_001",
+     "hyp_002_downgrade",
+     "impact_001"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via root_cause_001"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "obs_011",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "inf_002",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "alt_mitigation_001",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005",
+     "obs_008",
+     "obs_009",
+     "obs_010",
+     "root_cause_001",
+     "hyp_002_downgrade",
+     "impact_001"
+    ]
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The slot correction mitigation targeted the wrong feed and failed. Replaying the allocation for the 186 held orders is a reversible action that may route them to a different carrier lane or scheduling system with either shorter confirmation latency or longer slot validity windows. This avoids the complexity of diagnosing which feed is correct and allows the allocation logic to route orders optimally. If the issue recurs, the alternative is to revert rule v18 itself, but replay is the less disruptive reversible action."
+   },
+   "sim": {
+    "released": "m8_r_replay_ineff",
+    "flagged_for_revalidation": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005",
+     "obs_008",
+     "obs_009",
+     "obs_010",
+     "root_cause_001",
+     "hyp_002_downgrade",
+     "impact_001",
+     "obs_011",
+     "inf_002",
+     "alt_mitigation_001"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via root_cause_001"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "obs_012",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "inf_003",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "hyp_004_downgrade",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005",
+     "obs_008",
+     "obs_009",
+     "obs_010",
+     "root_cause_001",
+     "hyp_002_downgrade",
+     "impact_001",
+     "obs_011",
+     "inf_002",
+     "alt_mitigation_001"
+    ]
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The timing mismatch between rule v18's split-reservation structure and the carrier scheduling system's 47-minute confirmation lag cannot be resolved by slot correction or replay coordination\u2014both have failed. Reverting rule v18 to its previous version is the most direct reversible mitigation: it stops new EXC-0921 orders from being created and allows the 186 stuck orders to be handled under the previous rule, which does not trigger the timing conflict. Once the carrier integration issue is resolved (reducing confirmation lag or redesigning the split-reservation/scheduling interface), rule v18 can be re-deployed."
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005",
+     "obs_008",
+     "obs_009",
+     "obs_010",
+     "root_cause_001",
+     "hyp_002_downgrade",
+     "impact_001",
+     "obs_011",
+     "inf_002",
+     "alt_mitigation_001",
+     "obs_012",
+     "inf_003",
+     "hyp_004_downgrade"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via root_cause_001"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "obs_013",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "obs_014",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "inf_004",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "root_cause_002",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "contra_001",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005",
+     "obs_008",
+     "obs_009",
+     "obs_010",
+     "root_cause_001",
+     "hyp_002_downgrade",
+     "impact_001",
+     "obs_011",
+     "inf_002",
+     "alt_mitigation_001",
+     "obs_012",
+     "inf_003",
+     "hyp_004_downgrade"
+    ]
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The revert mitigation failed and made things worse. The root cause is now clear: east-node carrier confirmation latency of 47 minutes exceeds the 30-minute slot window for any orders routed there, affecting both rule v18 and v17 orders. Engaging directly with carrier ops to understand the source of this latency (overload, system issue, degradation) is the highest-information authorized next step. This will inform whether the solution is to clear the backlog, increase carrier throughput, extend slot windows globally at the east node, or address an upstream carrier integration issue."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005",
+     "obs_008",
+     "obs_009",
+     "obs_010",
+     "root_cause_001",
+     "hyp_002_downgrade",
+     "impact_001",
+     "obs_011",
+     "inf_002",
+     "alt_mitigation_001",
+     "obs_012",
+     "inf_003",
+     "hyp_004_downgrade",
+     "obs_013",
+     "obs_014",
+     "inf_004",
+     "root_cause_002"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 7,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "obs_015",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "conclusion_001",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "conclusion_002",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "contra_002",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "obs_001",
+     "obs_002",
+     "obs_003",
+     "obs_004",
+     "hyp_001",
+     "hyp_002",
+     "obs_005",
+     "obs_006",
+     "ref_001",
+     "hyp_001_refined",
+     "hyp_003",
+     "obs_007",
+     "inf_001",
+     "hyp_004",
+     "hyp_005",
+     "obs_008",
+     "obs_009",
+     "obs_010",
+     "root_cause_001",
+     "hyp_002_downgrade",
+     "impact_001",
+     "obs_011",
+     "inf_002",
+     "alt_mitigation_001",
+     "obs_012",
+     "inf_003",
+     "hyp_004_downgrade",
+     "obs_013",
+     "obs_014",
+     "inf_004",
+     "root_cause_002"
+    ]
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Investigation has identified the root cause and constraints clearly: the east-node carrier confirmation latency (47 minutes) exceeds the 30-minute slot window, affecting all orders routed there since ~06:00. The degradation is independent of allocation rules. Mitigations require precise identification of the correct carrier feed and careful sequencing (slot correction first, replay after), which is operational work requiring Carrier Operations and Inventory Control coordination. The 186 held orders are now blocked by the need for proper feed identification and simultaneous slot/replay correction. No further diagnostic work by the assessment layer is productive at this point."
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

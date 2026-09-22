@@ -1,0 +1,55 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_005",
+      "statement": "All 186 held orders fall within scope EXC-0921 (rule v18 split-reservation orders routed to east node)",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Perfectly correlated but cannot yet separate rule-change effect from east-node-lane infrastructure effect"
+    },
+    {
+      "claim_id": "obs_006",
+      "statement": "No held orders exist outside the EXC-0921 scope (no other node or allocation pattern is affected)",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Strengthens evidence of rule v18 involvement but does not prove rule defect vs. carrier issue"
+    },
+    {
+      "claim_id": "ref_001",
+      "statement": "Stale 2023 runbook suggests rolling back allocation rule sets after allocation changes cause held orders",
+      "kind": "observation",
+      "status": "stale",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e05"],
+      "limitation": "2023 document, procedures may have changed; suggests a pattern of allocation rules causing hold-ups"
+    },
+    {
+      "claim_id": "hyp_001_refined",
+      "statement": "Rule set v18's split-reservation logic creates orders that the east-node lanes cannot fulfill (either because the rule reserves stock incorrectly or because the split structure is incompatible with the carrier pickup model)",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e03"],
+      "limitation": "Requires examination of rule v18 design and test coverage to confirm"
+    },
+    {
+      "claim_id": "hyp_003",
+      "statement": "The east-node carrier or scheduling system has a capacity or integration issue specific to split-reservation orders from rule v18",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Observability gap prevents direct inspection of carrier-side state"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "Rule v18 is the sole differentiator for all 186 held orders. Reviewing its design change, test results, and any known issues in its deployment history will determine whether the split-reservation logic has a documented defect or works as designed. This discriminates between a rule implementation problem (which suggests rollback or correction) and a carrier/scheduling problem (which suggests integration diagnostic or east-node investigation)."
+  }
+}

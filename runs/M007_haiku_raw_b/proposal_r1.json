@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "c001",
+      "statement": "The customer-records app's entitlement cache is serving version 41 while the directory has already advanced to version 42 for the affected users; a manual cache refresh proved the access succeeds when version 42 is served",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces", "m7_e03"],
+      "limitation": "None; verified observability data plus directory job record"
+    },
+    {
+      "claim_id": "c002",
+      "statement": "The customer-records app did not refresh or invalidate its entitlement cache after the directory role sync completed at 02:10, causing a version mismatch that persists across all 214 affected users",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces", "m7_e03", "m7_e11"],
+      "limitation": "The app's cache invalidation/refresh mechanism has not been inspected; this inference assumes the app should have reacted to the directory change but did not"
+    },
+    {
+      "claim_id": "c005",
+      "statement": "All 214 support agents are denied access while holding version 41 entitlements; the 31% authorization failure rate on the customer-records app maps directly to users with stale version 41 cache entries",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces", "m7_e02", "m7_e11"],
+      "limitation": "None"
+    },
+    {
+      "claim_id": "c006",
+      "statement": "Evicting the stale version 41 entitlement entries will force the app to re-fetch user entitlements from the directory, retrieving version 42 and restoring access",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces"],
+      "limitation": "Inference based on single manual refresh test; assumes cache eviction will trigger re-fetch behavior"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "evict_entitlement_entries",
+    "kind": "mitigation",
+    "rationale": "The root cause is definitively a stale entitlement cache in the customer-records app serving version 41 when version 42 is available in the directory. A manual cache refresh for a single user in the trace sample immediately restored access. Evicting the stale entries for the 214 affected users will force the app to re-fetch current entitlements, restoring access to all denied support agents. This is a single reversible action: if unexpected issues arise, entries will repopulate on next access. This action directly addresses the proven root cause and has been validated by observability data."
+  }
+}

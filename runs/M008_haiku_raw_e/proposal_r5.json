@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_012",
+      "statement": "The allocation replay was applied to orders in closed pickup slots; they remain held despite re-booking",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_replay_ineff"],
+      "limitation": "Confirms that slot correction must precede replay; both mitigations require coordination"
+    },
+    {
+      "claim_id": "inf_003",
+      "statement": "Sequential correction of slots then replay is required, but coordinating these actions across multiple feeds and systems is failing; the root-cause timing mismatch requires addressing rule v18's carrier integration before mitigations can succeed",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_replay_ineff", "m8_r_slot_ineff"],
+      "limitation": "Indicates need for upstream fix to rule v18 or redesign of its carrier scheduling integration"
+    },
+    {
+      "claim_id": "hyp_004_downgrade",
+      "statement": "The split-reservation structure or metadata created by rule v18 is not compatible with the carrier pickup scheduling system",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+      "limitation": "While slot extension and replay mitigations were attempted, they failed due to system coupling; the root defect is in v18's design"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The timing mismatch between rule v18's split-reservation structure and the carrier scheduling system's 47-minute confirmation lag cannot be resolved by slot correction or replay coordination—both have failed. Reverting rule v18 to its previous version is the most direct reversible mitigation: it stops new EXC-0921 orders from being created and allows the 186 stuck orders to be handled under the previous rule, which does not trigger the timing conflict. Once the carrier integration issue is resolved (reducing confirmation lag or redesigning the split-reservation/scheduling interface), rule v18 can be re-deployed."
+  }
+}

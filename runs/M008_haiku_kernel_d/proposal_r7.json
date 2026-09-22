@@ -1,0 +1,13 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Check whether there is a lag in the carrier feed's partition processing. If the east-node carrier feed has a processing offset lag or queue backlog, this would discriminate toward a carrier-side lag issue. If offsets are current and processing is flowing, this discriminates toward the root cause being on the allocation side (our system's handling of the orders v18 creates). This directly tests whether the carrier feed is keeping up with the orders we're sending.",
+    "expected_information_gain": "Current processing offset for the east-node carrier feed; whether there's a backlog of unprocessed pickup requests; whether the lag correlates with when v18 went live"
+  }
+}

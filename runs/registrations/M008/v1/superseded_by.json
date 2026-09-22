@@ -1,0 +1,9 @@
+{
+ "created_utc": "2026-09-22T02:04:45.584438+00:00",
+ "new_record_sha256": "ebf45988aeaf94ffcc9b4004de9870cb1299f6a27640a88ba7968757e985d8f8",
+ "reason": "v1 superseded before confirmatory data collection (driver validation/atomicity/lock, guard canonical-path rewrite, registry itself, private-evaluator split, report eligibility). v2 freezes the hardened control system; scenario/Kernel/decoy mechanism unchanged. Registered with disclosure of the 2 known v1 pilot outcomes.",
+ "record_sha256": "b376fff94be91d90e71173bfc6c898b44e6fe736d501656fb450f6493ad22c91",
+ "superseded_by": 2,
+ "version": 1,
+ "world": "M008"
+}

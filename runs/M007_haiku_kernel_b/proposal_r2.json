@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C005",
+      "statement": "Approximately 214 support agents were unable to access customer records due to stale authorization cache, with 31% of requests failing; mitigation restored access within 3 minutes",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e11", "m7_e02", "m7_r_evict"],
+      "corroboration": "214 affected users confirmed by support_report (m7_e11, tier 2). 31% failure rate before mitigation confirmed by helpdesk alert (m7_e02, tier 1). Mitigation outcome (m7_r_evict, tier 1) shows restoration to 1% within 3 minutes, validating the root cause identification.",
+      "limitation": "Impact reported via proxy count (support team reports), not total affected user census; 31% reflects request-level failure rate during the incident window."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C001",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C002",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C003",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C004",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Root cause has been established with discriminating evidence (m7_r_traces: directory holds v42, app cached v41). Mitigation (evict_entitlement_entries) was approved by human gate and executed successfully (m7_r_evict: 31% → 1% failures in 3 minutes). No open contradictions. All material claims have sources and dispositions. The incident is resolved and fully explained.",
+    "expected_information_gain": "Final assessment will confirm closure of incident M007."
+  }
+}

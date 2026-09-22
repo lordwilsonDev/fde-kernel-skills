@@ -1,0 +1,70 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_005",
+      "statement": "For orders in scope EXC-0921 (v18-allocated split reservations), the median carrier confirmation latency is 47 minutes, while their pickup slot closes at 30 minutes post-booking",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Latency metric is empirical; the causation (whether split-reservation status triggers carrier delay, or slot closure time is too tight for split reservations) requires further investigation, but the correlation is clear"
+    },
+    {
+      "claim_id": "obs_006",
+      "statement": "Non-split-reservation east-node orders booked before 05:58 were carrier-confirmed within their 30-minute slot window",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Confirms that standard (non-split) reservations complete within the slot window; discriminates split-reservation latency as the anomaly"
+    },
+    {
+      "claim_id": "obs_007",
+      "statement": "One re-booked EXC-0921 order (after carrier data refresh) received a valid pickup slot",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Single-order evidence; suggests re-booking is a viable workaround, but does not establish why the original booking failed to complete"
+    },
+    {
+      "claim_id": "root_001",
+      "statement": "Allocation rule set v18 creates split-reservation orders that incur excessive carrier confirmation latency (median 47 min) relative to the pickup slot closure deadline (30 min), causing orders to remain unconfirmed and stuck in 'awaiting pickup' state",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions", "m8_r_handoffs"],
+      "limitation": "Root cause identifies v18 as the necessary condition (split-reservation creation); the underlying cause of carrier latency (v18's split-reservation logic inefficiency, carrier system processing delay, or slot-closure timing mismatch) is not discriminated and may require post-mitigation analysis"
+    },
+    {
+      "claim_id": "impact_001",
+      "statement": "186 orders (9% of overnight allocations) are held in 'allocated, awaiting pickup' without carrier pickup confirmation, blocking customer fulfillment since 06:00",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "limitation": "Scope and duration confirmed; customer impact (delayed delivery, potential cancellations) not quantified"
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "hyp_001",
+      "action": "refine",
+      "new_status": "established",
+      "new_kind": "root_cause",
+      "rationale": "Now refined to root cause by evidence from m8_r_handoffs: v18's split reservations trigger carrier latency exceeding slot closure, leaving orders unconfirmed"
+    },
+    {
+      "claim_id": "hyp_002",
+      "action": "refine",
+      "new_status": "inferred",
+      "rationale": "Partially confirmed: v18 does create the problematic condition, but the mechanism is carrier confirmation latency, not incomplete handoff"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The root cause is established: v18 creates split-reservation orders with unacceptable carrier confirmation latency. Reverting to the prior rule set removes the split-reservation creation and should restore normal (sub-30-minute) confirmation times for the 186 stuck orders. This is a reversible action within authority and directly addresses the root cause. Post-mitigation, v18 can be analyzed for optimization (e.g., adjustment of split-reservation heuristics or carrier-side integration fixes) before re-deployment."
+  }
+}

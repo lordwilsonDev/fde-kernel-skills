@@ -1,0 +1,45 @@
+{
+  "claims": [
+    {
+      "claim_id": "C6",
+      "statement": "Root cause: Carrier feed lag on east-node lanes caused the 186 orders (EXC-0921) to have pickup slot confirmations arrive 47 minutes after booking, but the slot window closes after 30 minutes. Orders allocated under v18 were routed to east node where this lag occurred; the lag is not a defect in v18 itself but a transient carrier-side delay. Evidence shows non-EXC-0921 orders booked before the lag window were confirmed normally, and re-booking after carrier data refresh succeeded, proving the issue is carrier data staleness, not allocation logic.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03"],
+      "corroboration": "m8_r_handoffs provides discriminating evidence: 47-minute booking-to-confirmation lag vs. 30-minute slot window closure, with explicit evidence that re-booking resolved the issue. m8_r_exceptions establishes v18 produced this cohort correctly. m8_e03 confirms v18 change was reviewed and tested, ruling out a defect in the rule logic itself.",
+      "limitation": "None identified; discriminating evidence establishes the mechanism and separates v18's correct operation from the transient carrier feed lag."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "With root cause established (transient carrier feed lag on east-node pickup slots), the highest-information reversible mitigation is to correct the pickup slot windows for the affected carrier feed. This will allow the 186 orders' confirmations (which have now arrived after the original slot window closed) to match valid slots. Scope: east-node carrier feed slots only, reversible.",
+    "expected_information_gain": "Slot correction will unblock the held orders by giving them valid pickup slots that overlap with their actual carrier confirmations. Post-correction, replay_held_allocations can be proposed to release them."
+  }
+}

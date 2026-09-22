@@ -1,0 +1,55 @@
+{
+  "claims": [
+    {
+      "claim_id": "C4",
+      "statement": "Carrier Operations indicates feed corrections are possible but must be scoped to a single feed and occur only after that feed's lag is confirmed.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "corroboration": "Tier-1 source from Carrier Operations directly; confirms reversibility and safety preconditions.",
+      "limitation": "Does not identify which feed(s) are affected or quantify the lag; requires further diagnostic data."
+    },
+    {
+      "claim_id": "C5",
+      "statement": "Split-reservation exception flags on all 186 held orders may indicate either (a) legitimate multi-node orders correctly routed by v18, or (b) malformed allocations that carriers cannot process.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "corroboration": "m8_e10 confirms all held orders flagged as split-reservation exceptions; m8_e03 confirms v18 change involves multi-node reservation strategy.",
+      "limitation": "Split-reservation flags alone do not indicate whether they are correct or malformed; requires audit of allocation exception details."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "All 186 stuck orders are flagged with split-reservation exceptions. Auditing these exceptions will reveal whether v18 is creating well-formed allocations or malformed ones. If allocations are correct, the issue is carrier-side (feed lag). If allocations are malformed, v18 is the root cause and requires rollback. This discriminates between the two primary hypotheses and guides whether to correct carrier slots or revert the allocation ruleset.",
+    "expected_information_gain": "Definitive evidence on allocation correctness; rules out one of the two main root-cause branches."
+  }
+}

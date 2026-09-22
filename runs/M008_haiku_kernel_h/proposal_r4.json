@@ -1,0 +1,63 @@
+{
+  "claims": [
+    {
+      "claim_id": "C6",
+      "statement": "East-node carrier partition 2 feed consumer stopped at 05:58, preventing pickup-window updates and leaving pickup slots booked against yesterday's availability",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets"],
+      "corroboration": "m8_r_offsets (tier 1 discriminating): partition 2 consumer stopped at 05:58, 47 minutes behind and growing while partitions 0&1 current. Timeline aligns with order stuck alert at 06:00. Allocation rule v18 is a triggering factor (routed orders there) but not the root cause (other nodes unaffected).",
+      "limitation": "Feed stop cause unknown. Diagnostic did not check feed consumer logs or upstream errors."
+    },
+    {
+      "claim_id": "C7",
+      "statement": "Impact: 186 orders stuck due to unavailable carrier pickup slots on partition 2 feed lag",
+      "kind": "impact",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_r_offsets"],
+      "corroboration": "9% of overnight allocations (consistent with 186 orders) held >90 min on east-node lanes (m8_e02). All stuck orders are EXC-0921 routed to east node (m8_r_exceptions). Partition 2 lag directly blocks slot confirmation for these orders (m8_r_offsets).",
+      "limitation": "Exact customer impact (revenue, SLA, notifications) not quantified. Recovery time unknown."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [
+    {
+      "contradiction_id": "X1",
+      "evidence_refs": ["m8_r_offsets"],
+      "outcome": "resolved_in_favor_of_c4",
+      "rationale": "m8_r_offsets provides discriminating evidence: carrier partition 2 feed stopped at 05:58, exactly matching the 06:00 order stuck timing. Allocation rule v18 is a trigger (routes to east-node) but not root cause. The root cause is the carrier feed lag."
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C4",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "impact_estimate",
+      "reason": "Operational impact quantified (186 orders, 47-min lag); financial impact requires pricing data unavailable in this assessment."
+    }
+  ],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Carrier Operations must correct partition 2 pickup slots to reflect current availability once the feed consumer is restarted. This is reversible, scoped to the affected feed, and the necessary precondition for replaying held allocations. Precondition: feed consumer must be restarted first (owner action, out of assessment scope).",
+    "expected_information_gain": "Correcting slots will allow the 186 held orders to proceed to pickup. This is the highest-information authorized next step given the root cause."
+  }
+}

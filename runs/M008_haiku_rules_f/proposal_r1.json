@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim_id": "C3",
+      "statement": "100% of held orders are in scope EXC-0921 (split-reservation under v18), and no orders outside this scope are held; the defect or impact is perfectly correlated with the v18 rule change and the east-node routing",
+      "kind": "inference",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Verified diagnostic audit shows perfect correlation between v18 split-reservation scope and held orders",
+      "limitation": "Audit cannot distinguish whether the problem is the rule logic itself (allocation_rule_defect) or east-node-specific pickup/capacity issue (carrier_feed_lag or dock_capacity)"
+    },
+    {
+      "claim_id": "C7",
+      "statement": "The root cause is either a defect in allocation rule set v18's split-reservation logic, or a carrier pickup lag / dock capacity constraint at the east node",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e03", "m8_e02"],
+      "corroboration": "The audit confirms v18 rule and split-reservation are causally linked to held orders, but cannot discriminate the mechanism",
+      "limitation": "Two plausible mechanisms remain; need carrier-side diagnostics or dock metrics to discriminate"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C3",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The held orders are perfectly scoped to v18 split-reservations routed to east node, but we cannot yet distinguish allocation-rule-defect from carrier-side issues (feed lag, dock capacity, acceptance delay). Confirming with carrier ops whether they are receiving/queuing pickup requests for EXC-0921 orders will discriminate: if carrier sees the requests but is not accepting them, it's carrier_feed_lag; if carrier is accepting and collecting but our state machine isn't updating, it's a handoff/observability issue. This is the critical discriminator.",
+    "expected_information_gain": "Will determine whether orders are stuck on the carrier side (feed lag / dock capacity / acceptance delay) or whether our allocation/reservation logic is broken. Directly addresses the two remaining mechanisms."
+  }
+}

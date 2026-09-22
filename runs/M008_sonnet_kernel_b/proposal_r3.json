@@ -1,0 +1,22 @@
+{
+ "claims": [],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C6", "action": "preserve"},
+  {"claim_id": "C7", "action": "preserve"},
+  {"claim_id": "C8", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "replay_held_allocations",
+  "kind": "mitigation",
+  "rationale": "The human gate already approved and applied apply_slot_correction last round on the strength of C8 (root_cause, status=inferred, discriminating evidence m8_r_handoffs, no open contradiction). C8 remains unchanged and uncontradicted this round. replay_held_allocations' eligible scope -- 'reversible; idempotent; only allocation windows that overlap the corrected slots; run only after the slots are corrected' -- is now satisfied, since the affected feed's pickup slots were just corrected. Without this step the 186 EXC-0921 orders remain stuck even though the underlying slot-timing defect has been fixed for future bookings.",
+  "expected_information_gain": "Re-runs allocation for the affected windows against the corrected slot timing, which should move the 186 stuck EXC-0921 orders out of 'allocated, awaiting pickup' and confirm (via the resulting order states) that the slot-timing mismatch was the operative blocker. It is reversible and idempotent, scoped only to windows overlapping the corrected slots."
+ }
+}

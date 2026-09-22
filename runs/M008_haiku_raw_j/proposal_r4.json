@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "claim_id": "c11",
+      "statement": "Replay of held allocations was ineffective because pickup slots were not corrected before replay; orders were re-booked into the same closed slots",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_replay_ineff"],
+      "limitation": "Slot correction must precede replay to allow orders to receive valid booking windows compatible with carrier confirmation latency."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause established (v18 30-minute slot window vs 47-minute carrier latency). Rule reverted to prevent new broken allocations. But 186 existing orders remain stuck in closed slots. Applying slot correction will extend or refresh the booking window for scope EXC-0921 orders to accommodate the 47-minute carrier confirmation latency. This is the necessary precursor to allowing carriers to confirm these orders. Following the corrected sequence: revert (done) -> correct slots -> allow carrier confirmation."
+  }
+}

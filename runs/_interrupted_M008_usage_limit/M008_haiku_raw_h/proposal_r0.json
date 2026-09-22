@@ -1,0 +1,55 @@
+{
+  "claims": [
+    {
+      "claim_id": "c001",
+      "statement": "186 orders allocated overnight are stuck in 'allocated, awaiting pickup' state since ~06:00 on east-node lanes",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "limitation": "State confirmed; underlying cause not yet identified"
+    },
+    {
+      "claim_id": "c002",
+      "statement": "All stuck orders were routed to east node and flagged as 'split-reservation exceptions' by the overnight allocator",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "limitation": "Flag indicates unusual behavior; mechanism unknown"
+    },
+    {
+      "claim_id": "c003",
+      "statement": "Allocation rule set v18 deployed at 22:00 reserves stock from east node first for multi-node orders; deployment review passed and regression suite was green",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e04"],
+      "limitation": "Regression suite tested in controlled environment; live behavior may differ"
+    },
+    {
+      "claim_id": "c004",
+      "statement": "The v18 change and stuck-order onset are temporally associated (v18 at 22:00, orders stuck from ~06:00); stuck orders are all on east-node lanes, which is the target of the v18 change",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02", "m8_e03"],
+      "limitation": "Temporal correlation and split-reservation exception flag suggest causation, but require evidence to rule out coincidence"
+    },
+    {
+      "claim_id": "c005",
+      "statement": "Inventory Control reported allocation totals reconcile and observability cannot correlate booked pickup with carrier confirmation",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01", "m8_e09"],
+      "limitation": "Observability gap prevents carrier-side visibility; cannot rule out carrier-side issue or pickup scheduling failure"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The 'split-reservation exception' flag on all held orders is the highest-information diagnostic. It signals the v18 rule-set change is triggering non-standard allocation behavior. Auditing these exceptions will determine whether the issue is in v18's logic, east-node inventory state, or pickup scheduling. This is the narrowest diagnostic to confirm or eliminate v18 as the root cause before considering rollback or escalation."
+  }
+}

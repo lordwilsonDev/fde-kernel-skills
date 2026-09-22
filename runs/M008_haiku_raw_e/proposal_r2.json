@@ -1,0 +1,55 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_007",
+      "statement": "Rule set v18 allocation path matches its specification; no defect found in the rule logic itself",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_rulehist"],
+      "limitation": "Replay test covers 14 days of historical orders but explicitly does not exercise carrier scheduling integration"
+    },
+    {
+      "claim_id": "inf_001",
+      "statement": "The issue is not in allocation rule v18's logic, but in how split-reservation orders integrate with the carrier pickup scheduling system",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_rulehist", "m8_r_exceptions"],
+      "limitation": "The replay test does not exercise carrier scheduling, so a carrier integration defect would not have been caught"
+    },
+    {
+      "claim_id": "hyp_001_downgrade",
+      "statement": "Allocation rule set v18 has a defect in how it handles multi-node stock reservation",
+      "kind": "hypothesis",
+      "status": "disproven",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_rulehist"],
+      "limitation": "Rule logic verified against 14 days of historical data; the rule itself works as designed"
+    },
+    {
+      "claim_id": "hyp_004",
+      "statement": "The split-reservation structure or metadata created by rule v18 is not compatible with or not fully transmitted to the carrier pickup scheduling system",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_rulehist", "m8_r_exceptions"],
+      "limitation": "Requires tracing the handoff from allocation to carrier scheduling to confirm"
+    },
+    {
+      "claim_id": "hyp_005",
+      "statement": "The east-node dock or carrier scheduling system has a capacity or integration issue that specifically affects split-reservation orders",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Requires inspection of dock capacity and handoff pipeline state"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Rule v18 logic is sound, but its output (split-reservation orders) is not reaching carrier pickup. Tracing how EXC-0921 orders flow from allocation through the handoff pipeline to carrier scheduling will pinpoint where the orders stop or fail—either in the metadata transmission, dock queuing, carrier feed integration, or scheduling logic. This isolates the root cause to a specific subsystem (allocation→carrier, dock capacity, or carrier integration)."
+  }
+}

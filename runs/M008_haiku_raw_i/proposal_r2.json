@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "claim_id": "c9_handoff_trace_requires_cohort",
+      "statement": "The handoff trace diagnostic requires a scoped list of order identifiers to execute. No order identifier list is currently available, so the trace returned no data. The affected cohort must be defined first before handoff tracing can be performed.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_handoffs_wait"],
+      "limitation": "This is a procedural constraint; it does not explain the root cause but identifies the prerequisite for the next diagnostic."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "To proceed with tracing how the held orders move through the system, we must first identify the specific order IDs that are stuck in 'allocated, awaiting pickup' state since 06:00 on the east node. The count_stranded_orders diagnostic will provide the scoped cohort of affected orders, which will enable the next handoff trace to show the exact point at which these orders become stuck."
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "claims": [
+    {
+      "claim_id": "C003_refined",
+      "statement": "v18 allocation logic is disproven as root cause by m8_r_revert: reverting to v17 did not resolve the held orders, and new allocations under v17 remain stuck",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_revert"],
+      "corroboration": "Rule set v17 restored in round 3 mitigation; 3,900 allocations re-run; held orders unchanged at 186; new east-node allocations still held under v17",
+      "limitation": "Proves allocation rule logic is not the cause; does not identify the actual downstream cause"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C001",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C002",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C003",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C004",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C005",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause identified: C005 (inferred) establishes that orders are stuck due to a downstream carrier-side constraint (feed lag or dock capacity), NOT allocation logic. Evidence: (1) all 186 orders correlate to v18 split-reservation scope (m8_r_exceptions - discriminating); (2) reverting v18 did not fix it (m8_r_revert); (3) inventory counts are healthy (m8_r_counts). Attempted mitigation (revert_allocation_ruleset) confirmed allocation is not the bottleneck. Impact quantified: 186 orders (~9%), no stock loss, customer delays. Open contradiction X001 is disambiguated by evidence chain: v18 correlated but not causal; actual cause is downstream.",
+    "expected_information_gain": "Final assessment closes the investigation; root cause is carrier-side constraint; future diagnostics (dock capacity, carrier feed lag) would be for mitigation, not root cause determination"
+  }
+}

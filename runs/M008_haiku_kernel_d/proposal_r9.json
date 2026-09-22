@@ -1,0 +1,34 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause identified and mitigation approved by human gate. Carrier feed lag (partition 2 east-node stopped at 05:58) combined with v18 routing orders to east-node caused 186 orders to be booked against stale availability. apply_slot_correction mitigation approved to restore east-node pickup slots and resolve the incident.",
+    "expected_information_gain": "Incident resolution confirmation"
+  }
+}

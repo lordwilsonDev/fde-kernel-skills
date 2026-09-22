@@ -1,0 +1,65 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_008",
+      "statement": "After reverting allocation rule set to v17, the 186 originally-stuck orders remain in 'allocated, awaiting pickup' and new east-node allocations are also being held",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_revert"],
+      "limitation": "Indicates the root cause is not specific to v18 rule logic, but rather a condition affecting the east-node routing or east-node subsystem itself"
+    },
+    {
+      "claim_id": "hyp_003",
+      "statement": "The east-node subsystem (dock, carrier integration, or pickup slot management) has a capacity or integration failure affecting all orders routed to it after approximately 05:58, independent of allocation rule version",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_handoffs", "m8_r_revert"],
+      "limitation": "East-node orders booked before 05:58 under v17 were confirmed normally; orders from ~06:00 onward (under both v18 and post-revert v17) are held, suggesting an east-node boundary condition rather than allocation-rule-specific defect"
+    },
+    {
+      "claim_id": "hyp_004",
+      "statement": "East node dock capacity was exceeded or carrier pickup scheduling failed at approximately 05:58, preventing any new orders from being handed off to carriers regardless of allocation rules",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_r_handoffs", "m8_r_revert"],
+      "limitation": "East node may have hit capacity, or carrier system integration (not carrier operations on-call) may have failed; requires dock diagnostics to discriminate"
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "root_001",
+      "action": "downgrade",
+      "new_status": "inferred",
+      "new_kind": "hypothesis",
+      "rationale": "Mitigation (revert_allocation_ruleset) did not resolve the condition; held orders persist and new east-node orders are also held, indicating the root cause is not v18's split-reservation logic but rather a condition in the east-node subsystem or its environment"
+    },
+    {
+      "claim_id": "inf_001",
+      "action": "refine",
+      "new_status": "inferred",
+      "rationale": "v18 remains a necessary condition for EXC-0921 scope, but is not the sufficient condition for orders being held; east-node routing is the discriminating factor"
+    },
+    {
+      "claim_id": "hyp_001",
+      "action": "downgrade",
+      "new_status": "refuted",
+      "rationale": "Hypothesis that v18 causes split-reservation incompleteness contradicted by revert outcome; split reservations per se may not be the mechanism"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "cont_001",
+      "claim_a": "root_001",
+      "claim_b": "obs_008",
+      "description": "root_001 claimed v18 creates the stuck-order condition; obs_008 shows reverting v18 does not resolve stuck orders, indicating root_001 was incorrect or incomplete"
+    }
+  ],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "The revert to v17 preserved the stuck-order condition and introduced new held orders on east node. This strongly suggests a capacity or integration issue at the east-node dock itself. Checking dock capacity will determine if the east node is over-booked, at capacity limits, or has a carrier pickup scheduling failure that prevents order handoff regardless of allocation rules. This is the highest-information diagnostic to isolate whether the problem is supply-side (capacity) or demand-side (carrier integration failure)."
+  }
+}

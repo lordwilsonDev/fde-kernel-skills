@@ -1,0 +1,289 @@
+{
+ "world": "M008",
+ "mode": "kernel",
+ "enforce": true,
+ "round": 6,
+ "done": false,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Support reports (C3) say held orders are flagged as split-reservation exceptions by the overnight allocator. Auditing the allocation exceptions directly (authoritative, Inventory Control-owned data) will confirm or refute whether these exceptions are real, scoped to east-node/v18-affected orders, and whether they mechanically explain why carriers aren't picking the orders up - distinguishing an allocation_rule_defect mechanism from carrier_feed_lag or dock_capacity before committing to a root-cause claim.",
+    "expected_information_gain": "Authoritative confirmation (or refutation) of the split-reservation-exception pattern and its scope, upgrading C3 from reported toward established and narrowing the mechanism_tag candidates for a future root_cause claim."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C3",
+      "from": "reported",
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "We now have an authoritative, discriminating scope (EXC-0921) with 100% overlap to the held orders, but m8_r_exceptions explicitly cannot separate a rule-change effect from an east-node-lane effect (e.g. carrier_feed_lag or dock_capacity). Tracing the cohort's handoffs from allocation through to the carrier for EXC-0921 will show exactly where the process breaks (allocation never releasing the split-reservation exception to the carrier feed, vs. a lag/capacity problem downstream at the carrier or dock), which is the discriminating evidence needed to support or refute the allocation_rule_defect hypothesis versus carrier_feed_lag/dock_capacity before any root_cause claim.",
+    "expected_information_gain": "Identifies the specific stage (allocation exception handling vs carrier feed vs dock) where EXC-0921 orders stop progressing, enabling a root_cause claim with discriminating evidence and ruling out at least one competing mechanism_tag."
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C6",
+      "from": null,
+      "to": "established",
+      "result": "denied",
+      "reason": "cannot establish: impact requires an impact_estimate artifact, not proxies"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Gate conditions are now met: C5 is a root_cause claim at status=inferred, citing discriminating evidence (m8_r_handoffs), with no open contradiction. The confirmed mechanism is a carrier-confirmation lag (median 47min) that exceeds the booked pickup slot window (30min) specifically for the EXC-0921 cohort. apply_slot_correction is scoped exactly to this: reversible, scoped to the affected carrier feed's pickup slots only, and its precondition ('run only after the lag on that feed is confirmed') is satisfied by m8_r_handoffs. This is the minimal, reversible, in-scope action that addresses the confirmed mechanism without touching inventory, dropping feeds, or contacting customers.",
+    "expected_information_gain": "If approved and applied, corrects the pickup slot timing for the affected feed so already-confirmed/soon-to-confirm carrier pickups fall inside a valid slot window, which can then be checked against whether held orders begin clearing - a direct test of the root-cause claim in addition to remediating the incident."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C5"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C5",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C7",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "C7 shows the first correction failed because it targeted the wrong carrier feed. Before proposing another approval_required mitigation, we need to positively identify which specific feed/partition carries the EXC-0921 east-node split-reservation confirmations and its current lag, rather than assuming 'the affected feed'. read_partition_offsets is the allowed, read-only diagnostic that can pinpoint the correct feed/partition and its live lag, which is required to re-scope apply_slot_correction correctly and avoid repeating the mis-targeted correction.",
+    "expected_information_gain": "Identifies the specific feed/partition and its current lag serving the EXC-0921 cohort, enabling a correctly scoped re-attempt of apply_slot_correction and strengthening C5 toward established via a second, independent confirmation of the lag."
+   },
+   "sim": {
+    "released": "m8_r_offsets",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C7"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C5",
+      "from": "inferred",
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C8",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "C5 is now an established root_cause claim citing discriminating evidence (m8_r_handoffs, m8_r_offsets) with no open contradiction, and C8 pinpoints the exact affected feed as carrier partition 2 (east-node carriers), stalled at 05:58. This corrects the scope error from the first attempt (C7: wrong feed, lag not reconfirmed at execution). apply_slot_correction is reversible and scoped to the affected carrier feed's pickup slots only, and its precondition (lag on that specific feed confirmed) is now satisfied by both an independent Observability trace and Carrier Operations' own partition-2 offset data - this time the target is explicitly carrier partition 2 (east-node carriers), not a generic 'affected feed'.",
+    "expected_information_gain": "A correctly-scoped correction to carrier partition 2's pickup slots should let EXC-0921 orders re-align to real carrier availability and begin clearing, directly testing and remediating the now-established root cause; if held orders still do not clear, that would itself be new discriminating evidence against the current mechanism."
+   },
+   "sim": {
+    "released": "m8_r_slot",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C7",
+     "C8"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C5"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "A second, correctly-scoped apply_slot_correction (targeting carrier partition 2 per C8) was approved and applied this incident, but no outcome evidence for it has been ingested yet and the mission remains in the CORRECTING phase. Before writing a final assessment, we need to verify whether the correction actually reduced the stranded-order count, since a root-cause claim and an approved mitigation are not the same as confirmed remediation. count_stranded_orders is an allowed, read-only diagnostic that gives an authoritative current count (as opposed to the earlier proxy support-ticket counts), which both verifies mitigation effectiveness and supplies the impact_estimate artifact still missing from the checklist.",
+    "expected_information_gain": "Confirms whether the EXC-0921 cohort is clearing after the corrected mitigation (supporting the root-cause claim and closing the incident) or is still stuck (indicating the correction needs further action or the mechanism needs revisiting), and provides an authoritative impact figure rather than a proxy."
+   },
+   "sim": {
+    "released": "m8_r_impact",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C7",
+     "C8"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  }
+ ]
+}

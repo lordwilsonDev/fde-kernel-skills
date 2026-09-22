@@ -1,0 +1,64 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_001",
+      "statement": "186 orders allocated overnight are stuck in 'allocated, awaiting pickup' at east node since 06:00",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "limitation": "Alert does not attribute a cause; only observes the state and timing"
+    },
+    {
+      "claim_id": "obs_002",
+      "statement": "Allocation rule set v18 went live at 22:00 last night with multi-node orders now reserving stock from east node first",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "limitation": "Release notes do not describe any allocation or scheduling changes; no known defects reported at time of change review"
+    },
+    {
+      "claim_id": "obs_003",
+      "statement": "Every held order was flagged by the overnight allocator as a split-reservation exception",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "limitation": "Reports began at 06:00 and keep arriving; no clarification of what 'split-reservation exception' semantically means"
+    },
+    {
+      "claim_id": "obs_004",
+      "statement": "Inventory allocation totals reconcile; inventory control found nothing wrong on their side",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01"],
+      "limitation": "Self-report from inventory control; does not rule out defects in how rule v18 splits or allocates stock"
+    },
+    {
+      "claim_id": "hyp_001",
+      "statement": "Allocation rule set v18 has a defect in how it handles multi-node stock reservation that causes orders to be marked as needing split allocation but not completing the pickup handoff",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "limitation": "Requires diagnostic inspection of what 'split-reservation exception' means and whether rule v18's logic correctly distributes stock"
+    },
+    {
+      "claim_id": "hyp_002",
+      "statement": "Carrier feed or pickup scheduling has a lag or failure in recognizing the east-node-prioritized allocations from rule v18",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_e09"],
+      "limitation": "Observability gap prevents seeing carrier-side confirmation; no read-only diagnostic exists yet to check carrier state"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception flag on all 186 held orders is the strongest signal that rule v18's multi-node reservation logic is involved. Inspecting why every order is flagged as an exception will discriminate between (a) a rule defect that creates unpickable orders, (b) normal behavior that the carrier feed is failing to process, or (c) an inventory count issue that makes stock unavailable despite reconciliation."
+  }
+}

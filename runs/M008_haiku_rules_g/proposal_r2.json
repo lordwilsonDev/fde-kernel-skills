@@ -1,0 +1,63 @@
+{
+  "claims": [
+    {
+      "claim_id": "C6",
+      "statement": "All 186 held orders belong to the EXC-0921 scope (v18-affected, split-reservation), and 100% of EXC-0921 orders routed to the east node are held.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Tier-1 verified audit result from Inventory Control directly confirms perfect correlation.",
+      "limitation": "Correlation is established, but the audit explicitly cannot separate an effect of the rule change from an effect on the east-node lanes, because only rule-affected orders were routed there. Causation is not yet discriminated."
+    },
+    {
+      "claim_id": "C7",
+      "statement": "The root cause is either (a) a defect in v18 allocation logic creating invalid reservations, or (b) a carrier feed lag or dock constraint on the east-node lanes preventing pickup despite valid allocations.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "m8_r_exceptions audit limitation explicitly states this ambiguity: cannot separate rule-change effect from east-node-lane effect.",
+      "limitation": "Requires discriminating evidence: inventory count verification will show whether reservations are valid (supporting hypothesis b) or corrupted (supporting hypothesis a)."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "inspect_inventory_counts",
+    "kind": "diagnostic",
+    "rationale": "The audit confirms perfect correlation between v18-affected orders and held orders, but cannot discriminate whether v18 is creating valid or invalid reservations. Inspecting inventory counts will reveal whether the split reservations in EXC-0921 are legitimate (stock reserved correctly) or corrupted (inventory drift). If counts match allocations, the issue is carrier-side and rules can be preserved. If counts drift or conflict with allocations, v18 is creating invalid reservations and must be rolled back.",
+    "expected_information_gain": "Direct evidence on whether v18's split-reservation logic is working correctly; this discriminates between the two root-cause hypotheses."
+  }
+}

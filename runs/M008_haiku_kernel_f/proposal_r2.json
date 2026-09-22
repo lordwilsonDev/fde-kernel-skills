@@ -1,0 +1,13 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "Quantify customer impact for impact_estimate artifact. Need exact order count, affected customers, and current hold duration to establish total SLA/revenue impact.",
+    "expected_information_gain": "Total stranded order count and duration will enable impact_estimate artifact and support gate decision on whether mitigation is warranted"
+  }
+}

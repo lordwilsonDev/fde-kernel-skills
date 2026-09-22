@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit|Grep|Glob|Bash|NotebookEdit|Skill|WebFetch|WebSearch|Agent|Task|ToolSearch|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/fde/blind_guard.py\"" }
+        ]
+      }
+    ]
+  }
+}

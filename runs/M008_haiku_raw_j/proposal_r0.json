@@ -1,0 +1,55 @@
+{
+  "claims": [
+    {
+      "claim_id": "c1",
+      "statement": "186 orders held in 'allocated, awaiting pickup' state since 06:00, all on east-node lanes",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01", "m8_e02"],
+      "limitation": "Alert counts only; no attribution of root cause"
+    },
+    {
+      "claim_id": "c2",
+      "statement": "Allocation rule set v18 deployed at 22:00 last night; change includes multi-node orders now reserving from east node first",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "limitation": "Verified deployment; actual impact not yet analyzed"
+    },
+    {
+      "claim_id": "c3",
+      "statement": "All held orders routed to east node and flagged by allocator as split-reservation exceptions",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "limitation": "Concurrent with rule v18 but causation not established"
+    },
+    {
+      "claim_id": "c4",
+      "statement": "Allocation rule v18 contains a defect in split-reservation exception handling or carrier handoff",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "limitation": "Strong temporal and semantic correlation; discriminating diagnostics needed"
+    },
+    {
+      "claim_id": "c5",
+      "statement": "Carrier integration may not be receiving pickup confirmations; observability gap prevents verification",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e09"],
+      "limitation": "Acknowledged gap in dashboards; carrier ops reported 'nothing obvious' but lacks full diagnostics"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "All 186 held orders are flagged as split-reservation exceptions routed to east node, directly after rule v18 deployment. Auditing these exceptions will reveal the pattern and discriminate between: (1) allocation rule defect, (2) carrier handoff failure, or (3) observability gap. This is a read-only diagnostic fully within authority and highest-information to guide mitigation."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "pull_sampled_traces",
+    "kind": "diagnostic",
+    "rationale": "Traces from a failed authorization request by one of the 214 affected users will show exactly what entitlements the app evaluated in its 403 check. This directly discriminates between: (a) app is reading old pre-sync entitlements (supports C03/stale_authz_cache), (b) app received entitlements in unexpected format or version (supports role_sync_error), or (c) app is missing the new roles entirely (supports role_sync_error). This is the single highest-information diagnostic available.",
+    "expected_information_gain": "Seeing the entitlement payload in the authorization trace will either confirm the app has stale data (matching old pre-02:10 roles) or reveal a version/format mismatch. If the trace shows the new roles but the app still denies, it points to logic error. If trace shows old roles, it confirms C03 and moves stale_authz_cache from hypothesis to inference."
+  }
+}

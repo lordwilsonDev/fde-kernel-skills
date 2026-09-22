@@ -1,0 +1,11 @@
+{
+ "schema_version": 1,
+ "experiment": "M008",
+ "run_id": "M008_qwen3_8b_kernel_x",
+ "world": "M008",
+ "arm": null,
+ "run_kind": "qualification",
+ "registration_hash": null,
+ "code_hashes": null,
+ "initialized_at": "2026-09-22T11:21:22.654454+00:00"
+}

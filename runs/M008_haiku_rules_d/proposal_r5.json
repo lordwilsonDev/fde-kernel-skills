@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C15",
+      "statement": "Carrier confirmations for EXC-0921 orders arrive a median of 47 minutes after booking, while pickup slots close after 30 minutes",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "Observability trace explicitly measures: 47 minute median confirmation time vs 30 minute slot closure",
+      "limitation": "None; direct measurement data"
+    },
+    {
+      "claim_id": "C16",
+      "statement": "Split-reservation orders created by v18 (EXC-0921 scope) are being booked with insufficient pickup slot duration relative to carrier confirmation latency",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_handoffs", "m8_e03"],
+      "corroboration": "Handoff trace shows slot closure before confirmation for EXC-0921; east-node orders outside cohort booked before 05:58 succeeded; one re-booked EXC-0921 order received valid slot and succeeded. The issue started when v18 began creating split-reservation exceptions around 05:58.",
+      "limitation": "The specific mechanism (why v18 orders get 30-min slots vs others) is not explicitly traced, but the discriminating evidence (timing data + temporal correlation + re-booking success) is clear"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C12",
+      "action": "downgrade",
+      "new_status": "reported",
+      "reason": "C12 claimed 'carrier feed lag' but m8_r_handoffs reveals the actual issue is slot duration mismatch (30 min vs 47 min confirmation time). The lag exists but is not the root cause of the stuck orders."
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Root cause (C16) is that v18's split-reservation orders are booked with insufficient slot durations. Reverting v18 (east-node reservation priority only) will stop creating split-reservation exceptions, allowing re-booking with correct slot durations. This is reversible and idempotent per the human gate scope.",
+    "expected_information_gain": "Reverting v18 will prevent new split-reservation orders from being created with insufficient slots. Subsequent replay_held_allocations can re-book stuck orders with correct slot timing."
+  }
+}

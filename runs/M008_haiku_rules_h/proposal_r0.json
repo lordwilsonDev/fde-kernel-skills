@@ -1,0 +1,53 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule set v18 (deployed 22:00, live at order-processing time) introduced a multi-node east-node-first reservation priority that may be causing split-reservation exceptions on east node lanes.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "corroboration": "v18 went live at 22:00, incident orders began at 06:00 (8 hours later, during overnight allocations). All held orders are on east node and flagged as split-reservation exceptions. Change review passed and regression suite green, but no evidence of east-node-specific split-reservation tests.",
+      "limitation": "Stale runbook (m8_e05) and regression suite do not guarantee the rule works correctly under the new east-node priority semantics. No evidence yet of actual allocation state in the system."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "The east-node-specific carrier pickup feed may have a lag or scheduling gap that prevents carriers from collecting orders that the system believes are ready.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_e09"],
+      "corroboration": "Problem is east-node-specific, other nodes normal. Observability gap exists: dashboards do not show booked pickup vs carrier confirmation. Carrier ops sees nothing obvious in dock schedule (but may not have full visibility into feed lag).",
+      "limitation": "No direct measurement of carrier feed timing or slot availability. No confirmation that orders were actually handed off to carrier feed."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Orders are properly allocated and inventoried; the system state is consistent on the fulfillment side.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "Inventory Control explicitly states allocation totals reconcile and nothing looks wrong on their side.",
+      "limitation": "Inventory Control cannot see carrier-side records (m8_e09), so reconciliation does not rule out a handoff gap."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "inspect_allocation_state",
+      "reason": "Need to verify whether held orders are in the correct allocation state and whether split-reservation exceptions are being resolved or stuck."
+    },
+    {
+      "capability": "inspect_carrier_feed_slots",
+      "reason": "Need to determine whether carrier feed received pickup slots for east-node orders and whether there is a timing gap or feed backlog."
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception flag is specific to the held orders and correlates with v18 deployment. Auditing allocation exceptions will show: (1) whether split-reservation is working as designed, (2) whether east-node orders have a systemic pattern, (3) whether the exception handling logic is stuck or cycling. This directly tests hypothesis C1 and informs whether the root cause is in allocation logic or downstream (carrier feed).",
+    "expected_information_gain": "High. Will establish whether the allocation rule change is defective or whether the problem lies in carrier feed integration."
+  }
+}

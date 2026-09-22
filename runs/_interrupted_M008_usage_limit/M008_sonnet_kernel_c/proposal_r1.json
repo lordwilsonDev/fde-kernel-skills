@@ -1,0 +1,28 @@
+{
+ "claims": [
+  {
+   "claim_id": "C3",
+   "statement": "The 186 held orders are exactly scope EXC-0921: orders allocated under v18 with a split reservation and routed to the east node. 100% of held orders are in EXC-0921 and no order outside EXC-0921 is held.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10", "m8_r_exceptions"],
+   "corroboration": "Tier-1 verified exception_audit from Inventory Control (m8_r_exceptions) now corroborates the earlier tier-2 support report (m8_e10): full overlap between held orders and the split-reservation exception cohort.",
+   "limitation": "m8_r_exceptions itself notes it cannot separate an effect of the rule change from an effect specific to the east-node lanes, since only rule-affected orders were routed there. Correlation/scope match only, not yet a mechanism."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "trace_cohort_handoffs",
+  "kind": "diagnostic",
+  "rationale": "We now have an authoritative, discriminating scope (EXC-0921) with 100% overlap to the held orders, but m8_r_exceptions explicitly cannot separate a rule-change effect from an east-node-lane effect (e.g. carrier_feed_lag or dock_capacity). Tracing the cohort's handoffs from allocation through to the carrier for EXC-0921 will show exactly where the process breaks (allocation never releasing the split-reservation exception to the carrier feed, vs. a lag/capacity problem downstream at the carrier or dock), which is the discriminating evidence needed to support or refute the allocation_rule_defect hypothesis versus carrier_feed_lag/dock_capacity before any root_cause claim.",
+  "expected_information_gain": "Identifies the specific stage (allocation exception handling vs carrier feed vs dock) where EXC-0921 orders stop progressing, enabling a root_cause claim with discriminating evidence and ruling out at least one competing mechanism_tag."
+ }
+}

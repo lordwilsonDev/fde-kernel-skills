@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c_r2_01",
+      "statement": "Rule set v18 was replayed against 14 days of historical orders and no defect was found in the allocation logic itself. The rule path matches its specification.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_rulehist"],
+      "limitation": "Replay testing does not exercise carrier scheduling integration; the allocation logic is correct but downstream integration may still be defective."
+    },
+    {
+      "claim_id": "c_r2_02",
+      "statement": "The root cause of held orders is not a defect in rule set v18's allocation logic, but in the downstream integration between v18's split-reservation routing and carrier pickup scheduling.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_rulehist", "m8_r_exceptions", "m8_e03"],
+      "limitation": "Exact failure point (carrier feed, dock capacity, carrier confirmation lag) cannot be determined without tracing the cohort handoff from allocation to carrier."
+    },
+    {
+      "claim_id": "c_r2_03",
+      "statement": "Disposition for c_r0_04: downgrade from 'hypothesis' (allocation_rule_defect) to superseded claim. The allocation rule logic is verified correct; the defect is in carrier integration, not in allocation.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_rulehist"],
+      "limitation": "This preserves the evidence trail while correctly narrowing the mechanism."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "To determine whether orders in EXC-0921 are being transmitted to the carrier, are queued but unprocessed, or are being rejected/dropped, we must trace the handoff path from allocation to carrier. The rule logic is correct (verified by replay); the blockage is in carrier integration. Tracing will show whether the issue is feed transmission, queue backlog, carrier acknowledgment, or dock capacity."
+  }
+}

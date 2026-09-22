@@ -1,0 +1,34 @@
+{
+  "claims": [
+    {
+      "claim_id": "C17",
+      "statement": "Reverting allocation rule v18 to v17 did not unblock the 186 stuck orders; they remain held with expired pickup slots",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_revert"],
+      "corroboration": "Rule set revert outcome confirms held orders unchanged at 186 despite revert and re-run of 3,900 allocations",
+      "limitation": "Indicates the root issue is not the allocation rule itself, but the already-booked orders' slot timing"
+    },
+    {
+      "claim_id": "C18",
+      "statement": "The 186 stuck orders in scope EXC-0921 require re-booking with corrected (longer) pickup slot durations to match carrier confirmation latency (47+ minutes vs 30 minutes)",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "Handoff trace shows one re-booked EXC-0921 order received a valid slot and succeeded; confirms that re-booking with corrected slots resolves the issue",
+      "limitation": "Single data point, but directly proves re-booking is the fix"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "Root cause (C16) is orders booked with insufficient slot duration. Reverting v18 did not fix already-stuck orders. The remedy per Carrier Ops is to replay held allocations (EXC-0921 scope) to re-book them with corrected slot durations. Evidence shows one re-booked order succeeded, proving this approach works.",
+    "expected_information_gain": "Re-booking EXC-0921 orders with corrected slot durations should allow carrier confirmations to arrive within valid slot windows, unblocking pickup."
+  }
+}

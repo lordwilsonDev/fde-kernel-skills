@@ -1,0 +1,38 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "The root cause is not a defect in allocation rule v18 itself, but the carrier system's inability to process pickup confirmations at the rate/volume that v18 generates, causing a 47-minute confirmation lag that exceeds the 30-minute slot window.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_e03"],
+      "corroboration": "Handoff trace (m8_r_handoffs) shows v18 orders (EXC-0921) have 47-minute confirmation lag while non-v18 orders have normal lag. The lag is specific to v18 orders and the booking rate/pattern they create, not a carrier system outage. One re-booked order (after carrier refresh) received valid slot, confirming the system is functional but overwhelmed.",
+      "limitation": "Root cause is the interaction between v18 volume and carrier capacity, not a failure in either system alone. Mitigation can address this by either: (1) adjusting slot windows to accommodate the lag (requires specific feed identification), or (2) changing the volume pattern by reverting v18."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Specific carrier feed identification",
+      "reason": "Confirm_with_carrier_ops returned procedural requirements but not the specific feed ID needed for apply_slot_correction. Without this, a second slot correction attempt risks the same misapplication as R2."
+    }
+  ],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Allocation rule v18 (east-node-first reservation priority) creates a booking volume/pattern that overwhelms the carrier confirmation system's 47-minute lag tolerance. Reverting to the prior rule set will restore the booking pattern that had no lag (as shown by non-EXC-0921 orders before 05:58), eliminating the trigger for the carrier lag. This is reversible and idempotent, scoped to east-node reservation priority as specified in the gate conditions. After reversion, replay_held_allocations can re-allocate the 186 orders under the old rule without slot conflicts.",
+    "expected_information_gain": "Reverting v18 will change the allocation booking pattern and volume on east-node routes, relieving pressure on the carrier confirmation system and allowing the 186 held orders to be re-allocated and successfully picked up."
+  }
+}

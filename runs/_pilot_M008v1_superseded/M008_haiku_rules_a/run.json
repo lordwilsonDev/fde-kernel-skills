@@ -1,0 +1,732 @@
+{
+ "world": "M008",
+ "mode": "rules",
+ "enforce": false,
+ "round": 8,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "established",
+      "result": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)",
+      "reason": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H1",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H2",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H3",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Carrier confirmation state for affected orders: did pickup requests reach carrier system, and why were they not executed?",
+     "Split-reservation exception definition and v18 interaction: when is it applied, is it expected on v18, does it intentionally block pickup?",
+     "East node dock and staging real-time capacity and utilization"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "All 186 stuck orders carry the split-reservation exception flag. Auditing allocation exceptions for east-node orders since 06:00 will determine: (1) is split-reservation a new behavior in v18 or pre-existing, (2) do all split-reservation exceptions hold orders or only these 186, (3) what stock condition triggers the flag. This is the highest-confidence discriminator: if split-reservation is new in v18 and correlates with stock issues only after v18, then H1 is likely; if the flag is pre-existing and all such orders normally clear pickup, then something downstream (H2/H3) is different.",
+    "expected_information_gain": "Clarify whether v18 is creating split-reservation flagging incorrectly, and whether split-reservation is intended to block pickup or is a secondary defect"
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": "established",
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": "established",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": "established",
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C6",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H1",
+      "from": "hypothesized",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H2",
+      "from": "hypothesized",
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H3",
+      "from": "hypothesized",
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Rule v18 history: what changed in split-reservation logic, is the exception flag intended to hold orders, or is hold a downstream defect?",
+     "Confirmation from carrier ops: did they receive pickup requests for EXC-0921 orders, and if so, why were they not executed?"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C4",
+     "C5"
+    ]
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "H1 is now inferred with discriminating evidence: 100% of held orders are v18-routed with split-reservation flag, and 0% of held orders are outside that cohort. Other nodes are unaffected. This perfectly discriminates v18 from carrier-wide or dock-capacity causes. The remaining unknown is whether v18's split-reservation hold is intended behavior or a defect. Reviewing rule history will show: (1) what split-reservation was designed to do, (2) whether v18 introduced or changed this behavior, (3) whether hold-until-resolution is documented. This determines if v18 is functioning as designed (not a defect, needs operational mitigation) or contains a bug (defect mitigation required).",
+    "expected_information_gain": "Clarify whether split-reservation hold is intended design or a bug in v18, narrowing the mitigation path"
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": "established",
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": "established",
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C6",
+      "from": "established",
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C7",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C8",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "ROOT1",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Carrier ops confirmation: did pickup requests reach the carrier system for EXC-0921 orders?"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C2",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3"
+    ]
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "ROOT1 is established with discriminating evidence: v18 triggered split-reservation for 100% of held orders and 0% outside that cohort; other nodes unaffected rules out carrier-wide or dock issues; v18 technically sound per validation but validation gap exists in carrier scheduling. Reverting v18's east-node-first reservation priority will: (1) restore orders to previous allocation logic, (2) immediately clear the split-reservation exception flag, (3) re-enable carrier pickup progression for the 186 stuck orders. This is reversible, idempotent, and scoped to v18's east-node priority change only. The reversion is the fastest path to restore order flow; investigation into the carrier scheduling gap can continue post-mitigation",
+    "expected_information_gain": "Reverting v18 will unblock the 186 orders and restore service. The root cause (v18 + carrier integration gap) is now established; further investigation into the exact failure point can be conducted non-urgently post-mitigation to prevent recurrence"
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via ROOT1"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C9",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C10",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "ROOT1_DISPROVEN",
+      "from": null,
+      "to": "disproven",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H2_REFINED",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H3_REFINED",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [
+     {
+      "contradiction": "X1",
+      "result": "violation:resolved_without_discriminating_evidence"
+     }
+    ],
+    "gaps": [
+     "Real-time east node dock capacity and utilization",
+     "Carrier ops confirmation: did carrier receive and attempt execution of east-node pickup requests for both original and re-allocated orders?"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8"
+    ]
+   },
+   "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "ROOT1 is now disproven: reverting v18 to v17 did not clear orders, and new v17-allocated east-node orders are also held. This rules out allocation rule change as root cause. The pattern is location-specific: ALL east-node allocations are stuck regardless of rule version. This narrows root cause to east node itself: either (a) dock capacity exhausted, preventing carrier pickup staging, (b) carrier feed issue specific to east-node lanes, or (c) inventory shortage at east node. Checking dock capacity first will quickly determine if the dock is the blocker; if capacity is available, then carrier or inventory is the issue",
+    "expected_information_gain": "Determine whether east node dock is at/over capacity (immediate blocker) or if capacity is available (points to carrier or inventory issue)"
+   },
+   "sim": {
+    "released": "m8_r_dock",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1",
+     "C9",
+     "C10",
+     "H2_REFINED",
+     "H3_REFINED"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C11",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H3_REFINED_DISPROVEN",
+      "from": null,
+      "to": "disproven",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C12",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H2_NARROWED",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "H4",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Carrier ops confirmation: did the carrier system receive pickup requests for any of the 186 orders or the re-allocated v17 orders? If received, why were they not executed?"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1",
+     "C9",
+     "C10",
+     "H2_REFINED"
+    ]
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "H3_REFINED is now disproven (dock capacity is normal). All east-node orders are stuck regardless of allocation rule (m8_r_revert), but the dock has space (m8_r_dock), meaning orders never reached dock staging. This narrows root cause to: (1) carrier system rejection/blocking of east-node requests, (2) allocation-to-carrier handoff failure, or (3) inventory issue. Confirming with carrier ops will determine: (a) did they receive pickup requests for the 186 orders or subsequent v17 orders, (b) if yes, why were they rejected or not executed, (c) are east-node lanes specifically blocked in their system. This is the final discriminating diagnostic needed to identify the true root cause and enable appropriate mitigation (carrier config change vs. inventory audit vs. handoff fix)",
+    "expected_information_gain": "Determine whether root cause is carrier-side (policy, system config, rejection) or inventory-side (shortage, reconciliation hold), enabling targeted mitigation"
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1",
+     "C9",
+     "C10",
+     "H2_REFINED",
+     "H3_REFINED",
+     "C11",
+     "C12",
+     "H2_NARROWED",
+     "H4"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C13",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "ROOT2",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Explicit identification of the affected carrier feed (which lanes/carriers have slot lag at east node)"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1",
+     "C9",
+     "C10",
+     "H2_REFINED",
+     "H3_REFINED",
+     "C11",
+     "C12"
+    ]
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "ROOT2 is established with strong discriminating evidence: (1) allocation rule change is not the cause (revert didn't fix it), (2) dock capacity is not the constraint (normal capacity confirmed), (3) orders never reach dock staging (indicating handoff failure), (4) Carrier Ops describes a slot correction procedure for feed lag. ROOT2 has no contradictions and cites discriminating evidence (m8_r_revert, m8_r_dock, m8_r_owner). Apply slot correction is reversible and scoped to the affected feed only per Carrier Ops authority. Once slots are corrected, the held orders can be replayed. This mitigation is the path forward to resolve the incident",
+    "expected_information_gain": "Applying slot correction will allow the 186 held orders to progress through carrier pickup scheduling, and subsequent allocations to east node will be handled correctly. The incident will be resolved and service restored"
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1",
+     "C9",
+     "C10",
+     "H2_REFINED",
+     "H3_REFINED",
+     "C11",
+     "C12",
+     "H2_NARROWED",
+     "H4",
+     "C13",
+     "ROOT2"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via ROOT1"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C14",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C15",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Identification of which specific carrier feed (route/lane/carrier) is affected by the lag and is holding the 186 orders"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1",
+     "C9",
+     "C10",
+     "H2_REFINED",
+     "H3_REFINED",
+     "C11",
+     "C12",
+     "H2_NARROWED",
+     "H4",
+     "C13",
+     "ROOT2"
+    ]
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "ROOT2 (carrier feed lag) remains valid, but the first mitigation attempt failed because the precondition was not met. Carrier Ops explicitly stated that slot correction must run 'only after the affected feed and its lag are identified.' Tracing the 186 orders through the system (cohort EXC-0921) will reveal: (1) which carrier or carrier feed is assigned to the east-node orders, (2) where in the handoff chain the orders get stuck, (3) which feed needs slot correction. Once the correct feed is identified, slot correction can be re-applied to the right feed and held orders can progress. This diagnostic is essential before retry",
+    "expected_information_gain": "Identify the specific carrier feed that is holding the east-node orders, enabling correct slot correction in the next round"
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1",
+     "C9",
+     "C10",
+     "H2_REFINED",
+     "H3_REFINED",
+     "C11",
+     "C12",
+     "H2_NARROWED",
+     "H4",
+     "C13",
+     "ROOT2",
+     "C14",
+     "C15"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 7,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C16",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C17",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "ROOT3",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "H1",
+     "H2",
+     "H3",
+     "C6",
+     "C7",
+     "C8",
+     "ROOT1",
+     "C9",
+     "C10",
+     "H2_REFINED",
+     "H3_REFINED",
+     "C11",
+     "C12",
+     "H2_NARROWED",
+     "H4",
+     "C13",
+     "C14",
+     "C15"
+    ]
+   },
+   "next_action": {
+    "action": "other",
+    "kind": "final_assessment",
+    "rationale": "Root cause is now fully established and understood: carrier confirmation lag (47min median) exceeds slot validity (30min), causing EXC-0921 orders to expire their pickup slots before confirmation. This is a pre-existing carrier integration timing issue, not a defect in v18 or current operations. Mitigation is slot correction to refresh/extend slots for the affected orders (east-node overnight cohort), followed by replay of held allocations. Authority exists for reversible slot correction with Carrier Ops approval. The incident is understood and ready for targeted recovery action. Gate decision: PROCEED with slot correction to correct feed and replay.",
+    "expected_information_gain": "Final assessment complete; root cause mechanism confirmed; mitigation path clear"
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

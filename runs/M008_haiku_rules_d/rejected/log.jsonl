@@ -1,0 +1,4 @@
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "next_action.action is not in the authority list", "path": "$.next_action.action", "n": 1, "at": "2026-09-22T12:23:56.003497+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "next_action.action is not in the authority list", "path": "$.next_action.action", "n": 2, "at": "2026-09-22T12:24:28.721557+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "$.next_action.action must not be empty", "path": "$.next_action.action", "n": 3, "at": "2026-09-22T12:24:35.859043+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "a final_assessment uses action 'none' or 'other'", "path": "$.next_action.action", "n": 4, "at": "2026-09-22T12:24:44.442655+00:00"}

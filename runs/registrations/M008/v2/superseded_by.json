@@ -1,0 +1,9 @@
+{
+ "created_utc": "2026-09-22T02:08:18.793272+00:00",
+ "new_record_sha256": "e504a7634ebeb874be473c0a791cce103967c0f8a1843fa33d7bdf51a4000a3f",
+ "reason": "v2 was immediately superseded by a one-file fix: registering v2 made the registration genuinely active for the first time, which exposed a real test-isolation bug in tests/test_m008_hardening.py (a test assumed no active registration would ever exist). Fixed, verified (206/206 + 3 independent regression checks), refrozen as v3. No scenario/driver/guard/scoring change.",
+ "record_sha256": "9b10d623142f4252f96b940417f2dcbe6214f92fdcb6f87879231f351e7c19cb",
+ "superseded_by": 3,
+ "version": 2,
+ "world": "M008"
+}

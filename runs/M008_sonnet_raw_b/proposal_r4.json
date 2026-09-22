@@ -1,0 +1,64 @@
+{
+ "claims": [
+  {
+   "claim_id": "c1",
+   "statement": "186 orders allocated overnight to the east node are stuck in 'allocated, awaiting pickup'; stuck-order alert shows 9% of overnight east-node allocations exceeded a 90-minute hold starting ~06:00, while other nodes are normal.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_e01", "m8_e02", "m8_r_handoffs"],
+   "limitation": "Disposition: preserved; mechanism_tag refined again to carrier_feed_lag given m8_r_slot_ineff now names an unconfirmed, misidentified feed as the live blocker."
+  },
+  {
+   "claim_id": "c3",
+   "statement": "Allocation rule set v18 went live at 22:00 last night, changing multi-node orders to reserve stock from the east node first; change review and regression suite passed.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03"],
+   "limitation": "Disposition: preserved unchanged. Retained as the trigger/exposure event, not the proximate mechanism."
+  },
+  {
+   "claim_id": "c4",
+   "statement": "Warehouse release w41 (label printer drivers, report exports) is unlikely to be the cause, since it lists no allocation or scheduling changes.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_e04"],
+   "limitation": "Disposition: preserved unchanged."
+  },
+  {
+   "claim_id": "c5",
+   "statement": "v18's split-reservation flow routes affected multi-node orders through a carrier-confirmation path that is subject to feed lag; this produces confirmations arriving later than the booking's pickup-slot window, so affected orders never complete carrier handoff.",
+   "kind": "inference",
+   "status": "inferred",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_e03", "m8_r_exceptions", "m8_r_handoffs", "m8_r_slot_ineff"],
+   "limitation": "Disposition: refined. v18 is retained as the exposure mechanism (it routes these orders onto the affected confirmation path); m8_r_slot_ineff's explicit language ('feed lag', 'wrong feed') shifts the proximate mechanism_tag from allocation_rule_defect to carrier_feed_lag. The specific feed/partition has not yet been identified."
+  },
+  {
+   "claim_id": "c9",
+   "statement": "Root cause (revised): the affected orders (cohort EXC-0921) stall because their carrier-confirmation feed lags behind the booking's pickup-slot window (slot closes ~30 min after booking; cohort confirmations arrived a median 47 min after booking) -- v18's split-reservation flow is what routes these specific orders onto that lagging feed. Two consecutive fixes attempted without first identifying the specific lagging feed both failed: a plain replay (m8_r_replay_ineff) reproduced the same closed-slot outcome, and a slot correction (m8_r_slot_ineff) was applied to the wrong feed and produced no change. The exact feed/partition responsible for the lag is not yet identified.",
+   "kind": "root_cause",
+   "status": "inferred",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+   "limitation": "Disposition: downgraded from established to inferred. The timing-mismatch symptom (slot vs. confirmation) remains well-evidenced, but m8_r_slot_ineff shows our own prior correction targeted 'the wrong feed', which means the precise mechanism (which feed/partition lags, and why) is not yet confirmed -- two mitigations proceeded on an incomplete diagnosis and both failed. Should not be treated as established again until the correct feed is positively identified."
+  },
+  {
+   "claim_id": "c11",
+   "statement": "Two consecutive mitigations targeting the timing-mismatch root cause both failed to clear the held orders: replay_held_allocations (round 2) re-booked into the same closed slots because it ran before any slot correction; apply_slot_correction (round 3) was applied 'before the feed lag was confirmed and was applied to the wrong feed', producing no change. This indicates there are multiple candidate feeds/partitions and the one actually responsible for the confirmation delay has not yet been diagnostically identified.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_replay_ineff", "m8_r_slot_ineff"],
+   "limitation": "Direct outcome evidence from our own two prior actions (tier-1, observability-sourced); establishes that further mitigation without first confirming which feed lags would likely fail a third time."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "read_partition_offsets",
+  "kind": "diagnostic",
+  "rationale": "Two mitigations have now failed for the same reason class: acting before the specific lagging feed was identified (m8_r_slot_ineff explicitly says the correction 'was applied to the wrong feed' because 'the feed lag was [not yet] confirmed'). Rather than guess a third time, read_partition_offsets is a read-only diagnostic that can directly show which feed/partition serving the EXC-0921 cohort's carrier-confirmation path is behind, quantifying the lag and identifying the correct target before any further corrective action is proposed. This is the highest-information next step and avoids repeating a mis-targeted, unauthorized-adjacent guess."
+ }
+}

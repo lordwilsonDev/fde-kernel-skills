@@ -1,0 +1,29 @@
+{
+ "body_sha256": "a94449e9db3f5342feb243c6612cd5c189abd55b49a19e65edc90ca0541698d2",
+ "created_utc": "2026-09-21T23:57:11.463474+00:00",
+ "files": {
+  "../.claude/settings.json": "80e88c2286b07e3b9ccaef6bdc861a8200996581a1e7fcb3c5c6c82d071e6707",
+  "blind_guard.py": "d5adccd3370b623238d2931d7d1ef506d5959103e31bd2235edeba8e11a9d35b",
+  "driver.py": "b5a8df17bf6a2f2f16dbed8565649d3bcf176619cda25cfaf7e8aeb8c26889c8",
+  "driver_m008.py": "50923396d6832226c6af79d4569bb9cbe56f5fcf74a620cf34e16e6983b2ef40",
+  "inspect_run.py": "d7d4ee481300a1fb2d1728a266aa5fac173c86676984250e7194ed1f2dacf0ec",
+  "kernel.py": "5a045324b460dbdb7354dfd13ab2da58452ca852faa926a1ee0875f0b729a485",
+  "lint_scenario.py": "5ef1ee00add7a5862c2650e8eef0c7652361ac8b8fae9d22cf0ef0a01b907ee8",
+  "manifest.py": "3997ac23929f87072678863bb32a3841ffc11ce575106f343a8ab2f2f5afc9a0",
+  "report.py": "d8475d91439cd27769781dee24c7dd894646880ff25360f718504cafab5a7050",
+  "run_blind_m008.sh": "4bb88b407d7d0dc3a72703d6f6f0dcb95dae27a9f77ec6dd453e83437b3427ac",
+  "schema.sql": "bd4f9267fb0e246a28b47b8183d8618664e738d797f523bf77cc5d583dc6f8fc",
+  "simulator.py": "8d1886169b059f460c2e56df4bfe29b768ea94c5b827cda4a583c0838b4186ab",
+  "simulator_m008.py": "c60aa1f74ddc379500d3ea9b5bd7dc2deab9b3eb9a02301c45d4fc98e52e95c2",
+  "tests/test_m008.py": "9b3253ed429403792dce65a70f582856c4a0bd8eb74399bfb8ef38637f115a2e"
+ },
+ "files_manifest_sha256": "1192d93703c95c85f61c4cecf105ff789c4cfaeddafdc239e2ce3e70f91c203c",
+ "legacy_import": true,
+ "predictions_sha256": "47b157140fd3f8469195244aa59c8b5f33afca0aee1a0d211c7aa5dcf35dca62",
+ "record_sha256": "f73c0132c6d0b1b861391c02fb29c8775712ed7e1f1832f73654f23deb0804a5",
+ "schema": 1,
+ "supersedes": null,
+ "supersedes_reason": null,
+ "version": 1,
+ "world": "M008"
+}

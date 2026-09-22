@@ -1,0 +1,49 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule v18 (deployed 22:00, east-node-first reservation for multi-node orders) introduced a defect that flags split-reservation exceptions, causing carriers to reject or not see the pickup orders.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_e02"],
+      "corroboration": "m8_e03 confirms v18 live at 22:00; m8_e10 shows split-reservation exception flag on every held order; m8_e02 shows only east node affected and timing aligns (06:00 onset ~8 hours after deployment). m8_e01 notes allocation totals reconcile, ruling out gross inventory error.",
+      "limitation": "Split-reservation exceptions do not inherently mean a rule defect; they could be correct flags for a downstream carrier feed lag or dock capacity issue."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "East node carrier feed (integration or pickup scheduling) is lagged or disconnected; carriers booked the pickup but the feed did not process the confirmation, so orders remain in 'awaiting pickup' state.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_e09", "m8_e01"],
+      "corroboration": "m8_e02 isolates issue to east-node lanes; m8_e09 notes observability gap (dashboards cannot see carrier-side confirmation vs booked state); m8_e01 carrier ops reports no obvious dock issue but cannot see cross-system reconciliation.",
+      "limitation": "Carrier ops on-call did not immediately spot a lag; would need partition offset or carrier confirmation audit to verify."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "East node dock capacity reached saturation; allocation system booked pickups but carriers cannot stage more orders, causing a backlog in 'awaiting pickup' state.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_e02", "m8_e01"],
+      "corroboration": "m8_e02 shows 9% of overnight allocations held on east node; m8_e01 notes carrier ops found 'nothing obvious' on dock schedule, but did not quantify available slots vs pending orders.",
+      "limitation": "Stale evidence; a current dock capacity check would be needed to rule this in/out."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "See actual carrier-side confirmation state vs our 'booked' state",
+      "reason": "m8_e09 observability gap: dashboards only track our order state, not carrier's pickup confirmation. Blocks full picture of feed lag."
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception flag is on every held order. Auditing what the exceptions say (e.g., inventory mismatch, rule parse error, carrier data malformed) will discriminate between rule defect (C1) and downstream issues (C2/C3).",
+    "expected_information_gain": "High: will clarify whether exceptions are a symptom of rule defect or a downstream effect; if rule defect, points to specific field/logic."
+  }
+}

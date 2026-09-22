@@ -1,0 +1,22 @@
+{
+ "claims": [],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C6", "action": "preserve"},
+  {"claim_id": "C7", "action": "preserve"},
+  {"claim_id": "C8", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "final_assessment",
+  "kind": "final_assessment",
+  "rationale": "Root cause C8 (allocation_rule_defect: v18's east-node-first split-reservation orders were booked into a 30-minute pickup slot while carrier confirmation for that cohort took a median of 47 minutes) is established at status=inferred with discriminating evidence (m8_r_handoffs) and no open contradiction. Two reversible, in-scope mitigations were proposed and approved by the human gate: apply_slot_correction (corrected the affected carrier feed's pickup-slot duration) and replay_held_allocations (re-ran allocation for the overlapping windows). The impact gap was closed via the read-only count_stranded_orders diagnostic (released m8_r_impact), removing the 'no impact_estimate' checklist item. No open_contradictions remain, no proposal has been denied, and all pending_review claims have been carried forward each round with explicit dispositions. Remaining unrun diagnostics (check_dock_capacity, confirm_with_carrier_ops, inspect_inventory_counts, read_partition_offsets, review_rule_history) are not flagged BLOCKING and would only probe alternative mechanisms (dock_capacity, generic carrier_feed_lag, inventory_count_drift) that C4/C5/m8_r_handoffs already weigh against for this cohort.",
+  "expected_information_gain": "None further sought; this closes the mission with the root cause, its evidentiary basis, the mitigation path taken and its gate approvals, and the residual limitations already recorded on C8 (the deeper reason carrier confirmation takes ~47 minutes for split-reservation orders is not characterized, and recurrence for future split-reservation orders is not separately verified beyond the corrected slot duration)."
+ }
+}

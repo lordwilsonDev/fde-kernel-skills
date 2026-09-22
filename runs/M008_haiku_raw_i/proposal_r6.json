@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "claim_id": "c14_replay_ineffective_due_to_slots",
+      "statement": "The replay_held_allocations action re-booked the 186 orders, but they were re-booked into the same closed pickup slots that had already expired. Without correcting the slot state first, re-booking alone does not resolve the hold. The evidence demonstrates that orders re-booked after carrier confirmation completes and slots are refreshed do receive valid new slots.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_replay_ineff"],
+      "limitation": "This establishes that slot correction is a prerequisite; re-booking after slot correction should succeed, but this has not yet been tested."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The root cause is a carrier confirmation latency that causes orders to miss their initial pickup slots. The replay_held_allocations action failed because the closed slots were not cleared first. apply_slot_correction will correct the expired slot state, allowing the 186 orders to be assigned fresh pickup slots. After slot correction, the orders should be able to receive valid confirmations and be collected by carriers. This is a reversible action that directly addresses the slot timing problem demonstrated in the handoff trace."
+  }
+}

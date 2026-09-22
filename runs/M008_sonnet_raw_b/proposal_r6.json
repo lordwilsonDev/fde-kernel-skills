@@ -1,0 +1,19 @@
+{
+ "claims": [
+  {
+   "claim_id": "c13",
+   "statement": "The slot correction (round 5), this time correctly scoped to the faulty carrier feed (partition 2), succeeded: pickup slots for the affected feed were realigned to current carrier availability and new bookings now confirm inside their slots. The 186 already-held EXC-0921 orders remain held, since the outcome states held orders stay held until their allocation windows are replayed -- the correction fixes the going-forward mechanism but does not itself retroactively clear already-stuck orders.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_slot"],
+   "limitation": "Tier-1, observability-sourced, directly confirms the fix is effective and explicitly reversible; also explicitly states a replay is still required to clear the existing held cohort, so the incident is not yet resolved for the 186 affected orders."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "replay_held_allocations",
+  "kind": "mitigation",
+  "rationale": "m8_r_slot confirms the underlying defect (partition-2 feed lag, root cause c9) is now fixed -- new bookings confirm inside their slots -- but explicitly states 'held orders stay held until their allocation windows are replayed.' Replaying allocation for the EXC-0921 cohort is now the correct, well-evidenced action: unlike the round-2 attempt (which ran before any correction and predictably re-booked into the same closed/stale-availability slots, per m8_r_replay_ineff), this replay now runs after the feed has been correctly realigned, so it should book the held orders against current carrier availability and let them clear. This is the narrowest action needed to resolve the actual customer-facing impact (186 stuck orders), reversible, and scoped only to the affected cohort. It is a production change under Inventory Control ownership requiring on-call plus incident-commander approval; proposing for human-gate review."
+ }
+}

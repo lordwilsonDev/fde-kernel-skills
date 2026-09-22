@@ -1,0 +1,47 @@
+{
+  "claims": [
+    {
+      "claim_id": "C4",
+      "statement": "East-node inventory counts match the system of record; reservations reconcile; no drift found",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "inventory_count_drift",
+      "sources": ["m8_r_counts"],
+      "corroboration": "Authoritative tier-1 inventory audit from Inventory Control; confirms C3 at authoritative level",
+      "limitation": "Inventory side is clean; the bottleneck is downstream (carrier pickup, dock, or feed layer)"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "Allocation rule v18 is executing correctly: orders are being routed to east node and reserved as designed, but stuck in 'allocated, awaiting pickup' stage since 06:00",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e03", "m8_r_counts", "m8_e10"],
+      "corroboration": "v18 live at 22:00 (m8_e03), counts reconcile (m8_r_counts), every order routed to east node and flagged as split-reservation exception (m8_e10), inventory totals match (m8_r_counts)",
+      "limitation": "Inventory/allocation working correctly; need to determine why carrier pickup is blocked. Discriminating evidence needed on carrier system readiness, dock capacity, or feed lag."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "All 186 stuck orders are flagged as 'split-reservation exceptions'. Understanding what makes them exceptional (vs. normal allocations) will discriminate between an allocation rule defect that creates unpickable orders, a carrier system incompatibility with split reservations, or a downstream scheduling lag. This is the next highest-information diagnostic.",
+    "expected_information_gain": "Will reveal the specific characteristics of split-reservation exceptions and whether they are inherently unpickable, system-incompatible, or just delayed."
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "C15",
+      "statement": "Replaying allocation windows for EXC-0921 (held orders from the lag window) will reassign them to corrected partition 2 slots and enable carrier pickup",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_replay"],
+      "corroboration": "Tier-1 verified: observability confirms 186 of 186 orders re-booked into current slots with no duplicates; all confirmed for pickup",
+      "limitation": "Actual carrier pickup in progress; does not yet confirm end-to-end delivery"
+    },
+    {
+      "claim_id": "C16",
+      "statement": "Incident mitigation complete: 186 held orders successfully re-allocated to corrected carrier slots and confirmed for pickup",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_replay", "m8_r_slot"],
+      "corroboration": "m8_r_slot: slots realigned to current availability; m8_r_replay: all 186 orders re-booked and confirmed; sequencing followed per m8_r_owner preconditions",
+      "limitation": "Success is contingent on carrier partition 2 feed consumer staying current; permanent fix requires addressing the feed consumer failure root cause"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "identify and fix partition 2 feed consumer failure",
+      "reason": "Mitigation addressed symptom (stale slots); root cause (feed consumer stopped at 05:58) remains. Permanent fix requires diagnosing why partition 2 consumer stopped and restoring it to current state. Recommend escalation to carrier ops infrastructure team."
+    }
+  ],
+  "next_action": {
+    "kind": "final_assessment",
+    "rationale": "Mission objective achieved: incident explained and mitigated. Root cause established at established status (C9: carrier partition 2 feed lag); discriminating evidence provided (m8_r_offsets showing 47+ minute lag, stopped at 05:58); no open contradictions (C8 disproven, C15 confirmed). Mitigation executed and verified successful (C16: all 186 orders re-booked and confirmed for pickup). Gate conditions were met and both mitigation actions (apply_slot_correction, replay_held_allocations) were approved and executed. Recommended follow-up: permanent fix for partition 2 feed consumer failure."
+  }
+}

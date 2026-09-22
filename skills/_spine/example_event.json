@@ -1,0 +1,3 @@
+{"run_id": "work_2026_09_21_001", "skill": "evidence-builder", "status": "complete", "objective": "Create model-neutral governed workflow", "inputs": ["user_request", "approved_project_context"], "outputs": ["evidence_register", "assumptions_register"],
+ "claims": [{"id": "C-12", "statement": "External changes need approval gates.", "status": "recommended", "basis": ["workspace policy"], "confidence": "high"}],
+ "assumptions": [{"id": "A-03", "statement": "The user wants multiple model providers.", "status": "assumption"}], "risks": [], "approvals_required": [], "timestamp": "2026-09-21T00:00:00Z"}

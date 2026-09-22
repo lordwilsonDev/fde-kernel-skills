@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C5",
+      "statement": "Allocation rule v18 (east-first multi-node split reservation) is the root cause: 100% of held orders are split-reservation allocations from v18; zero held orders exist outside this scope; the rule's timing (22:00 deploy) and scope (east-node priority) correlate perfectly with the incident onset (06:00, east-node lanes only)",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e03", "m8_e02"],
+      "corroboration": "m8_e04 rules out competing allocation changes; m8_e01 confirms inventory reconciles (no stock defect); 100% isolation to rule v18 allocations (EXC-0921 scope)",
+      "limitation": "Does not yet prove whether the defect is in split-reservation record structure, carrier-slot compatibility, or east-node feed lag; only proves that v18 is the cause and not a coincidence"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Final discriminating step: confirm whether the east-node carrier feed is operational and accepting order records. If carrier ops reports normal operation and no missing orders, the defect is in allocation rule logic. If carrier reports missing or malformed order records, confirms handoff failure. This determines whether mitigation is rule revert or slot correction.",
+    "expected_information_gain": "Carrier-side operational status, order receipt confirmation, slot/dock availability, any feedback on order record format or content from the carrier perspective"
+  }
+}

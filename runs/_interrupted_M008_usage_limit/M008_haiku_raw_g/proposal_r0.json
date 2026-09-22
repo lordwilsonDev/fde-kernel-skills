@@ -1,0 +1,55 @@
+{
+  "claims": [
+    {
+      "claim_id": "m8_c001",
+      "statement": "186 orders allocated to east node are stuck in 'allocated, awaiting pickup' state since approximately 06:00",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "limitation": null
+    },
+    {
+      "claim_id": "m8_c002",
+      "statement": "All stuck orders are flagged by the overnight allocator as split-reservation exceptions",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e10"],
+      "limitation": null
+    },
+    {
+      "claim_id": "m8_c003",
+      "statement": "Allocation rule set v18 went live at 22:00 yesterday and changed multi-node order stock reservation to east-node-first",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "limitation": null
+    },
+    {
+      "claim_id": "m8_c004",
+      "statement": "Temporal correlation exists between v18 deployment at 22:00 and incident start at 06:00, with all stuck orders being routed to east node and flagged as split-reservation exceptions",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e01", "m8_e02", "m8_e03", "m8_e10"],
+      "limitation": "Correlation does not establish causation; allocation totals reconcile and regression suite was green"
+    },
+    {
+      "claim_id": "m8_c005",
+      "statement": "Carrier operations cannot see why carriers are not collecting the stuck orders; dock schedule shows nothing obvious",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01"],
+      "limitation": "Carrier ops has limited visibility into order format or carrier-side confirmation state"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The common denominator across all 186 stuck orders is that they are flagged as split-reservation exceptions by the allocator. Understanding the definition, trigger conditions, and carrier-impact of this flag is essential to determine whether the v18 allocation rule change is producing a format or validation issue that prevents carrier pickup. This diagnostic is read-only and will clarify if the mechanism is allocation_rule_defect or another root cause."
+  }
+}

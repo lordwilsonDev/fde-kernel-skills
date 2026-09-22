@@ -1,0 +1,74 @@
+{
+  "claims": [
+    {
+      "claim_id": "C11",
+      "statement": "East-node dock and labour capacity are normal; no orders are queueing at the dock for pickup",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_dock"],
+      "corroboration": "Dock capacity audit (tier-1, Operations) confirms normal capacity and no queueing",
+      "limitation": "None"
+    },
+    {
+      "claim_id": "H3_REFINED_DISPROVEN",
+      "statement": "H3_REFINED (east-node dock capacity saturated) is disproven: dock capacity is normal with no queueing",
+      "kind": "hypothesis",
+      "status": "disproven",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_r_dock"],
+      "corroboration": "Dock audit (tier-1, Operations) shows normal capacity and labour; no staging bottleneck",
+      "limitation": "None; dock is definitively ruled out as root cause"
+    },
+    {
+      "claim_id": "C12",
+      "statement": "186 stuck orders are held in 'allocated, awaiting pickup' state BEFORE reaching dock staging (no queueing observed); issue is in allocation-to-carrier-scheduling handoff or carrier request rejection",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e02", "m8_r_dock"],
+      "corroboration": "Orders in 'awaiting pickup' state (m8_e02) but zero queueing at dock (m8_r_dock); gap is upstream of dock",
+      "limitation": "None"
+    },
+    {
+      "claim_id": "H2_NARROWED",
+      "statement": "Carrier system did not receive or rejected pickup requests for east-node orders; either the allocation system is failing to hand off to carrier scheduling, or the carrier explicitly blocks east-node lane requests",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_r_dock", "m8_r_revert"],
+      "corroboration": "Orders held before reaching dock (m8_e02, m8_r_dock); issue affects all east-node orders regardless of rule version (m8_r_revert); dock has capacity (m8_r_dock); this points to carrier system rejection or handoff failure",
+      "limitation": "Requires carrier ops confirmation to determine exact failure point"
+    },
+    {
+      "claim_id": "H4",
+      "statement": "Inventory shortage or reconciliation issue at east node prevents pickup request generation or causes orders to be held pending reconciliation",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "inventory_count_drift",
+      "sources": ["m8_e01"],
+      "corroboration": "Inventory control reports totals reconcile (m8_e01) but does not confirm regional or SKU-level adequacy at east node",
+      "limitation": "Requires inventory count audit at east node to confirm or rule out"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "H3_REFINED",
+      "action": "downgrade"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Carrier ops confirmation: did the carrier system receive pickup requests for any of the 186 orders or the re-allocated v17 orders? If received, why were they not executed?",
+      "reason": "Critical discriminator: if carrier did not receive requests, then allocation-to-carrier handoff is broken. If received but rejected or blocked, that's a carrier policy/system issue. If received and attempted but failed, that's a carrier execution issue"
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "H3_REFINED is now disproven (dock capacity is normal). All east-node orders are stuck regardless of allocation rule (m8_r_revert), but the dock has space (m8_r_dock), meaning orders never reached dock staging. This narrows root cause to: (1) carrier system rejection/blocking of east-node requests, (2) allocation-to-carrier handoff failure, or (3) inventory issue. Confirming with carrier ops will determine: (a) did they receive pickup requests for the 186 orders or subsequent v17 orders, (b) if yes, why were they rejected or not executed, (c) are east-node lanes specifically blocked in their system. This is the final discriminating diagnostic needed to identify the true root cause and enable appropriate mitigation (carrier config change vs. inventory audit vs. handoff fix)",
+    "expected_information_gain": "Determine whether root cause is carrier-side (policy, system config, rejection) or inventory-side (shortage, reconciliation hold), enabling targeted mitigation"
+  }
+}

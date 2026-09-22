@@ -1,0 +1,66 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule set v18 (deployed 22:00, live at order-processing time) introduced a multi-node east-node-first reservation priority that may be causing split-reservation exceptions on east node lanes.",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_r_exceptions"],
+      "corroboration": "Perfect correlation: 100% of held orders are in scope EXC-0921 (v18 rule-affected orders), and 0% of non-v18 orders are held. Temporal correlation: v18 deployed 22:00, incident orders allocated and held starting 06:00. No other system change (m8_e04 unrelated).",
+      "limitation": "m8_r_exceptions notes it cannot separate rule-change logic defect from east-node lane specifics. Still need to test whether split-reservation logic is faulty or whether the problem is downstream (carrier feed lag). Regression suite passed but may not have tested split-reservation under new east-node priority."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "The east-node-specific carrier pickup feed may have a lag or scheduling gap that prevents carriers from collecting orders that the system believes are ready.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_e09"],
+      "corroboration": "Problem is east-node-specific, other nodes normal. Observability gap exists: dashboards do not show booked pickup vs carrier confirmation. Carrier ops reports nothing obvious in dock schedule, but lacks visibility into feed processing.",
+      "limitation": "Not yet confirmed whether carrier feed received pickup slots for EXC-0921 orders or whether there is a backlog/lag. Need trace of cohort handoff to carrier ops."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Orders are properly allocated and inventoried; the system state is consistent on the fulfillment side.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "Inventory Control explicitly states allocation totals reconcile and nothing looks wrong on their side.",
+      "limitation": "Inventory Control cannot see carrier-side records (m8_e09), so reconciliation does not rule out a handoff gap."
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "C1: v18 rule logic is defective",
+      "claim_b": "C2: carrier feed has lag/gap, rule change just routed orders there",
+      "description": "Both could be true, but they require different mitigations. If C1 (rule defect), revert_allocation_ruleset is appropriate. If C2 (carrier feed), apply_slot_correction is appropriate. If both, need both mitigations. Currently cannot discriminate.",
+      "discriminating_evidence_needed": "Trace of EXC-0921 cohort handoffs (are orders reaching carrier feed? are slots being booked?). Rule history (did v18 split-reservation logic have known issues or edge cases?). Dock capacity and carrier feed status for east node."
+    }
+  ],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "trace_cohort_handoffs for EXC-0921",
+      "reason": "Need to see whether EXC-0921 orders are stuck in allocation processing, or have reached carrier feed and are stuck there, or are stuck at dock capacity."
+    },
+    {
+      "capability": "review_rule_history for v18 split-reservation",
+      "reason": "Need to establish whether v18's split-reservation logic on east-node has known issues, design flaws, or untested edge cases."
+    }
+  ],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Tracing EXC-0921 through the order processing pipeline (allocation → carrier feed → dock) will show exactly where the orders are stuck. This directly discriminates between rule-defect (stuck in allocation) and carrier-feed-lag (stuck after handoff to carrier ops). Combined with review_rule_history, this will establish the root cause.",
+    "expected_information_gain": "Very high. Will pinpoint the exact handoff or processing stage where orders are held, and either confirm C1 (rule defect) or point to C2 (carrier feed lag)."
+  }
+}

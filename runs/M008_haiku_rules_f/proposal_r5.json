@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim_id": "C12",
+      "statement": "Reverting from v18 to v17 did not resolve the held orders; the 186 original orders remain held AND new east-node allocations under v17 logic are also held, indicating the problem is not v18-specific",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert"],
+      "corroboration": "Verified from observability at trust_tier 1",
+      "limitation": "Conclusively rules out v18 as root cause; problem is universal to east-node routing regardless of allocation rule version"
+    },
+    {
+      "claim_id": "C10",
+      "statement": "The root cause is a carrier feed lag on the east-node carrier: the east-node carrier is not picking up ANY orders routed there (both v18 split-reservation orders and orders from v17 allocations), indicating a systemic carrier availability or feed issue rather than an allocation-rule incompatibility",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_exceptions", "m8_r_dock"],
+      "corroboration": "v18 revert failed to resolve the issue (m8_r_revert); dock capacity is normal (m8_r_dock); all affected orders route to east node (m8_r_exceptions); problem is universal to east-node routing, not v18-specific",
+      "limitation": "Specific carrier feed identity and exact lag duration not confirmed; must trace handoffs or inspect partition offsets to pinpoint the carrier feed mechanism"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C10",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "The revert attempt revealed that the problem is not v18-specific but a systemic east-node carrier issue. All orders routed to east node remain held regardless of allocation rule version. Tracing cohort handoffs for the EXC-0921 scope will show exactly where these orders are stuck in the system: still queued to the east-node carrier feed (indicating carrier_feed_lag), or stuck earlier in the allocation/pickup-scheduling pipeline (indicating a different mechanism). This will confirm whether the fix is a carrier-side slot correction or if there's a deeper system issue.",
+    "expected_information_gain": "Will reveal where in the fulfillment pipeline the east-node orders are actually stuck and whether they have reached the carrier feed at all. This discriminates between carrier_feed_lag (stuck waiting for carrier pickup) vs. other system-level issues."
+  }
+}

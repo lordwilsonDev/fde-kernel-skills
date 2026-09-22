@@ -1,0 +1,37 @@
+{
+ "claims": [
+  {
+   "claim_id": "c2",
+   "statement": "Every held order was routed to the east node and flagged by the overnight allocator as a split-reservation exception, with reports beginning about 06:00 and continuing.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10", "m8_r_exceptions"],
+   "limitation": "Disposition: preserved unchanged."
+  },
+  {
+   "claim_id": "c8",
+   "statement": "The allocation exception audit shows 100% of held orders fall within exception scope EXC-0921 (split reservation under v18, routed to the east node), and no held order falls outside that scope. However, the audit itself states it cannot separate an effect of the rule change from an effect specific to east-node lanes, because only rule-affected orders were routed there.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_exceptions"],
+   "limitation": "Disposition: preserved unchanged; the confound it describes was subsequently resolved by m8_r_handoffs (see c9)."
+  },
+  {
+   "claim_id": "c10",
+   "statement": "The round-2 mitigation (replay_held_allocations) ran before the pickup slot window was corrected; the same orders were re-booked into the same closed slot window and remain held. This is a negative-control confirmation of c9: the defect is the slot-window/confirmation-timing mismatch itself, not merely stale carrier data, so re-running allocation alone does not resolve it -- the slot timing must be corrected first.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_replay_ineff"],
+   "limitation": "Single tier-1 source, but it is a direct outcome observation of our own prior action, not a proxy; it rules out 'stale carrier data' as sufficient by itself and confirms the slot window as the parameter that must change."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "apply_slot_correction",
+  "kind": "mitigation",
+  "rationale": "m8_r_replay_ineff shows the round-2 replay reproduced the exact same failure because it ran before the pickup slot window was corrected -- direct confirmation that the root cause (c9) is the slot-window/carrier-confirmation timing mismatch (30-minute slot vs. ~47-minute confirmation), not stale data alone. Correcting the slot window for the affected cohort (EXC-0921) is the targeted fix that follows directly from this evidence, and is narrower than a full ruleset revert. It is a production change under Inventory Control ownership requiring on-call plus incident-commander approval per the authority boundary (m8_e07); proposing it for human-gate review rather than executing unilaterally. A subsequent replay would still be needed to actually clear the held orders once the slot window is corrected."
+ }
+}

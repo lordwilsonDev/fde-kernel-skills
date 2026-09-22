@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skill event (observability spine)",
+  "type": "object",
+  "required": ["run_id", "skill", "status", "objective", "inputs", "outputs", "timestamp"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": {"type": "string", "minLength": 1},
+    "skill": {"enum": ["preflight", "intent-capture", "context-mapper", "scope-governance", "evidence-builder", "plan-generator", "execution-orchestrator", "quality-safety-review", "deliverable-composer", "proactive-guide", "feedback-learning-loop", "semantic-resolution", "concurrency-state", "skill-lifecycle"]},
+    "status": {"enum": ["started", "complete", "blocked", "failed", "needs_approval"]},
+    "stem_activation_plan": {"type": "object", "description": "preflight events only: {stem_name: status}, status one of ACTIVE|CONDITIONAL|NOT_NEEDED|BLOCKED", "additionalProperties": {"enum": ["ACTIVE", "CONDITIONAL", "NOT_NEEDED", "BLOCKED"]}},
+    "objective": {"type": "string"},
+    "inputs": {"type": "array", "items": {"type": "string"}},
+    "outputs": {"type": "array", "items": {"type": "string"}},
+    "claims": {"type": "array", "items": {"type": "object", "required": ["id", "statement", "status"], "properties": {"status": {"enum": ["confirmed", "inferred", "hypothesis", "user_preference", "assumption", "unknown", "contradicted", "recommended"]}}}},
+    "assumptions": {"type": "array", "items": {"type": "object", "required": ["id", "statement", "status"]}},
+    "risks": {"type": "array"},
+    "approvals_required": {"type": "array", "items": {"type": "object", "required": ["action_class", "target", "proposed_change"], "properties": {"action_class": {"enum": ["read", "analyze", "draft", "recommend", "modify", "communicate", "publish", "transact", "delete", "remember"]}}}},
+    "timestamp": {"type": "string"}
+  }
+}

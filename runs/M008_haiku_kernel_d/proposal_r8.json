@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C5",
+      "statement": "The pickup-window feed consumer for the east-node carrier partition (partition 2) stopped advancing at 05:58; combined with allocation rule v18 routing orders to the east-node, this results in orders being booked against yesterday's carrier availability and unable to be picked up. The root cause is the carrier feed lag on partition 2, not a defect in v18 itself, but v18's routing change exposed the pre-existing feed issue.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_e03", "m8_e10", "m8_e02"],
+      "corroboration": "m8_r_offsets (tier-1, verified, discriminating) is the key evidence: the east-node carrier feed consumer stopped at 05:58 and slots are booked against yesterday's availability. This discriminates the root cause to the CARRIER feed lag, not our allocation logic. Combined with e03 (v18 routes multi-node orders to east-node) and e02 (failure isolated to east-node lanes), this shows v18's routing change to east-node triggered pickup failures caused by the pre-existing carrier feed lag.",
+      "limitation": "Root cause is bifurcated: primarily a carrier feed issue (partition 2 lag), secondarily enabled by v18 routing orders toward a problematic feed. Fix requires restoring partition 2 feed processing OR reverting v18 to avoid east-node routing until carrier feed is healthy."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause is carrier feed partition 2 (east-node) lag - consumer stopped at 05:58 and slots are stale. apply_slot_correction is the reversible mitigation scoped to fix the east-node carrier feed's pickup slots. Once slots are corrected to today's availability, orders booked against yesterday's stale slots will match today's carrier schedules. This is reversible, scoped to the affected feed (partition 2), and directly addresses the root cause.",
+    "expected_information_gain": "Confirmation that correcting east-node pickup slots restores carrier pickup flow for the 186 stranded orders"
+  }
+}

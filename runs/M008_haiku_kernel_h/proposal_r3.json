@@ -1,0 +1,30 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Obtain carrier-side partition offset data to discriminate X1 (rule defect vs. carrier lag). This evidence will show whether the message queue backlog is on the carrier integration feed, which directly reveals if the issue is allocation logic (no backlog expected) or carrier constraint (backlog expected).",
+    "expected_information_gain": "Partition offsets will show message flow through the carrier handoff queue. If offsets are normal, points to allocation logic issue (C3). If offsets show lag/backlog, points to carrier feed constraint (C4). This resolves X1."
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "claims": [
+    {
+      "claim_id": "C001",
+      "statement": "A version mismatch exists between the directory's role assignments (updated at 02:10) and the customer-records app's cached or live entitlement store",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e03", "m7_e02", "m7_e11"],
+      "corroboration": "Directory job succeeded with no errors and 214 role updates verified (m7_e03). Authorization failures began 6.5 hours later, affecting only those 214 people (m7_e11). Other apps unaffected (m7_e02). This temporal and scoped pattern suggests the roles were updated in source but not propagated to the app's entitlement evaluation.",
+      "limitation": "Temporal correlation does not establish causation; need to verify whether directory has the new roles, app's entitlements match old roles, and IDP claims reflect the change."
+    },
+    {
+      "claim_id": "C002",
+      "statement": "The directory-side entitlements for the 214 affected users are currently aligned with the change record (02:10 update)",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "unknown",
+      "sources": ["m7_e03", "m7_e01"],
+      "corroboration": "Change record confirms 214 updates with verification passed (m7_e03). IT Identity team reported 'directory looks correct from our side' (m7_e01, 08:46).",
+      "limitation": "IT Identity's visual inspection is non-authoritative (single source, tier 2). Need audit_role_changes to corroborate the actual stored state."
+    },
+    {
+      "claim_id": "C003",
+      "statement": "The customer-records app is evaluating authorization using cached or stale entitlements that predate the 02:10 directory update",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e02", "m7_e10"],
+      "corroboration": "Observability dashboards show 403 rates but not which entitlement version was applied to requests (m7_e10, observability gap). If the app is using a stale version, traces would show new roles in IDP claims but old roles in authorization decisions.",
+      "limitation": "No trace data yet; observability gap prevents direct visibility. Need pull_sampled_traces to inspect request-time role claims."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "inspect which entitlements the app has stored for the affected users",
+      "reason": "Observability gap (m7_e10): directory team cannot see what the app has stored. Need this to confirm version mismatch."
+    },
+    {
+      "capability": "trace a representative 403 request to see role claims and authorization logic",
+      "reason": "m7_e10 gap: dashboards show failure counts only, not request-level details. Sampled traces would show whether new roles are present in claims but rejected."
+    }
+  ],
+  "next_action": {
+    "action": "pull_sampled_traces",
+    "kind": "diagnostic",
+    "rationale": "Pull a sample of 403 responses from the affected users to inspect role claims in the requests. This will discriminate between: (a) new roles are in IDP claims but app rejects them (suggests authorization logic change or entitlement sync failure), vs (b) new roles are not in IDP claims at all (suggests directory-to-IDP sync failure).",
+    "expected_information_gain": "Traces will show what role claims are present at request time, whether they match the directory's current state, and at what step the authorization decision is being made. This is discriminating evidence for stale_authz_cache vs role_sync_error vs idp_claim_error."
+  }
+}

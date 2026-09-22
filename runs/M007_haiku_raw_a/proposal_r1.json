@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "root_1",
+      "statement": "The customer-records app entitlement cache was not invalidated after the directory sync at 02:10, causing it to serve stale cached role assignments (version 41 instead of directory version 42), resulting in 403 denials for the 214 affected users",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e02", "m7_e03", "m7_e11", "m7_r_traces"],
+      "limitation": "Confirmed by sampled traces showing v41 in app vs v42 in directory; manual refresh resolved access for one user"
+    },
+    {
+      "claim_id": "impact_1",
+      "statement": "31% of customer-record open requests from 214 support agents fail with 403 since 08:30, blocking customer support operations",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e01", "m7_e02", "m7_e11"],
+      "limitation": "Impact is ongoing and affects all 214 synced users"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "evict_entitlement_entries",
+    "kind": "mitigation",
+    "rationale": "Root cause is confirmed: stale cache serving v41 instead of v42. Evicting entitlement entries for the 214 affected users will force the app to reload from the directory on next request, serving correct v42 and unblocking access. This is reversible (cache naturally rebuilds) and directly resolves the root cause without requiring re-sync or admin elevation."
+  }
+}

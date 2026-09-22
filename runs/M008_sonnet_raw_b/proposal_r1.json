@@ -1,0 +1,28 @@
+{
+ "claims": [
+  {
+   "claim_id": "c2",
+   "statement": "Every held order was routed to the east node and flagged by the overnight allocator as a split-reservation exception, with reports beginning about 06:00 and continuing.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10", "m8_r_exceptions"],
+   "limitation": "Now corroborated by two distinct-owner sources (customer_support report and Inventory Control's verified audit); confirms the split-reservation exception scope but not yet that this exception is what blocks carrier pickup."
+  },
+  {
+   "claim_id": "c8",
+   "statement": "The allocation exception audit shows 100% of held orders fall within exception scope EXC-0921 (split reservation under v18, routed to the east node), and no held order falls outside that scope. However, the audit itself states it cannot separate an effect of the rule change from an effect specific to east-node lanes, because only rule-affected orders were routed there.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_exceptions"],
+   "limitation": "Perfect confound: EXC-0921 membership and east-node routing are identical sets under v18, so this evidence alone cannot discriminate an allocation-logic defect from an east-node-specific dock/carrier issue that would affect the same orders regardless of the split-reservation flag."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "trace_cohort_handoffs",
+  "kind": "diagnostic",
+  "rationale": "The exception audit (m8_r_exceptions) confirms scope EXC-0921 but explicitly cannot separate a rule-change effect from an east-node-lane effect, since every rule-affected order is also the only cohort routed east. Tracing the handoff for EXC-0921 from allocation through to carrier scheduling is the discriminating test: if the cohort never reaches a valid carrier-visible booking state, that points to allocation_rule_defect; if it reaches carrier scheduling normally but stalls there, that points to dock_capacity or carrier_feed_lag. This is read-only and directly breaks the confound before any mitigation (e.g. ruleset revert) is considered."
+ }
+}

@@ -1,0 +1,58 @@
+{
+  "claims": [
+    {
+      "claim_id": "C7",
+      "statement": "Carrier Operations confirms that corrections to pickup slots are reversible and must run only after the affected feed's lag is identified and corrected",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "corroboration": "Tier-1 verified response from Carrier Operations confirming procedure",
+      "limitation": "Does not directly state whether a lag exists on the east-node feed or whether carrier has slots on file; only confirms that corrections are reversible"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "review_rule_history",
+      "reason": "Need to understand the specific changes in v18 that affect split-reservation logic and east-node priority; this will clarify whether the allocation rule itself is defective or functioning as designed but creating an unintended interaction with the carrier pickup process"
+    }
+  ],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "We have two plausible mechanisms: (1) v18 allocation logic is defective, causing split-reservation that prevents valid pickup, or (2) v18 is working correctly but interacts with a carrier feed lag. Reviewing the rule change history will clarify the intent and implementation of v18's east-node priority logic, discriminating between these hypotheses.",
+    "expected_information_gain": "Understanding what v18 changed will reveal whether the split-reservation is an intended side effect or a defect, and whether it could prevent carrier pickup integration"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "claims": [
+    {
+      "claim_id": "C10",
+      "statement": "V18's split-reservation routing causes orders to be booked to the east-node carrier feed with a 30-minute pickup slot closure window, while that carrier's confirmation system has a median 47-minute lag; this timing mismatch prevents confirmations from arriving before slots close, leaving orders stuck in 'allocated, awaiting pickup'",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03"],
+      "corroboration": "m8_r_handoffs provides exact metrics (30 min vs 47 min median); m8_r_exceptions confirms all 186 held orders are EXC-0921 v18-routed; m8_e03 documents v18 change affecting east-node routing. Observation that non-split orders booked before 05:58 were confirmed in slots and one re-booked order received valid slot confirms the lag is the discriminating factor.",
+      "limitation": "This is inferred from evidence, not directly tested; however, the timing mismatch is explicit and uncontradicted"
+    },
+    {
+      "claim_id": "C11",
+      "statement": "The root cause is NOT a defect in v18's allocation logic (which passed replay testing), but rather an untested interaction: v18's routing change causes a population of orders to miss carrier confirmation deadlines due to pre-existing carrier lag",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_rulehist", "m8_r_handoffs"],
+      "corroboration": "m8_r_rulehist confirms no allocation logic defect and carrier scheduling was not exercised in testing; m8_r_handoffs shows the carrier-side timing issue that was untested",
+      "limitation": "None"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C11",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "C10 establishes the root cause as the timing mismatch between 30-minute slot window and 47-minute carrier lag on the east-node feed. apply_slot_correction is reversible and scoped to the affected feed, and the lag has been explicitly confirmed. This is safer and more surgical than reverting all of v18.",
+    "expected_information_gain": "Extending the slot closure window will allow carrier confirmations to arrive before slots expire, releasing the 186 held orders for pickup."
+  }
+}

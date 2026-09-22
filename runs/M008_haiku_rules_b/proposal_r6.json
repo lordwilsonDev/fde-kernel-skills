@@ -1,0 +1,91 @@
+{
+  "claims": [
+    {
+      "claim_id": "C13",
+      "statement": "Reverting allocation rule set v18 to v17 did not clear the 186 held orders; new allocations under v17 are also stuck when routed to the east-node carrier feed, proving the root cause is the east-node feed's pre-existing 47-minute carrier confirmation lag, not v18's allocation logic or routing algorithm",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert"],
+      "corroboration": "Tier-1 observability report confirms that reverting v18 to v17 and re-running 3,900 allocations resulted in no change to the 186 held orders and new east-node allocations experiencing the same hold condition",
+      "limitation": "This definitively rules out v18 as the root cause and confirms the east-node carrier feed's lag is the underlying issue"
+    },
+    {
+      "claim_id": "C14",
+      "statement": "The root cause is the east-node carrier feed's 47-minute median confirmation lag exceeding the 30-minute pickup slot closure window. This is a pre-existing operational constraint that v18's routing change exposed by shifting which orders route to that feed. Any allocation rule that routes orders to the east-node feed will encounter this timing mismatch.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_revert", "m8_r_exceptions"],
+      "corroboration": "m8_r_handoffs provides the explicit timing metrics (47 min lag vs 30 min slot); m8_r_revert demonstrates that reverting the allocation rule does not solve the problem; m8_r_exceptions confirms all held orders route to east-node. The pattern is consistent: east-node orders miss their slot windows regardless of allocation rule.",
+      "limitation": "None; this is now firmly established"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C11",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C12",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C13",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C14",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "The investigation has conclusively established the root cause: the east-node carrier feed's 47-minute confirmation lag vs. the 30-minute slot closure window. V18 and attempted mitigations (slot correction to wrong feed, allocation rule revert) have both failed or been shown to address the wrong level. The root cause requires operational coordination with Carrier Operations to extend the east-node feed's slot window to accommodate the known confirmation lag. This assessment documents the root cause and supporting evidence for the incident commander and Carrier Operations to take next steps.",
+    "expected_information_gain": "Complete"
+  }
+}

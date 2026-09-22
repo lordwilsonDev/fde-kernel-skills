@@ -1,0 +1,49 @@
+{
+  "claims": [
+    {
+      "claim_id": "C16",
+      "statement": "Carrier confirmations for the 186 EXC-0921 orders are arriving with a median lag of 47 minutes, but pickup slots close/expire after 30 minutes; orders remain stuck because their slots expired before confirmation",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "Dispatch handoff trace (tier-1, Observability) shows median confirmation lag of 47min vs 30min slot validity; earlier orders (booked before 05:58, outside EXC-0921) were confirmed inside validity window; one re-booked order received valid slot",
+      "limitation": "None; mechanism is clear"
+    },
+    {
+      "claim_id": "C17",
+      "statement": "The 186 orders in EXC-0921 cohort were booked around 06:00 (after overnight allocation window ~05:58 boundary), placing them in the slot expiration window before carrier confirmation could complete",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_handoffs", "m8_e02", "m8_e10"],
+      "corroboration": "Handoff trace (tier-1) confirms orders booked before 05:58 confirmed inside slots; EXC-0921 orders (later in window) have expired slots. Alert (m8_e02, tier-1) and Fulfillment report (m8_e10, tier-2) show stuck orders began at 06:00",
+      "limitation": "None"
+    },
+    {
+      "claim_id": "ROOT3",
+      "statement": "Carrier confirmation lag (47-minute median) exceeds pickup slot validity window (30 minutes); orders allocated to east node near the overnight window boundary (EXC-0921 at ~06:00) expire their pickup slots before carrier confirmation, leaving orders stuck in 'allocated, awaiting pickup' state",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "Discriminating evidence: (1) slot validity and confirmation lag times are explicitly measured (47min median vs 30min window), (2) orders booked before 05:58 confirmed successfully (no expiration), (3) EXC-0921 orders booked after 05:58 have expired slots, (4) one re-booked order received valid slot (confirming re-booking fixes the issue), (5) dock has capacity (rules out physical constraint), (6) allocation rule change is not causal (revert didn't fix it, issue pre-existing), (7) only east-node and timing-dependent",
+      "limitation": "None; mechanism is fully determined"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "ROOT2",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "other",
+    "kind": "final_assessment",
+    "rationale": "Root cause is now fully established and understood: carrier confirmation lag (47min median) exceeds slot validity (30min), causing EXC-0921 orders to expire their pickup slots before confirmation. This is a pre-existing carrier integration timing issue, not a defect in v18 or current operations. Mitigation is slot correction to refresh/extend slots for the affected orders (east-node overnight cohort), followed by replay of held allocations. Authority exists for reversible slot correction with Carrier Ops approval. The incident is understood and ready for targeted recovery action. Gate decision: PROCEED with slot correction to correct feed and replay.",
+    "expected_information_gain": "Final assessment complete; root cause mechanism confirmed; mitigation path clear"
+  }
+}

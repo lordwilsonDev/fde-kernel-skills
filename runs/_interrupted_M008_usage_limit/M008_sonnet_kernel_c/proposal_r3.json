@@ -1,0 +1,39 @@
+{
+ "claims": [
+  {
+   "claim_id": "C5",
+   "statement": "Root cause: for the EXC-0921 cohort (186 east-node orders with a split reservation under v18), carrier confirmation arrives a median of 47 minutes after booking, but the booked pickup slot closes 30 minutes after booking - so the slot closes before confirmation completes and the order is left 'allocated, awaiting pickup' with no carrier collection. East-node orders outside the cohort booked before 05:58 confirmed inside their slots (control group unaffected), and one cohort order re-booked after carrier data refreshed received a valid slot. This is a carrier-confirmation-timing/feed lag specific to the split-reservation cohort, not a general east-node dock or allocation-total defect.",
+   "kind": "root_cause",
+   "status": "inferred",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_e02", "m8_r_exceptions", "m8_r_handoffs"],
+   "corroboration": "m8_r_handoffs (tier-1, discriminating, Observability) with an internal control comparison and a natural experiment; m8_r_exceptions (tier-1, Inventory Control) confirms cohort scope matches held orders exactly.",
+   "limitation": "The first apply_slot_correction attempt (m8_r_slot_ineff) was applied to the wrong carrier feed and did not change held-order status, so it does not confirm this mechanism, but it also does not disconfirm it - the outcome is attributed to mis-targeting, not to the timing analysis being wrong. Status held at inferred (not established) pending correct feed identification and independent corroboration from Carrier Operations, the process owner."
+  },
+  {
+   "claim_id": "C7",
+   "statement": "The apply_slot_correction mitigation approved and run this incident was applied to the wrong carrier feed, and ran before that feed's lag was reconfirmed at execution time; held orders were unchanged afterward.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_slot_ineff"],
+   "corroboration": "Tier-1 verified mitigation-outcome record from Observability.",
+   "limitation": "Does not specify which feed serves EXC-0921/east-node split-reservation orders, so does not by itself identify the correct feed for a corrected re-attempt."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "read_partition_offsets",
+  "kind": "diagnostic",
+  "rationale": "C7 shows the first correction failed because it targeted the wrong carrier feed. Before proposing another approval_required mitigation, we need to positively identify which specific feed/partition carries the EXC-0921 east-node split-reservation confirmations and its current lag, rather than assuming 'the affected feed'. read_partition_offsets is the allowed, read-only diagnostic that can pinpoint the correct feed/partition and its live lag, which is required to re-scope apply_slot_correction correctly and avoid repeating the mis-targeted correction.",
+  "expected_information_gain": "Identifies the specific feed/partition and its current lag serving the EXC-0921 cohort, enabling a correctly scoped re-attempt of apply_slot_correction and strengthening C5 toward established via a second, independent confirmation of the lag."
+ }
+}

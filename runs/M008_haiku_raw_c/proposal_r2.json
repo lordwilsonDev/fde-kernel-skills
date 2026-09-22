@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_carrier_readiness",
+      "statement": "Carrier Operations confirms they can make reversible corrections scoped to single feed, and must first identify affected feed and its lag, and correct pickup slots before replaying allocations.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "limitation": "Does not directly answer whether carrier received the orders; indicates coordination needed but path forward clear."
+    },
+    {
+      "claim_id": "inf_possible_handoff_failure",
+      "statement": "EXC-0921 orders are stuck in 'allocated, awaiting pickup' state despite inventory reconciliation. This suggests orders failed to transition from allocation to scheduling/carrier stages, or encountered a state machine block preventing pickup advancement.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e01", "m8_r_owner"],
+      "limitation": "Requires diagnostic confirmation of handoff stage; unclear whether failure is in data format, state machine logic, or downstream scheduling."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Determine whether the 186 EXC-0921 orders successfully transitioned from allocation stage to scheduling/carrier stage. If stuck in allocation stage: problem is in allocation rule or state machine. If handed off but rejected: problem is in order data format or carrier feed parsing. If handed off and scheduled but not advancing to pickup: problem is in pickup slot booking or carrier confirmation. This diagnostic pinpoints the exact stage where the cohort is blocked."
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "C4",
+      "statement": "The incident represents a quantified delay of 186 orders (9% of overnight allocations) with no stock loss; orders are allocated but awaiting carrier pickup",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_impact", "m8_e02"],
+      "corroboration": "m8_e01 confirms inventory reconciliation; no stock shortage or overflow",
+      "limitation": "m8_r_impact does not list individual order IDs; temporal bounds approximate"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Discriminating test to distinguish allocation_rule_defect from carrier_feed_lag. Inspect the structure and completeness of the 186 split-reservation exception records: are they valid, complete orders ready for carrier handoff, or are they malformed/incomplete (indicating v18 rule defect)? This is the critical discriminating evidence.",
+    "expected_information_gain": "Detailed exception structure: field completeness, validation errors, timestamp alignment with rule change, carrier-ready status. Will prove or disprove whether split-reservation exceptions are themselves broken."
+  }
+}

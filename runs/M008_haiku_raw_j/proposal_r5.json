@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c12",
+      "statement": "Slot correction was applied to the wrong feed before the feed lag mechanism was confirmed; orders remain held",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": "Indicates multiple feeds/systems involved; slot correction needs targeted understanding of which feed controls the 30-minute booking window."
+    },
+    {
+      "claim_id": "c13",
+      "statement": "Remediation sequence (rule revert, replay, slot correction) has not cleared the 186 held orders; diagnostic confirmation with carrier operations is needed to understand which system/feed controls the pickup slot window",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+      "limitation": "Previous mitigations failed due to incomplete understanding of carrier integration architecture."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Root cause established: v18 books slots with 30-minute window but carrier confirms in ~47 minutes median. Attempted mitigations (revert, replay, slot correction) have not cleared the 186 held orders. Confirming directly with carrier operations will establish: (1) which system/feed controls the pickup slot window, (2) what slot correction should target, (3) whether carriers can manually confirm or extend slots for the affected orders. This diagnostic is essential to guide remaining remediation authority."
+  }
+}

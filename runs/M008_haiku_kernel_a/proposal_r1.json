@@ -1,0 +1,31 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "read_partition_offsets requires cohort scope",
+      "reason": "Offset diagnostic needs to be scoped to a specific carrier feed cohort; no cohort record exists yet. Must trace order flow first."
+    }
+  ],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Trace the 186 stuck orders through the system to identify: (1) which carrier feed cohort they belong to, (2) their handoff sequence through allocation → carrier booking → pickup, (3) where the handoff chain breaks. This will allow us to scope the offset read to the correct cohort and understand whether the failure is in carrier booking or pickup confirmation.",
+    "expected_information_gain": "Discriminates between allocation_rule_defect (failure in booking creation) and carrier_feed_lag (failure in confirmation flow). Also enables targeted offset read."
+  }
+}

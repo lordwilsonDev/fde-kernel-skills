@@ -1,0 +1,653 @@
+{
+ "world": "M008",
+ "mode": "rules",
+ "enforce": false,
+ "round": 9,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "established",
+      "result": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)",
+      "reason": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "established",
+      "result": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)",
+      "reason": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)"
+     },
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C6",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [
+     "inspect_inventory_counts",
+     "audit_allocation_exceptions",
+     "check_dock_capacity",
+     "confirm_with_carrier_ops"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The core contradiction is whether the allocation rule is functioning correctly (regression passed, reconciliation correct) or whether v18 has a latent bug in multi-node split handling. Auditing allocation exceptions will show whether exception-flagged orders are queued upstream or progressing downstream. This discriminates between an allocation-layer bug (stuck in queue) vs. a carrier integration or dock issue (past allocation, stuck at handoff).",
+    "expected_information_gain": "Determines whether the root cause is in allocation rule processing or in downstream carrier integration/dock handling"
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C7",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C8",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [
+     "confirm_with_carrier_ops"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C5",
+     "C6"
+    ]
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "X1 contradiction requires discriminating evidence. The allocation audit shows orders are exception-flagged and routed correctly to east node, but cannot determine if the problem is upstream (v18 not releasing orders to carrier) or downstream (orders at carrier but not being picked up). Carrier ops confirmation of booking status will directly answer this: if orders ARE booked (in their system), issue is on their side; if NOT booked, issue is upstream (v18 exception handling preventing handoff).",
+    "expected_information_gain": "Determines whether root cause is in allocation rule/exception handling (upstream) or carrier integration/pickup scheduling (downstream)."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C9",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C10",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [
+     {
+      "contradiction": "X1",
+      "result": "violation:resolved_without_discriminating_evidence"
+     }
+    ],
+    "gaps": [
+     "check_dock_capacity"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8"
+    ]
+   },
+   "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Carrier Ops has identified a feed lag on the affected carrier lane. Before proposing corrections (apply_slot_correction), need to verify the lag is not caused by dock capacity issues or unavailability at the east node. If dock is at capacity or down, slot corrections would not resolve the issue.",
+    "expected_information_gain": "Confirms whether dock readiness is adequate for pickup operations, or if dock saturation is the underlying cause of the carrier feed lag."
+   },
+   "sim": {
+    "released": "m8_r_dock",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C11",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C12",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10"
+    ]
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause (C12) is carrier feed lag on the affected carrier feed (east-node lane). Carrier Ops confirmed this is reversible and scoped to a single carrier feed. The action directly addresses the lag by correcting pickup slot scheduling. This is the highest-information authorized next step to unblock the 186 stuck orders.",
+    "expected_information_gain": "Applying slot correction will confirm whether the carrier feed lag is the true blocker (orders resume pickup), or whether there is an additional underlying issue (orders remain stuck despite slot correction)."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C12"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C13",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C14",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "trace_cohort_handoffs"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12"
+    ]
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "The slot correction failed because it targeted the wrong feed. Before reapplying the mitigation, must trace the actual carrier feed assignment for orders in scope EXC-0921. This will identify which feed is actually lagged and needs correction.",
+    "expected_information_gain": "Determines which specific carrier feed the EXC-0921 orders were routed to, enabling targeted and successful slot correction on the correct feed."
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C15",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C16",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C13",
+     "C14"
+    ]
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Root cause (C16) is that v18's split-reservation orders are booked with insufficient slot durations. Reverting v18 (east-node reservation priority only) will stop creating split-reservation exceptions, allowing re-booking with correct slot durations. This is reversible and idempotent per the human gate scope.",
+    "expected_information_gain": "Reverting v18 will prevent new split-reservation orders from being created with insufficient slots. Subsequent replay_held_allocations can re-book stuck orders with correct slot timing."
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14",
+     "C15",
+     "C16"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C12"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C17",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C18",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14",
+     "C15",
+     "C16"
+    ]
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "Root cause (C16) is orders booked with insufficient slot duration. Reverting v18 did not fix already-stuck orders. The remedy per Carrier Ops is to replay held allocations (EXC-0921 scope) to re-book them with corrected slot durations. Evidence shows one re-booked order succeeded, proving this approach works.",
+    "expected_information_gain": "Re-booking EXC-0921 orders with corrected slot durations should allow carrier confirmations to arrive within valid slot windows, unblocking pickup."
+   },
+   "sim": {
+    "released": "m8_r_replay_ineff",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14",
+     "C15",
+     "C16",
+     "C17",
+     "C18"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C12"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 7,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C19",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C20",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "review_rule_history"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14",
+     "C15",
+     "C16",
+     "C17",
+     "C18"
+    ]
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "Before final assessment, check whether v18 rule change includes slot duration modifications, or whether the 30-minute slot windows are a booking system issue independent of v18. This will complete the root cause investigation.",
+    "expected_information_gain": "Determines whether the slot mismatch is a v18 rule defect or a booking system configuration issue"
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14",
+     "C15",
+     "C16",
+     "C17",
+     "C18",
+     "C19",
+     "C20"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 8,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C21",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C22",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13",
+     "C14",
+     "C15",
+     "C16",
+     "C17",
+     "C18",
+     "C19",
+     "C20"
+    ]
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause fully established with discriminating evidence (C22): booking system assigns 30-minute slot windows to split-reservation orders, but carrier confirmation latency is 47 minutes. Authorized operational mitigations attempted all failed. Root cause requires fix in booking system's slot duration logic. 186 orders remain stuck in 'allocated, awaiting pickup'. Assessment complete.",
+    "expected_information_gain": "End assessment"
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

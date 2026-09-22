@@ -1,0 +1,323 @@
+{
+ "world": "M008",
+ "mode": "rules",
+ "enforce": false,
+ "round": 6,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Carrier confirmation visibility"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Determine whether split-reservation exceptions are logically correct given v18 rule (inventory legitimately insufficient at east node to fulfill orders) or whether v18 has a defect (reserving incorrectly, failing to try fallback nodes). Discriminates between allocation-rule-defect and carrier-feed-lag hypotheses.",
+    "expected_information_gain": "If v18 is correctly splitting across nodes but carriers are not collecting, points to carrier-side issue. If v18 is incorrectly refusing to split or mis-reserving stock, points to rule defect in v18."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2_refined",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Carrier system acknowledgment status"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2"
+    ]
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Determine whether orders in EXC-0921 have been handed off to the carrier system and are awaiting carrier pickup, or whether they are stuck at allocation/handoff stage. If they reach carrier system but are not picked up, points to carrier_feed_lag or slot-confirmation gap. If they fail to reach carrier system, points to allocation_rule_defect or handoff bug.",
+    "expected_information_gain": "Cohort handoff trace will show the stage where EXC-0921 orders are blocked. This will discriminate between allocation-rule-defect (stuck pre-handoff) and carrier-feed-lag (stuck post-handoff)."
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C2_refined"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3_downgraded",
+      "from": null,
+      "to": "disproven",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "C2",
+     "C3"
+    ]
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The root cause is carrier confirmation lag exceeding slot windows for EXC-0921 orders. Re-booking orders after carrier data refreshes resolves the lag (per m8_r_handoffs: one re-booked order received valid slot). Slot correction is reversible, scoped to affected carrier feed (east-node EXC-0921), and addresses the lag directly by re-opening or extending pickup slots to accommodate carrier response time.",
+    "expected_information_gain": "Slot correction will re-align the 47-minute carrier confirmation lag with the extended slot closing window, allowing EXC-0921 orders to receive carrier confirmations within valid pickup slots. This unblocks the 186 stuck orders."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C2_refined",
+     "C5"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C5"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C6",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C7",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Specific carrier feed identification"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C4",
+     "C2_refined",
+     "C5"
+    ]
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Ask Carrier Operations to identify which specific carrier feed (by feed ID, carrier name, or lane classification) is responsible for handling EXC-0921 pickup confirmations on the east-node routes. This will allow the next slot correction to be scoped correctly to the affected feed.",
+    "expected_information_gain": "Carrier Ops will confirm the specific feed ID/carrier that owns east-node EXC-0921 pickup slots and has the 47-minute confirmation lag. This enables a properly scoped slot_correction in the next round."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C2_refined",
+     "C5",
+     "C6",
+     "C7"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C8",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Specific carrier feed identification"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C2_refined",
+     "C6"
+    ]
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Allocation rule v18 (east-node-first reservation priority) creates a booking volume/pattern that overwhelms the carrier confirmation system's 47-minute lag tolerance. Reverting to the prior rule set will restore the booking pattern that had no lag (as shown by non-EXC-0921 orders before 05:58), eliminating the trigger for the carrier lag. This is reversible and idempotent, scoped to east-node reservation priority as specified in the gate conditions. After reversion, replay_held_allocations can re-allocate the 186 orders under the old rule without slot conflicts.",
+    "expected_information_gain": "Reverting v18 will change the allocation booking pattern and volume on east-node routes, relieving pressure on the carrier confirmation system and allowing the 186 held orders to be re-allocated and successfully picked up."
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C2_refined",
+     "C5",
+     "C6",
+     "C7",
+     "C8"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C5"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C9",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C10",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Specific carrier feed identification",
+     "Carrier system backlog drain capability"
+    ],
+    "next_action": null,
+    "pending_review": [
+     "C1",
+     "C3",
+     "C4",
+     "C2_refined",
+     "C6",
+     "C7"
+    ]
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause has been established with discriminating evidence: carrier confirmation lag (47-minute median response vs. 30-minute slot window) prevents pickup slot confirmation for east-node allocations. However, mitigation is blocked on two fronts: (1) apply_slot_correction requires identifying the specific carrier feed (not provided by diagnostics), and (2) revert_allocation_ruleset did not resolve the backlog, indicating deeper systemic congestion. Escalation to operations with specific feed identity is needed to proceed. The 186 held orders are recoverable via slot correction and replay once the feed is identified.",
+    "expected_information_gain": "Assessment complete. Root cause identified. Mitigation path identified but blocked by operational data (carrier feed ID)."
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

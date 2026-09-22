@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C5",
+      "statement": "186 orders (9% of overnight allocations) held in 'allocated, awaiting pickup' since 06:00 with no successful carrier pickup scheduled; all from rule v18 split-reservation cohort.",
+      "kind": "impact",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02", "m8_r_exceptions"],
+      "corroboration": "m8_e02: 9% overnight allocations held since 06:00. m8_r_exceptions: all 186 stuck orders in EXC-0921 (rule v18 split reservations).",
+      "limitation": "Customers impacted estimated at 186 (scope EXC-0921); no revenue/delivery SLA data available in this assessment."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C4",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "m8_r_dock rules out capacity exhaustion as the bottleneck. The root cause is now most likely a failure in the carrier-pickup handoff: split-reservation exceptions from rule v18 are not transitioning to 'carrier scheduled' state. Confirm what carrier ops sees regarding the east-node feed status and whether the split-reservation format is the issue.",
+    "expected_information_gain": "Will establish whether carrier ops can see and process the split-reservation orders, or whether there is a communication/format mismatch preventing the handoff."
+  }
+}

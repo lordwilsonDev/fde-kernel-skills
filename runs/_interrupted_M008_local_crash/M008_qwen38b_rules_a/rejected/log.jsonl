@@ -1,0 +1,2 @@
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "mechanism_tag must be one of ['carrier_feed_lag', 'allocation_rule_defect', 'inventory_count_drift', 'dock_capacity', 'other', 'unknown']", "path": "$.claims[3].mechanism_tag", "n": 1, "at": "2026-09-22T11:34:23.831691+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "proposal is not valid JSON (or nests too deeply)", "path": "$", "n": 2, "at": "2026-09-22T11:42:25.041217+00:00"}

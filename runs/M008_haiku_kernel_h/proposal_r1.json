@@ -1,0 +1,61 @@
+{
+  "claims": [
+    {
+      "claim_id": "C3",
+      "statement": "Allocation rule v18 defect in split-reservation logic causes the 186 held orders by blocking the carrier handoff",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_r_exceptions"],
+      "corroboration": "m8_r_exceptions (tier 1 discriminating): 100% of held orders in EXC-0921 (rule v18 scope), 0% outside. Timeline: rule live 22:00, orders stuck 06:00. No other recent changes (m8_e04). Inventory control confirms allocation totals reconcile but cannot see carrier confirmation (m8_e09).",
+      "limitation": "m8_r_exceptions cannot separate rule-logic defect from carrier-feed interaction because only rule-affected orders were routed. Carrier-side confirmation status unknown."
+    },
+    {
+      "claim_id": "C4",
+      "statement": "East-node carrier feed has a pickup slot lag or capacity constraint that prevents collection of rule v18-routed orders",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_r_exceptions"],
+      "corroboration": "Alert shows lag only on east-node lanes (m8_e02). Carrier ops on-call saw nothing obvious in dock schedule (m8_e01), but observability is limited (m8_e09).",
+      "limitation": "Carrier-side confirmation status and slot availability not yet confirmed. Dock capacity and partition offsets unknown."
+    },
+    {
+      "claim_id": "C5",
+      "statement": "Impact: 186 orders in 'allocated, awaiting pickup' state, representing 9% of overnight allocations, unable to progress to shipment",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02", "m8_e10", "m8_r_exceptions"],
+      "corroboration": "Consistent across incident chat (186 orders), monitor alert (9% of overnight allocations), support report (every held order routed east), and exception audit (scope EXC-0921 = 186 orders).",
+      "limitation": "Duration of impact and customer notification status unknown. Remediation timeline not estimated."
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "C3 (rule v18 defect is root cause)",
+      "claim_b": "C4 (carrier feed lag is root cause)",
+      "description": "Both are consistent with the evidence but point to different ownership and mitigation. Rule defect would require code fix or rollback; carrier lag would require slot correction and replay.",
+      "discriminating_evidence_needed": "Carrier-side confirmation status for the 186 orders; dock capacity and pickup slot availability; partition offset analysis for carrier feed."
+    }
+  ],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Directly test whether the lag is on the carrier-side (pickup slot unavailability or confirmation failure) or our allocation logic. This discriminates between rule-logic defect (C3) and carrier-feed interaction (C4).",
+    "expected_information_gain": "Will show whether the 186 rule-v18 orders have successful carrier confirmation, available pickup slots, and expected handoff timing. If slots exist and orders lack confirmation, points to rule-logic defect; if slots unavailable, points to carrier lag."
+  }
+}

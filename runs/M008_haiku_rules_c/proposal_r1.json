@@ -1,0 +1,44 @@
+{
+  "claims": [
+    {
+      "claim_id": "C4",
+      "statement": "All 186 stuck orders belong to the v18-rule-affected cohort (EXC-0921) with split-reservation flags. No orders outside EXC-0921 are stuck, and no non-v18 orders are affected.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Exception audit (m8_r_exceptions, tier-1) confirms 100% of held orders are in EXC-0921 (v18-affected split-reservation scope), and no order outside it is held.",
+      "limitation": "Observation confirms v18 orders are stuck, but audit limitation notes it cannot separate a rule-change effect from an east-node-lane effect because only rule-affected orders were routed there. Need cohort-level carve-out testing."
+    },
+    {
+      "claim_id": "C2_refined",
+      "statement": "Allocation rule set v18 is either defective (producing invalid splits or failing to allocate correctly) OR the problem is specific to how east-node lanes handle these split-reservation orders from v18.",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "corroboration": "v18 deployment at 22:00 preceded stuck-order reports by 8 hours. Exception audit shows v18 orders exclusively in held cohort. Inventory Control confirmed allocation totals reconcile on their side (m8_e01), suggesting the stuck orders do exist in the allocation system but are not reaching carrier pickup.",
+      "limitation": "Cannot yet determine if the rule is defective (should not have created split-reservation) or if split-reservation is valid but east-node capacity/carrier-handoff is broken. Requires tracing orders from allocation to carrier-system acknowledgment."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Carrier system acknowledgment status",
+      "reason": "Cannot determine if orders are stuck at allocation-to-carrier handoff (rule defect) or at carrier-pickup confirmation (carrier lag). Need trace of cohort handoff from allocation system to carrier-integration system."
+    }
+  ],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Determine whether orders in EXC-0921 have been handed off to the carrier system and are awaiting carrier pickup, or whether they are stuck at allocation/handoff stage. If they reach carrier system but are not picked up, points to carrier_feed_lag or slot-confirmation gap. If they fail to reach carrier system, points to allocation_rule_defect or handoff bug.",
+    "expected_information_gain": "Cohort handoff trace will show the stage where EXC-0921 orders are blocked. This will discriminate between allocation-rule-defect (stuck pre-handoff) and carrier-feed-lag (stuck post-handoff)."
+  }
+}

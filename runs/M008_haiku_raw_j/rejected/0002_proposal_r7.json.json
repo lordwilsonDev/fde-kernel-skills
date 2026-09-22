@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c16",
+      "statement": "The pickup-window feed consumer for carrier partition 2 (east-node carriers) stopped advancing at 05:58 and is 47 minutes behind, causing slots to be booked against stale carrier availability data",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets"],
+      "limitation": "Complete root cause: v18 routes split-reservation orders to partition 2, whose consumer is broken since 05:58, creating 47-minute data staleness that exceeds 30-minute slot window."
+    },
+    {
+      "claim_id": "c17",
+      "statement": "Prevention: rule v18 reverted to v17 to prevent new allocations to partition 2. Remediation: Carrier Ops must restart partition 2's consumer, re-correct pickup slots, then replay EXC-0921 allocations.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_offsets", "m8_r_owner"],
+      "limitation": "Complete mitigation path identified; execution is Carrier Ops responsibility (outside incident assessment authority)."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Root cause fully established: allocation rule v18 routes split-reservation orders to carrier partition 2, whose pickup-window feed consumer broke at 05:58, creating 47-minute data staleness. This exceeds the 30-minute slot window, causing 186 orders to remain held. Prevention complete: rule reverted to v17. Remediation path established: Carrier Ops must restart partition 2's consumer, re-correct slots for EXC-0921 scope, then replay allocations. Assessment concludes; escalate to Carrier Operations."
+  }
+}

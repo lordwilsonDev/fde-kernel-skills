@@ -1,0 +1,54 @@
+{
+  "claims": [
+    {
+      "claim_id": "C7",
+      "statement": "186 orders in scope EXC-0921 (all held orders) were allocated under rule v18 with split reservation and routed to east node",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e10"],
+      "corroboration": "Allocation audit (tier 1, inventory_control) confirms all held orders are in EXC-0921 scope; fulfillment report (tier 2, customer_support) confirms flagging",
+      "limitation": "Establishes correlation but audit explicitly states it cannot separate rule-change effect from east-node-lane effect"
+    },
+    {
+      "claim_id": "C8",
+      "statement": "Allocation exception audit cannot discriminate between a rule v18 defect and an east-node-lane problem (carrier lag, dock issue, etc.)",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Audit limitation explicitly stated: 'cannot separate an effect of the rule change from an effect on the east-node lanes'",
+      "limitation": "Identifies an observability limitation, not a root cause"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "Allocation reconciliation is correct and v18 regression suite was green (C3, C4)",
+      "claim_b": "All orders in scope EXC-0921 (exception-flagged) are stuck in 'allocated awaiting pickup' (C1, C7)",
+      "description": "Allocation exception audit cannot separate whether v18 has a latent multi-node split bug OR east-node lanes have a problem. Possible resolutions: (a) v18 correctly flags split-reservation but orders cannot progress through carrier integration for exception-flagged orders, (b) east-node carrier feed has lag/timeout, (c) dock capacity issue, (d) v18 regression did not cover multi-node split scenarios",
+      "discriminating_evidence_needed": "Carrier ops confirmation: were pickups actually scheduled/booked for these 186 orders? If yes, issue is doc-side (v18 orders reaching carrier but not picked up). If no, issue is upstream (orders not reaching carrier scheduling)."
+    }
+  ],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C4",
+      "action": "downgrade",
+      "new_status": "reported",
+      "reason": "Kernel feedback: single non-authoritative tier-2 source (incident_channel). Inventory Control's 'nothing looks wrong' is data about their perception, not definitive evidence that reconciliation is correct or that the root cause is not in allocation."
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "confirm_with_carrier_ops",
+      "reason": "Need definitive answer: were pickups scheduled/booked in carrier system for these 186 orders? Discriminates between allocation (orders not reaching carrier) vs. carrier (orders reached but not picked up)."
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "X1 contradiction requires discriminating evidence. The allocation audit shows orders are exception-flagged and routed correctly to east node, but cannot determine if the problem is upstream (v18 not releasing orders to carrier) or downstream (orders at carrier but not being picked up). Carrier ops confirmation of booking status will directly answer this: if orders ARE booked (in their system), issue is on their side; if NOT booked, issue is upstream (v18 exception handling preventing handoff).",
+    "expected_information_gain": "Determines whether root cause is in allocation rule/exception handling (upstream) or carrier integration/pickup scheduling (downstream)."
+  }
+}

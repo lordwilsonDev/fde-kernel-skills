@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c0_01",
+      "statement": "Allocation rule set v18 deployed at 22:00 last night introduced east-node-first reservation for multi-node orders",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "limitation": "Change review passed and regression suite was green; defect not caught pre-deployment"
+    },
+    {
+      "claim_id": "c0_02",
+      "statement": "All 186 stuck orders are routed to east node and flagged as split-reservation exceptions by overnight allocator",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "limitation": "Does not explain why carrier is not collecting; observability gap prevents seeing carrier-side state"
+    },
+    {
+      "claim_id": "c0_03",
+      "statement": "Other nodes are operating normally; problem is east-node specific",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02"],
+      "limitation": "Narrows scope but does not isolate root cause"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "v18 is the strongest temporal and scope correlation. Need to understand what changed in split-reservation logic and whether the deployed version matches reviewed version. This is the highest-leverage diagnostic to confirm or exclude allocation-rule-defect as root cause."
+  }
+}

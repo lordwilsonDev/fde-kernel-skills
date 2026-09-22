@@ -1,0 +1,136 @@
+{
+ "world": "M008",
+ "mode": "kernel",
+ "enforce": true,
+ "round": 3,
+ "done": false,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [
+     "audit_allocation_exceptions"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "To confirm if the allocation rule change introduced exceptions causing orders to be stranded.",
+    "expected_information_gain": "Identify if there are allocation exceptions related to the east-node rule change, which would support the root_cause claim."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [
+     "check_dock_capacity"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "To determine if dock capacity is the root cause or if the issue is indeed related to the allocation rule defect.",
+    "expected_information_gain": "Clarify the root cause by assessing whether dock capacity constraints are contributing to the stranded orders."
+   },
+   "sim": {
+    "released": "m8_r_dock",
+    "flagged_for_revalidation": [
+     "C1"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [
+     "carrier_feed_lag_analysis"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "To confirm the allocation rule change's impact and validate the hypothesis that the rule defect caused the stranded orders.",
+    "expected_information_gain": "Understanding the exact changes in the allocation rules and their effect on order routing and reservations."
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "C1"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,44 @@
+{
+ "claims": [
+  {
+   "claim_id": "C1",
+   "statement": "9% of orders allocated overnight to the east node have been held in 'allocated, awaiting pickup' for more than 90 minutes since 06:00; all other nodes are normal.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_e02"],
+   "corroboration": "tier-1 verified monitor_alert from observability, single authoritative source sufficient for an observation of state.",
+   "limitation": "The alert measures state duration only; it explicitly cannot attribute a cause."
+  },
+  {
+   "claim_id": "C2",
+   "statement": "Allocation rule set v18, which makes multi-node orders reserve stock from the east node first, went live at 22:00 last night; change review passed and the regression suite was green.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03"],
+   "corroboration": "tier-1 verified allocation_rule_record from the owning team (Inventory Control).",
+   "limitation": "Confirms the change occurred and passed review; does not by itself show the change is causing the stuck orders (temporal proximity is not causation)."
+  },
+  {
+   "claim_id": "C3",
+   "statement": "Every currently-held order was routed to the east node and flagged by the overnight allocator as a split-reservation exception, with reports beginning around 06:00 and continuing.",
+   "kind": "hypothesis",
+   "status": "reported",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10", "m8_e02", "m8_e03"],
+   "corroboration": "m8_e10 is a single tier-2 non-authoritative source (customer_support), consistent with the tier-1 alert's east-node/06:00 pattern (m8_e02) and the timing of rule v18 (m8_e03), but not yet corroborated by an authoritative allocation-system record.",
+   "limitation": "Cannot yet be treated as root_cause: no discriminating evidence has isolated split-reservation exceptions from v18 as the mechanism versus carrier-side lag or dock capacity on the east node. Observability gap (m8_e09) means we also cannot rule out a carrier-confirmation mismatch. Support-report proxy counts do not establish customer impact."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "audit_allocation_exceptions",
+  "kind": "diagnostic",
+  "rationale": "C3's split-reservation-exception mechanism rests on a single non-authoritative support report. Auditing the allocation system's own exception records will confirm or deny whether the held east-node orders are in fact flagged as split-reservation exceptions by rule v18's logic, providing the discriminating, authoritative evidence needed to move toward (or away from) a root_cause claim of allocation_rule_defect, versus carrier_feed_lag or dock_capacity.",
+  "expected_information_gain": "Authoritative confirmation of exception cause/rate tied to the held orders, distinguishing an allocation-rule defect from carrier- or dock-side explanations."
+ }
+}

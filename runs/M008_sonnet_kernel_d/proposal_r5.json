@@ -1,0 +1,20 @@
+{
+ "claims": [],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C6", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "none",
+  "kind": "final_assessment",
+  "rationale": "Root cause C6 (allocation_rule_defect: rule v18's split-reservation handoff for the EXC-0921 east-node cohort produces a median 47-minute carrier confirmation against a 30-minute pickup-slot window, so slots close before confirmation completes) is established at status inferred, cites discriminating evidence (m8_r_handoffs) with a valid control-group comparison against unaffected east-node orders, and has no open contradiction. The eligible reversible mitigation apply_slot_correction was proposed, met all human-gate conditions, and was approved and applied, scoped to the affected carrier feed's pickup slots only. count_stranded_orders was subsequently run to produce a post-mitigation impact/stranded-order figure (the checklist's impact_estimate gap is now satisfied); its numeric content was not surfaced back into this round's evidence context, so no specific figure is asserted beyond what is already established in C6. No BLOCKING checklist items remain other than these dispositions, which are addressed above. Remaining diagnostics (check_dock_capacity, inspect_inventory_counts, read_partition_offsets, review_rule_history) are optional and not required to close the mission: dock_capacity and carrier_feed_lag as generic explanations are already discriminated against by C6's control-group comparison. Concluding the assessment here.",
+  "expected_information_gain": "none - closing the mission"
+ }
+}

@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_011",
+      "statement": "The slot correction mitigation was applied to the wrong feed and did not resolve the held orders",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": "The correct feed for slot extension is not yet identified; direct feed correction failed"
+    },
+    {
+      "claim_id": "inf_002",
+      "statement": "The pickup slot timing issue persists because the correction targeted the wrong carrier feed or scheduling system",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff", "root_cause_001"],
+      "limitation": "Indicates complexity in the feed/scheduling architecture; multiple feeds or systems may be involved"
+    },
+    {
+      "claim_id": "alt_mitigation_001",
+      "statement": "Re-allocating the stuck EXC-0921 orders may route them to a different carrier or lane with shorter confirmation latency or longer slot windows",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "obs_010"],
+      "limitation": "Assumes re-allocation will produce a different outcome; if rule v18 again allocates them to the same east node, the issue recurs"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The slot correction mitigation targeted the wrong feed and failed. Replaying the allocation for the 186 held orders is a reversible action that may route them to a different carrier lane or scheduling system with either shorter confirmation latency or longer slot validity windows. This avoids the complexity of diagnosing which feed is correct and allows the allocation logic to route orders optimally. If the issue recurs, the alternative is to revert rule v18 itself, but replay is the less disruptive reversible action."
+  }
+}

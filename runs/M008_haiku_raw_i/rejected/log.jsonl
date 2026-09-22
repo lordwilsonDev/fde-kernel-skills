@@ -1,0 +1,3 @@
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "unknown top-level field(s) ['round']", "path": "$", "n": 1, "at": "2026-09-22T16:14:09.243629+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "next_action.action is not in the authority list", "path": "$.next_action.action", "n": 2, "at": "2026-09-22T16:16:42.761522+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "action 'confirm_with_carrier_ops' is a diagnostic; kind must match", "path": "$.next_action.kind", "n": 3, "at": "2026-09-22T16:16:56.181222+00:00"}

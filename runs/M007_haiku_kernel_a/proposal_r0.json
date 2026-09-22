@@ -1,0 +1,75 @@
+{
+  "claims": [
+    {
+      "claim_id": "C01",
+      "statement": "Directory role synchronization completed successfully at 02:10 on 2026-09-29, updating 214 role assignments with no logged errors, but authorization failures on the customer-records app began 6+ hours later at 08:30.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": [
+        "m7_e03",
+        "m7_e02"
+      ],
+      "corroboration": "Verified tier-1 sources: change record confirms directory job success; helpdesk alert confirms failure timeline divergence from directory change.",
+      "limitation": "Establishes temporal sequence but not causal link; observability gap (m7_e10) prevents visibility into app's entitlement state."
+    },
+    {
+      "claim_id": "C02",
+      "statement": "All 214 affected users reporting 403 access denials are among those whose roles were modified in the overnight directory sync; no 403s reported from users outside this cohort.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "role_sync_error",
+      "sources": [
+        "m7_e11",
+        "m7_e01"
+      ],
+      "corroboration": "Support report (tier 2, reviewed) directly correlates failure cohort to directory change cohort.",
+      "limitation": "Non-authoritative sources; support tickets are proxy impact only (m7_e01 and m7_e11 are tier 2). Requires count_affected_users diagnostic to establish actual scope."
+    },
+    {
+      "claim_id": "C03",
+      "statement": "The customer-records app's authorization check is reading stale entitlements (not the 214 updated roles from the directory sync) or has a version mismatch between stored and requested entitlements.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": [
+        "m7_e03",
+        "m7_e02",
+        "m7_e10"
+      ],
+      "corroboration": "Timing gap and observability gap create conditions where a version mismatch could exist undetected. Release r7 (m7_e04) noted no functional changes, reducing likelihood of intentional auth logic change.",
+      "limitation": "Highly speculative without entitlement introspection. Observability gap (m7_e10) prevents direct confirmation. Alternative causes (IDP claim error, stale cache at different layer) remain open."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "inspect_idp_claims",
+      "reason": "Determine if directory's IDP claims are correctly formatted and reaching the app, vs. app's stored/cached representation"
+    },
+    {
+      "capability": "read_service_settings",
+      "reason": "Verify app's entitlement configuration, cache TTL, and version handling after r7 deploy"
+    },
+    {
+      "capability": "pull_sampled_traces",
+      "reason": "Inspect authorization decision path for one failing user request to see what entitlements the app evaluated"
+    },
+    {
+      "capability": "audit_role_changes",
+      "reason": "Confirm directory recorded the 214 role changes correctly and identify any role transition logic that could trigger denials"
+    },
+    {
+      "capability": "count_affected_users",
+      "reason": "Establish actual impact scope beyond support proxy counts"
+    }
+  ],
+  "next_action": {
+    "action": "pull_sampled_traces, inspect_idp_claims, read_service_settings",
+    "kind": "diagnostic",
+    "rationale": "These three diagnostics directly address the core ambiguity: does the app have stale entitlements, or did the directory sync fail to propagate to the app despite reporting success? Traces show what the app evaluated; IDP claims show what directory sent; service settings show caching/versioning. Together they discriminate between stale_authz_cache vs. role_sync_error vs. idp_claim_error mechanisms.",
+    "expected_information_gain": "Traces + IDP claims will reveal whether app is working from old entitlements (supports C03/stale_authz_cache) or received incorrect claims (supports role_sync_error). Service settings will show if a cache or version boundary exists that could explain the 6-hour delay."
+  }
+}

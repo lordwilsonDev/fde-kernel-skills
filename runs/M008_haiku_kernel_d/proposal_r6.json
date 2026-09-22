@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C5",
+      "statement": "Allocation rule v18's change to east-node-first multi-node reservation creates split-exception orders routed to the east-node lane; these orders are stuck in 'allocated, awaiting pickup' because carrier integration fails to process split-exception orders from the east-node lane, specifically as a result of v18's routing change combined with a pre-existing limitation in how the carrier integration layer handles split-exceptions",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_r_rulehist", "m8_e02"],
+      "corroboration": "m8_r_rulehist explicitly states 'Replay does not exercise carrier scheduling' - this discriminates the root cause to the carrier integration layer, not the rule logic itself. The rule path is correct and matches specification. Combined with e03 (v18 changed east-node routing), e10 (all orders are split-exceptions), and e02 (failure isolated to east-node), this discriminates toward v18's change breaking the carrier integration handoff specifically for split-exceptions on the east-node route.",
+      "limitation": "Root cause is integration-layer defect triggered by v18; the exact failure mechanism (lag, malformed message, missing handler) requires deeper diagnostic, but the causal chain to v18's routing change is discriminated by the rule-review evidence showing carrier scheduling untested."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Root cause is v18's east-node-first routing breaking carrier integration for split-exceptions. This is directly reversible by reverting the ruleset to v17. No other authorized mitigation addresses the root cause. Given 186 orders stranded and impact growing ('reports keep arriving'), reverting v18 is the highest-information action to stop the root cause and restore carrier pickup flow. After revert, replay_held_allocations can re-process the cohort under v17 logic.",
+    "expected_information_gain": "Confirmation that reverting v18 restores carrier pickup flow for east-node orders; validation of the root cause hypothesis"
+  }
+}

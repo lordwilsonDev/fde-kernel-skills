@@ -1,0 +1,63 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_002",
+      "statement": "Every held order was flagged by the overnight allocator as a 'split-reservation exception'",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10", "m8_r_exceptions"],
+      "limitation": "Confirmed by audit; 100% of held orders in scope EXC-0921 (v18-affected) and no order outside this scope is held, establishing the correlation with v18"
+    },
+    {
+      "claim_id": "inf_001",
+      "statement": "The allocation rule set v18 change is a necessary condition for the stuck-order condition: all 186 stuck orders are v18-allocated, and no non-v18 order is stuck",
+      "kind": "inference",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e03"],
+      "limitation": "The audit cannot isolate whether the defect is in v18's logic, in the east-node environment it forces orders toward, or in carrier-system integration with split reservations; further diagnostics needed to pinpoint the mechanism"
+    },
+    {
+      "claim_id": "hyp_002",
+      "statement": "The v18 allocation rule change creates split-reservation orders that the carrier system or east-node subsystem does not complete, leaving orders in 'awaiting pickup' without handoff to the carrier",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "limitation": "Root mechanism not yet isolated; could be incomplete reservation logic in v18, missing carrier integration for split reservations, or east-node capacity/configuration issue"
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "obs_001",
+      "action": "preserve",
+      "status": "established",
+      "rationale": "Still accurate; new evidence does not contradict"
+    },
+    {
+      "claim_id": "obs_003",
+      "action": "preserve",
+      "status": "established",
+      "rationale": "Still accurate; now correlated with specific stuck-order scope EXC-0921"
+    },
+    {
+      "claim_id": "obs_004",
+      "action": "preserve",
+      "status": "established",
+      "rationale": "Observability gap confirmed; relevant to diagnosis but separate from root cause"
+    },
+    {
+      "claim_id": "hyp_001",
+      "action": "refine",
+      "new_status": "inferred",
+      "rationale": "Now supported by audit evidence that all stuck orders are v18-affected and none outside v18 are stuck; hypothesis strengthened to inference, but specific mechanism (allocation logic vs. carrier integration vs. east-node environment) still open"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception flag and stuck-order state suggest the allocation is recorded but the handoff to the carrier system is incomplete or failing. Tracing how scope EXC-0921 orders move through the allocation-to-carrier pipeline will reveal whether v18 broke the integration, whether the east node subsystem is not releasing them, or whether the carrier system is not receiving/confirming them. This is the highest-information diagnostic within authority and directly targets the mechanism of failure."
+  }
+}

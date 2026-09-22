@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c14",
+      "statement": "Carrier Operations confirms that slot corrections must be targeted to the identified carrier feed and its specific lag after diagnosis, and must precede any replay of allocations",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "limitation": "Previous slot correction failed because the affected feed was not identified. Carrier Ops requires feed identification before applying correction."
+    },
+    {
+      "claim_id": "c15",
+      "statement": "The 186 held orders require: (1) feed identification, (2) targeted slot correction to that feed, (3) replay of allocations. The root cause is preventable (v17 restore), but remediation requires Carrier Ops coordination.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_r_handoffs"],
+      "limitation": "Remediation authority limited to read-only diagnostics and single reversible action; Carrier Ops slot correction is outside incident assessment scope."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Carrier Operations requires identification of the specific carrier feed whose 47-minute confirmation lag exceeds the 30-minute slot window. Reading partition offsets will show the carrier feed topology and lag characteristics, enabling targeted slot correction. This diagnostic is final step to enable remediation: identify feed -> report to Carrier Ops for slot correction -> resume replay."
+  }
+}

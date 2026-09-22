@@ -1,0 +1,19 @@
+{
+ "claims": [],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C6", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "final_assessment",
+  "kind": "final_assessment",
+  "rationale": "Root cause (C4, kind=root_cause, status=inferred) is supported by two independent tier-1 discriminating sources with no open contradiction: the exception audit (m8_r_exceptions) shows 100% of held orders fall in the v18 split-reservation cohort EXC-0921, and the handoff trace (m8_r_handoffs) shows carrier confirmations for that cohort arrive a median 47 minutes after booking against a 30-minute slot-close window, with a re-booked order confirming the mechanism once carrier data refreshed. A competing dock-capacity/general-carrier hypothesis (C5) was disproven by the same handoff trace. Impact is quantified via an authoritative count (C6: 186 orders, ~9% of overnight allocations, delayed not cancelled/lost, not a support-contact proxy). The reversible, scoped mitigation apply_slot_correction was proposed once its precondition (confirmed feed lag) was met and was approved by the human gate. All pending_review claims are addressed by disposition; no open contradictions remain; no prohibited action was taken.",
+  "expected_information_gain": "N/A - closing the mission."
+ }
+}

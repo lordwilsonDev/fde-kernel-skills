@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c6_01",
+      "statement": "Slot correction was applied to the wrong carrier feed; identified root cause but failed to target the correct feed before mitigation",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": "Mitigation requires feed identification as prerequisite"
+    },
+    {
+      "claim_id": "c6_02",
+      "statement": "Root cause remains established and valid: v18 split-reservation orders (EXC-0921) need 47+ minute carrier confirmation windows but receive 30-minute slot assignments",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Root cause is correct; implementation requires precise feed targeting"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Before retrying slot correction, identify which specific carrier feed(s) are assigned to EXC-0921 orders at the east node. This will enable a targeted, correct slot correction to the right feed(s) where split-reservation orders are queued. Partition offsets will show feed lag, queue depth, and confirm which feed handles east-node split-reservation orders."
+  }
+}

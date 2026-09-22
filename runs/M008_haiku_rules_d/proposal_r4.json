@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim_id": "C13",
+      "statement": "The slot correction was applied to the wrong carrier feed and did not resolve the stuck orders",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "corroboration": "Observability verified that the correction ran before the feed lag was confirmed and targeted the wrong feed; no change in held orders",
+      "limitation": "Indicates the mitigation was premature; the specific affected carrier feed was not identified before the correction was applied"
+    },
+    {
+      "claim_id": "C14",
+      "statement": "The specific carrier feed to which orders in scope EXC-0921 were routed must be identified and verified for lag before applying slot corrections",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "corroboration": "Carrier Ops precondition: corrections must run 'only after the affected feed and its lag are identified'",
+      "limitation": "This is a procedural requirement, not yet a confirmed finding"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "trace_cohort_handoffs",
+      "reason": "Must identify the specific carrier feed to which the EXC-0921 orders were routed (e.g., 'FedEx east', 'UPS-2', etc.) before attempting another slot correction"
+    }
+  ],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "The slot correction failed because it targeted the wrong feed. Before reapplying the mitigation, must trace the actual carrier feed assignment for orders in scope EXC-0921. This will identify which feed is actually lagged and needs correction.",
+    "expected_information_gain": "Determines which specific carrier feed the EXC-0921 orders were routed to, enabling targeted and successful slot correction on the correct feed."
+  }
+}

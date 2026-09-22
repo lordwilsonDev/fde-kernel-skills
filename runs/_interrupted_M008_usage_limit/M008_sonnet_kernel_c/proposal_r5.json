@@ -1,0 +1,21 @@
+{
+ "claims": [],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C7", "action": "preserve"},
+  {"claim_id": "C8", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "count_stranded_orders",
+  "kind": "diagnostic",
+  "rationale": "A second, correctly-scoped apply_slot_correction (targeting carrier partition 2 per C8) was approved and applied this incident, but no outcome evidence for it has been ingested yet and the mission remains in the CORRECTING phase. Before writing a final assessment, we need to verify whether the correction actually reduced the stranded-order count, since a root-cause claim and an approved mitigation are not the same as confirmed remediation. count_stranded_orders is an allowed, read-only diagnostic that gives an authoritative current count (as opposed to the earlier proxy support-ticket counts), which both verifies mitigation effectiveness and supplies the impact_estimate artifact still missing from the checklist.",
+  "expected_information_gain": "Confirms whether the EXC-0921 cohort is clearing after the corrected mitigation (supporting the root-cause claim and closing the incident) or is still stuck (indicating the correction needs further action or the mechanism needs revisiting), and provides an authoritative impact figure rather than a proxy."
+ }
+}

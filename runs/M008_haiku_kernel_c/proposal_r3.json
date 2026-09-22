@@ -1,0 +1,34 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C2",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Rule v18 (live at 22:00) is the discriminating cause of the stall: 100% of held orders are rule-v18-allocated split reservations (m8_r_exceptions). The stale runbook (m8_e05) recommends rolling back allocation changes when orders stall post-allocation-change. Reverting rule v18 will reprocess the 186 held orders under rule v17, allowing proper carrier handoff. Scope is limited to east-node reservation priority only (per human_gate scope), reversible.",
+    "expected_information_gain": "If revert succeeds and orders transition to carrier pickup, this confirms rule v18 was the root cause. If revert does not clear the stall, the root cause is elsewhere (e.g., carrier integration, inventory mismatch) and requires further investigation."
+  }
+}

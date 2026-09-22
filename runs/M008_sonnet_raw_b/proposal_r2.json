@@ -1,0 +1,64 @@
+{
+ "claims": [
+  {
+   "claim_id": "c1",
+   "statement": "186 orders allocated overnight to the east node are stuck in 'allocated, awaiting pickup'; stuck-order alert shows 9% of overnight east-node allocations exceeded a 90-minute hold starting ~06:00, while other nodes are normal.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e01", "m8_e02", "m8_r_handoffs"],
+   "limitation": "Disposition: preserved, mechanism_tag refined from unknown to allocation_rule_defect now that the handoff trace (m8_r_handoffs) attributes the stall to the v18 split-reservation timing mismatch rather than a general east-node condition."
+  },
+  {
+   "claim_id": "c3",
+   "statement": "Allocation rule set v18 went live at 22:00 last night, changing multi-node orders to reserve stock from the east node first; change review and regression suite passed.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03"],
+   "limitation": "Disposition: preserved unchanged."
+  },
+  {
+   "claim_id": "c4",
+   "statement": "Warehouse release w41 (label printer drivers, report exports) is unlikely to be the cause, since it lists no allocation or scheduling changes.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_e04"],
+   "limitation": "Disposition: preserved unchanged."
+  },
+  {
+   "claim_id": "c5",
+   "statement": "v18's split-reservation flow for multi-node orders generates a downstream timing defect: split-reservation carrier confirmations take longer than the pickup slot window allows, so affected orders never complete carrier handoff.",
+   "kind": "inference",
+   "status": "inferred",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03", "m8_r_exceptions", "m8_r_handoffs"],
+   "limitation": "Disposition: refined and upgraded from hypothesized to inferred on new discriminating evidence (m8_r_handoffs); superseded in confidence by root-cause claim c9 below."
+  },
+  {
+   "claim_id": "c6",
+   "statement": "A general carrier-side confirmation or dock-capacity gap at the east node, independent of the split-reservation cohort, is not supported: east-node orders outside cohort EXC-0921 booked before 05:58 were confirmed normally within their slots.",
+   "kind": "hypothesis",
+   "status": "unknown",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_handoffs"],
+   "limitation": "Disposition: downgraded from hypothesized to unknown as a general/independent explanation. The comparison group (non-cohort east-node orders) behaved normally, which weighs against a node-wide dock/carrier capacity problem; carrier confirmation latency itself is retained only as a component of the allocation_rule_defect mechanism (c9), not as an independent cause."
+  },
+  {
+   "claim_id": "c9",
+   "statement": "Root cause: allocation rule set v18's split-reservation flow produces carrier bookings whose confirmation takes a median of 47 minutes, but the booked pickup slot for these orders closes after 30 minutes -- so the slot expires before carrier confirmation completes, leaving the order permanently in 'allocated, awaiting pickup'. This is specific to the v18-affected split-reservation cohort (EXC-0921), not a general east-node or carrier problem: non-cohort east-node orders booked before 05:58 confirmed normally within their slots, and one cohort order that was re-booked after carrier data refreshed received a valid slot.",
+   "kind": "root_cause",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03", "m8_e02"],
+   "limitation": "Discriminating evidence is the within-node comparison (cohort EXC-0921 vs. non-cohort east-node orders) and the single successful re-book after data refresh, both from tier-1 verified sources (Inventory Control audit, observability trace); no contradicting evidence found. Not yet independently confirmed by Carrier Operations, who own pickup scheduling and have not yet weighed in on this specific timing finding."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "replay_held_allocations",
+  "kind": "mitigation",
+  "rationale": "Root cause (c9) is established on tier-1, discriminating evidence: the v18 split-reservation cohort's carrier confirmations (median 47 min) arrive after their 30-minute pickup slot closes, while non-cohort east-node orders behave normally -- ruling out a general dock/carrier issue. The trace evidence itself demonstrates the fix: one cohort order re-booked after carrier data refreshed received a valid slot. Replaying/re-running allocation for the scoped EXC-0921 cohort (now that substantial time has passed since 06:00, so carrier confirmation data has likely caught up) is a targeted, reversible action limited to the affected orders -- narrower and lower-risk than a full ruleset revert (which the stale 2023 runbook suggests but which would affect all multi-node orders, not just the stuck cohort, and doesn't address the underlying slot/confirmation timing mismatch). This is a production change under Inventory Control ownership requiring on-call plus incident-commander approval per the authority boundary; proposing it for human-gate review rather than executing unilaterally."
+ }
+}

@@ -1,0 +1,57 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule set v18 (live since 22:00 last night, enforcing east-node-first reservation for multi-node orders) is the temporal coincidence with the incident; 186 east-node orders held since 06:00 all flagged as split-reservation exceptions.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_e02"],
+      "corroboration": "Timing alignment: v18 live 22:00, orders flagged 06:00+. All affected orders on east node (consistent with new routing logic). Regression suite was green, but field behavior differs.",
+      "limitation": "Hypothetical correlation, not causation yet. Need to confirm whether the rule itself has a defect or whether it's exposing a downstream issue (carrier feed lag, inventory mismatch)."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "Inventory Control confirms allocation totals reconcile on their side; no obvious stock shortage.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "inventory_count_drift",
+      "sources": ["m8_e01"],
+      "corroboration": "Single statement from incident chat.",
+      "limitation": "Single non-authoritative source; 'totals reconcile' does not rule out selective inventory drift or a mismatch between inventory system and carrier expectation."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Carrier Operations on-call reports 'nothing obvious' on the dock schedule; no explicit confirmation that carrier received or rejected the pickup slots.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01"],
+      "corroboration": "Single incident chat statement.",
+      "limitation": "Non-authoritative, non-exhaustive inspection. Observability gap (m8_e09) means Inventory Control cannot see carrier-side records; a full handoff trace is needed."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Split-reservation exception details",
+      "reason": "m8_e10 flags all held orders as split-reservation exceptions, but the audit_allocation_exceptions diagnostic is needed to confirm the exception type, rule branch taken, and inventory state at exception time."
+    },
+    {
+      "capability": "Rule history and regression scope",
+      "reason": "m8_e03 documents v18 change; review_rule_history will confirm no other undocumented changes and show test coverage for edge cases (e.g., partial stock on east node, carrier feed delays)."
+    },
+    {
+      "capability": "Carrier feed state and slot confirmation",
+      "reason": "m8_e09 documents observability gap; trace_cohort_handoffs and confirm_with_carrier_ops are needed to establish whether pickup slots were sent to carrier and whether carrier confirmed or rejected them."
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception flagging (m8_e10) is the most discriminating feature of the incident. Auditing these exceptions will reveal whether v18's new reservation logic is: (a) working correctly but exposing a carrier-side lag, (b) producing invalid allocations, or (c) correct but hitting an edge case in the inventory or slot-confirmation flow.",
+    "expected_information_gain": "Classification of exception type, inventory levels at allocation time, rule branch taken, and whether exceptions correlate with partial stock on east node or rejection from carrier."
+  }
+}

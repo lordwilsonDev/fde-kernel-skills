@@ -1,0 +1,34 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause established and confirmed via discriminating evidence (m8_r_exceptions, m8_r_dock); mitigation approved and executed by human gate. Rule v18 allocation change created split-reservation exceptions that failed to transition to carrier pickup, causing 186 orders to stall in 'allocated, awaiting pickup' state. Mitigation (revert_allocation_ruleset) was applied to restore proper carrier handoff. All pending review claims addressed with dispositions.",
+    "expected_information_gain": "Mission complete: root cause identified as allocation_rule_defect (rule v18); 186-order impact quantified; reversible mitigation executed via human gate approval."
+  }
+}

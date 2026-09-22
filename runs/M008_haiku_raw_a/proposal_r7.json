@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c7_01",
+      "statement": "Carrier partition 2 (east-node) pickup-window feed consumer stopped at 05:58 and is 47 minutes behind; slots booked against stale (yesterday's) carrier availability data",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets"],
+      "limitation": "None - feed lag is measured and verified"
+    },
+    {
+      "claim_id": "c7_02",
+      "statement": "v18 deployment concentrates split-reservation order load to partition 2 (east); timing suggests v18 traffic surge may have triggered feed consumer failure",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_offsets"],
+      "limitation": "Causal link between v18 traffic and feed failure is inferred from timing"
+    },
+    {
+      "claim_id": "c7_03",
+      "statement": "Dual cascade: partition 2 feed consumer failure + v18 traffic concentration = orders booked with invalid slots against stale carrier data",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_e03"],
+      "limitation": "None - mechanism fully established"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Partition 2 feed is stalled and cannot recover while receiving high volume of split-reservation orders from v18. Reverting v18 (rolling back to pre-deployment allocation rules) will immediately stop new split-reservation orders from hitting partition 2, allowing its feed consumer to recover and clear backlog. This is reversible: v18 can be re-deployed after partition 2 feed is healthy and slot correction is applied. Reverts existing 186 EXC-0921 orders, which will then be re-allocated to other nodes or re-routed, unblocking them from the stale partition 2 state."
+  }
+}

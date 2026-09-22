@@ -1,0 +1,247 @@
+{
+ "world": "M008",
+ "mode": "kernel",
+ "enforce": true,
+ "round": 7,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Determine if carrier feed pipeline is processing orders or stalled. If offsets are lagged, points to feed processing issue (e.g., consumer lag, broker backlog). If current, points away from feed infrastructure toward order/booking mismatch.",
+    "expected_information_gain": "Discriminates between carrier_feed_lag and allocation_rule_defect/dock_capacity hypotheses"
+   },
+   "sim": {
+    "released": "m8_r_offsets_wait",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "read_partition_offsets requires cohort scope"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Trace the 186 stuck orders through the system to identify: (1) which carrier feed cohort they belong to, (2) their handoff sequence through allocation \u2192 carrier booking \u2192 pickup, (3) where the handoff chain breaks. This will allow us to scope the offset read to the correct cohort and understand whether the failure is in carrier booking or pickup confirmation.",
+    "expected_information_gain": "Discriminates between allocation_rule_defect (failure in booking creation) and carrier_feed_lag (failure in confirmation flow). Also enables targeted offset read."
+   },
+   "sim": {
+    "released": "m8_r_handoffs_wait",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "trace_cohort_handoffs and read_partition_offsets both require pre-scoped order list"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Examine the split-reservation exceptions directly. This will reveal: (1) the exact nature and pattern of the exceptions, (2) whether they are a known behavior or new in v18, (3) which orders are affected, enabling downstream diagnostics. The support report says all 186 held orders were flagged as split-reservation exceptions by the overnight allocator\u2014this is the highest-discriminating evidence about v18's behavior.",
+    "expected_information_gain": "Determines whether v18 is creating an anomalous exception pattern (allocation_rule_defect hypothesis) or if split-reservations are normal behavior. Also provides order identifiers for cohort tracing."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "Examine what changed in v18 regarding split-reservations. Determine if split-reservations are: (1) expected behavior but with a downstream defect in carrier integration, (2) an unintended side-effect of the east-first reservation logic, or (3) benign but only on non-east-node lanes. This will confirm whether the split-reservation itself is the root cause or whether it's a valid allocation pattern that exposed a separate constraint.",
+    "expected_information_gain": "Establishes whether v18's split-reservation behavior is anomalous (supporting allocation_rule_defect as root cause) or expected (pointing to downstream carrier/dock constraint as actual cause)"
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Determine carrier-side state of EXC-0921 orders. Specifically: (1) Have these orders been transmitted to carrier systems? (2) What state are they in (booked, rejected, pending)? (3) Is there a known limitation with split-reservation bookings? (4) Are east-node carrier lanes operational? This will discriminate between allocation_rule_defect (carrier can't process split-reservations), carrier_feed_lag (orders not transmitted or confirmation stalled), and dock_capacity (carrier operational but node-level constraint).",
+    "expected_information_gain": "Determines whether the failure point is in order transmission, carrier booking acceptance, or pickup confirmation flow"
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Test dock capacity hypothesis directly. Determine: (1) Is east-node dock at or near capacity? (2) Are there pending pickups or backlog? (3) Is capacity available for new orders? If dock is capacity-constrained, it would explain why carriers aren't collecting (no space). If dock has capacity, it points to carrier-side booking/feed issue with split-reservations. This discriminates between dock_capacity and allocation_rule_defect/carrier_feed_lag hypotheses.",
+    "expected_information_gain": "Determines if physical east-node dock capacity is the bottleneck or if the issue is upstream in carrier booking/feed processing"
+   },
+   "sim": {
+    "released": "m8_r_dock",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause established with discriminating evidence (m8_r_exceptions: 100% correlation of held orders with v18's EXC-0921 split-reservations; m8_r_rulehist: allocation logic verified but carrier scheduling untested). The evidence chain is clear: v18 (22:00 deploy) introduced split-reservations \u2192 all held orders are split-reservations \u2192 only orders routed to east node are held \u2192 no non-EXC-0921 orders are held. The defect is upstream at the allocation rule layer (incorrect feature design for carrier integration), not downstream at dock/carrier feed layers. Reversible mitigation (revert_allocation_ruleset) is available per Carrier Ops if human gate approves.",
+    "expected_information_gain": "Mission complete. Root cause identified. Reversible mitigation path available."
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

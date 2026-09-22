@@ -1,0 +1,2 @@
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "status must be one of ['disproven', 'established', 'hypothesized', 'inferred', 'reported', 'stale', 'unknown']", "path": "$.claims[2].status", "n": 1, "at": "2026-09-22T16:15:03.015137+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "next_action.action is not in the authority list", "path": "$.next_action.action", "n": 2, "at": "2026-09-22T16:16:58.888883+00:00"}

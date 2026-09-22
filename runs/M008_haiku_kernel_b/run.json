@@ -1,0 +1,261 @@
+{
+ "world": "M008",
+ "mode": "kernel",
+ "enforce": true,
+ "round": 6,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Split-reservation exception details",
+     "Rule history and regression scope",
+     "Carrier feed state and slot confirmation"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception flagging (m8_e10) is the most discriminating feature of the incident. Auditing these exceptions will reveal whether v18's new reservation logic is: (a) working correctly but exposing a carrier-side lag, (b) producing invalid allocations, or (c) correct but hitting an edge case in the inventory or slot-confirmation flow.",
+    "expected_information_gain": "Classification of exception type, inventory levels at allocation time, rule branch taken, and whether exceptions correlate with partial stock on east node or rejection from carrier."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Carrier-side pickup slot receipt and confirmation status"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "With C4 established (v18 split-reservation directly produced this cohort), and inventory confirmed reconciled, the next highest-information diagnostic is the full handoff trace from allocation \u2192 carrier queue \u2192 carrier confirmation. This will reveal whether the allocation was handed off to carrier ops and whether carrier acknowledged or rejected the pickup slots.",
+    "expected_information_gain": "Proof that orders reached carrier feed; confirmation of slot acceptance/rejection; timing of handoff relative to 06:00 held-order detection; any error or exception on carrier side."
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C6",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "With root cause established (transient carrier feed lag on east-node pickup slots), the highest-information reversible mitigation is to correct the pickup slot windows for the affected carrier feed. This will allow the 186 orders' confirmations (which have now arrived after the original slot window closed) to match valid slots. Scope: east-node carrier feed slots only, reversible.",
+    "expected_information_gain": "Slot correction will unblock the held orders by giving them valid pickup slots that overlap with their actual carrier confirmations. Post-correction, replay_held_allocations can be proposed to release them."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C6"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C7",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Identification of the specific east-node carrier feed with the lag"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The slot correction failed because it targeted the wrong feed. With the root cause confirmed as carrier feed lag (specifically a 47-minute booking-to-confirmation lag on east-node lanes), confirming with carrier ops is critical to identify which specific east-node feed(s) experience this lag. This information will enable a correctly-scoped second slot correction attempt.",
+    "expected_information_gain": "Specific identification of the affected east-node carrier feed(s), confirmation that they are experiencing the 47-minute lag, and validation that re-correction to the correct feed(s) will resolve the held orders."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "Customer impact quantification"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "To close the incident assessment, need to quantify the customer impact of the 186 held orders. This will provide the impact_estimate artifact required before a final_assessment can be accepted.",
+    "expected_information_gain": "Total count of stranded orders, impact duration, and any escalation to customers or internal teams."
+   },
+   "sim": {
+    "released": "m8_r_impact",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C8",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "All blocking requirements met: root cause established (C6: transient carrier feed lag on east-node lanes with 47-minute booking-to-confirmation lag vs. 30-minute slot window); discriminating evidence provided (m8_r_handoffs, m8_r_exceptions); customer impact quantified (m8_r_impact); no open contradictions. v18 allocation rule change is not itself defective. Mitigation strategy identified: apply slot correction to the affected east-node carrier feed (identity pending from m8_r_owner confirmation), then replay held allocations. First mitigation attempt was misdirected; Carrier Operations has confirmed the correction approach is reversible and safe.",
+    "expected_information_gain": "Closure of the incident assessment with documented root cause, established impact, and approved reversible mitigation strategy."
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

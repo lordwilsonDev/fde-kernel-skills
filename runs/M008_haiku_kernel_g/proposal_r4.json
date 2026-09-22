@@ -1,0 +1,53 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "Pickup-window feed consumer for carrier partition 2 (east-node carriers) stopped advancing at 05:58, is 47 minutes behind and growing; slots booked against yesterday's carrier availability",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets"],
+      "corroboration": "Tier-1 feed offset data from Carrier Ops; marked DISCRIMINATING",
+      "limitation": "This confirms the feed lag mechanism but does not quantify business impact (customer count, revenue impact, order value)"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "Root cause is fully identified and discriminated: partition 2 feed consumer lag started at 05:58, causing orders to be booked against stale slot availability. Before proposing mitigation, need to quantify the business impact (order count, value, customer count) to inform the decision to apply_slot_correction and replay_held_allocations.",
+    "expected_information_gain": "Will provide impact_estimate artifact with customer count, order value, and duration of impact to justify and scope the mitigation."
+  }
+}

@@ -1,0 +1,21 @@
+{
+ "claims": [],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C7", "action": "preserve"},
+  {"claim_id": "C8", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "none",
+  "kind": "final_assessment",
+  "rationale": "Root cause is established (C5, status=established): the pickup-window feed consumer for carrier partition 2 (east-node carriers) stalled at 05:58 and fell 47 minutes behind, so EXC-0921 cohort orders (186 east-node, split-reservation orders under v18) had their pickup slots booked against stale carrier availability and closed before a real carrier confirmation could land - a carrier_feed_lag mechanism, corroborated independently by Observability's handoff trace and Carrier Operations' own partition-2 feed-offset data (the process owner per m8_e06), with a control group (non-cohort east-node orders, other partitions) unaffected and a natural-experiment order that succeeded once re-booked after data refresh. dock_capacity and a general allocation-total defect were discriminated against by that same evidence. A first apply_slot_correction attempt was mis-scoped and had no effect (C7); once the correct target (carrier partition 2) was identified via read_partition_offsets (C8), a second, correctly-scoped apply_slot_correction was proposed and approved by the human gate (root_cause established, discriminating evidence, no open contradiction, reversible and in-scope). count_stranded_orders was then run as an authoritative (non-proxy) check of current impact/state, resolving the impact_estimate checklist item. All pending_review claims are addressed via preserve dispositions with no open contradictions. Remaining optional diagnostics (check_dock_capacity, confirm_with_carrier_ops, inspect_inventory_counts, review_rule_history) are not required by the checklist and would mainly re-confirm mechanisms already discriminated against by existing tier-1 evidence from two independent owners; closing here avoids over-collection relative to the authorized, minimal, reversible mitigation path already taken.",
+  "expected_information_gain": "none - concluding the mission with the established root cause and the corrected, human-gate-approved mitigation in place."
+ }
+}

@@ -1,0 +1,46 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "apply_slot_correction has been approved and executed. The scope for replay_held_allocations requires 'reversible; idempotent; only allocation windows that overlap the corrected slots; run only after the slots are corrected.' The slots have now been corrected. This will re-run allocation for the 186 held orders (scope EXC-0921) with the corrected slot availability, allowing carriers to complete pickup collection.",
+    "expected_information_gain": "Will resolve the held orders by replaying allocation with corrected carrier availability. This is the final step to clear the incident."
+  }
+}

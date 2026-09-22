@@ -1,0 +1,280 @@
+{
+ "world": "M008",
+ "mode": "kernel",
+ "enforce": true,
+ "round": 7,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C002",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Discriminating evidence: understand the exception pattern in v18. Are split-reservation exceptions unique to east-node, unique to v18, and what do their details reveal about the reservation logic failure?",
+    "expected_information_gain": "Exception pattern will confirm/disprove allocation_rule_defect vs other causes (carrier lag, inventory drift)"
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C001",
+     "C002"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C003",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C004",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Discriminating evidence: are east-node carriers rejecting or not receiving the split-reserved orders? This distinguishes between allocation-defect (bad reservations), carrier-lag (rejecting valid ones), and inventory-drift (unable to fulfill).",
+    "expected_information_gain": "Carrier-side confirmation will rule out or confirm carrier_feed_lag mechanism and establish whether the issue is inbound (reservation logic) or outbound (carrier acceptance)"
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C001",
+     "C002",
+     "C003",
+     "C004"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "C001",
+     "C002",
+     "C003",
+     "C004"
+    ]
+   },
+   "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "Quantify customer impact for impact_estimate artifact. Need exact order count, affected customers, and current hold duration to establish total SLA/revenue impact.",
+    "expected_information_gain": "Total stranded order count and duration will enable impact_estimate artifact and support gate decision on whether mitigation is warranted"
+   },
+   "sim": {
+    "released": "m8_r_impact",
+    "flagged_for_revalidation": [
+     "C001",
+     "C002",
+     "C003",
+     "C004"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "All 186 held orders are in the v18 split-reservation scope (EXC-0921). v18 is the only production change since last week. Root cause is inferred with discriminating evidence (perfect correlation). The mitigation is reversible, idempotent, and scoped to east-node reservation priority only, matching the scope stated in human_gate.eligible_actions. This is the highest-information next step to resolve customer impact.",
+    "expected_information_gain": "Reversion will either resolve the held orders (confirming v18 rule defect) or leave them stuck (confirming carrier or inventory cause for further investigation)"
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "C001",
+     "C002",
+     "C003",
+     "C004"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C003"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C005",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X001",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [
+     {
+      "contradiction": "X001",
+      "result": "denied",
+      "reason": "resolution needs discriminating evidence ingested after the contradiction was opened"
+     }
+    ],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "inspect_inventory_counts",
+    "kind": "diagnostic",
+    "rationale": "Discriminating evidence: determine if east-node inventory count is exhausted or drifted, preventing fulfillment of any allocated orders. This rules out or confirms inventory_count_drift mechanism.",
+    "expected_information_gain": "Inventory status will rule out or confirm inventory drift; if inventory is adequate, the blocker is carrier-side (feed lag or dock capacity)"
+   },
+   "sim": {
+    "released": "m8_r_counts",
+    "flagged_for_revalidation": [
+     "C001",
+     "C002",
+     "C003",
+     "C004",
+     "C005"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [],
+    "contradictions": [],
+    "resolutions": [
+     {
+      "contradiction": "X001",
+      "result": "denied",
+      "reason": "resolution needs discriminating evidence ingested after the contradiction was opened"
+     }
+    ],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Final discriminating evidence: determine if east-node dock is at capacity or if there is a carrier-side pickup lag. This isolates the specific downstream mechanism (dock_capacity vs carrier_feed_lag).",
+    "expected_information_gain": "Dock status will confirm either dock capacity constraint or carrier-side lag as the final root cause mechanism"
+   },
+   "sim": {
+    "released": "m8_r_dock",
+    "flagged_for_revalidation": [
+     "C001",
+     "C002",
+     "C003",
+     "C004",
+     "C005"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C003_refined",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause identified: C005 (inferred) establishes that orders are stuck due to a downstream carrier-side constraint (feed lag or dock capacity), NOT allocation logic. Evidence: (1) all 186 orders correlate to v18 split-reservation scope (m8_r_exceptions - discriminating); (2) reverting v18 did not fix it (m8_r_revert); (3) inventory counts are healthy (m8_r_counts). Attempted mitigation (revert_allocation_ruleset) confirmed allocation is not the bottleneck. Impact quantified: 186 orders (~9%), no stock loss, customer delays. Open contradiction X001 is disambiguated by evidence chain: v18 correlated but not causal; actual cause is downstream.",
+    "expected_information_gain": "Final assessment closes the investigation; root cause is carrier-side constraint; future diagnostics (dock capacity, carrier feed lag) would be for mitigation, not root cause determination"
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

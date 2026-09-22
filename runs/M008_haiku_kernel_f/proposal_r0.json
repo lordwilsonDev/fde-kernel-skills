@@ -1,0 +1,34 @@
+{
+  "claims": [
+    {
+      "claim_id": "C001",
+      "statement": "Allocation rule v18 (live 22:00, east-node-first reservation) triggered split-reservation exceptions that stalled east-node orders in 'awaiting pickup' state",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e02", "m8_e10"],
+      "corroboration": "v18 is the only production change since last week; all stuck orders are on east-node lanes and flagged as split-reservation exceptions; timing aligns with v18 live time plus allocation window lag",
+      "limitation": "Not yet discriminated from carrier-feed lag or inventory-count drift hypotheses; rule change review passed and regression suite was green, but real-world behavior differs"
+    },
+    {
+      "claim_id": "C002",
+      "statement": "Impact: 186 orders (9% of overnight allocations) held in 'awaiting pickup' for >90 minutes, east-node only, generating customer support reports",
+      "kind": "impact",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e02", "m8_e10"],
+      "corroboration": "Monitor alert confirms 9% metric; support report indicates continuous arrival of complaints",
+      "limitation": "Total customer impact (SLA violations, revenue risk) not yet quantified; proxy count (support contacts) is incomplete"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Discriminating evidence: understand the exception pattern in v18. Are split-reservation exceptions unique to east-node, unique to v18, and what do their details reveal about the reservation logic failure?",
+    "expected_information_gain": "Exception pattern will confirm/disprove allocation_rule_defect vs other causes (carrier lag, inventory drift)"
+  }
+}

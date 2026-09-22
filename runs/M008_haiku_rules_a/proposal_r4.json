@@ -1,0 +1,59 @@
+{
+  "claims": [
+    {
+      "claim_id": "C11_disproven",
+      "statement": "Allocation rule set v18 creates split-reservation format that is incompatible with carrier protocol or pickup systems; carriers cannot or will not process split-reservation orders, causing the hold.",
+      "kind": "root_cause",
+      "status": "disproven",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_revert"],
+      "corroboration": "m8_r_revert shows that reverting v18 to v17 did NOT clear the 186 held orders, which remain unchanged after the revert. Additionally, NEW east-node allocations (under v17, which lacks the split-reservation pattern) are STILL held. This proves the issue is not v18's split-reservation format.",
+      "limitation": "Disproven by direct test: revert did not fix the problem."
+    },
+    {
+      "claim_id": "C12",
+      "statement": "East-node carrier feed, integration, or protocol has a defect or systematic failure preventing pickup of all orders routed to east-node, independent of allocation rule version.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_dock", "m8_e02"],
+      "corroboration": "East-node dock is normal (m8_r_dock), but orders routed there are held under both v18 AND v17 (m8_r_revert). Geographic isolation (east-node only, m8_e02) and rule-independence (both v18 and v17 produce holds) point to east-node infrastructure as the root cause.",
+      "limitation": "Underlying mechanism unknown: could be carrier system rejection, pickup scheduling conflict, carrier capacity issue, or feed-level protocol failure. Requires carrier operations deep dive or system log analysis."
+    },
+    {
+      "claim_id": "C13",
+      "statement": "The revert of v18 allocation ruleset, applied as mitigation, did not resolve the held orders and caused collateral system impact (duplicate pick lists, 3,900 re-runs).",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_revert"],
+      "corroboration": "m8_r_revert explicitly reports: orders unchanged, new east-node allocations still held, duplicate pick lists generated.",
+      "limitation": "Revert was necessary to rule out v18 as root cause; the failure itself is diagnostic evidence."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {"claim_id": "C1", "action": "preserve"},
+    {"claim_id": "C2", "action": "preserve"},
+    {"claim_id": "C3", "action": "preserve"},
+    {"claim_id": "C4", "action": "preserve"},
+    {"claim_id": "C5", "action": "preserve"},
+    {"claim_id": "C2_refined", "action": "preserve"},
+    {"claim_id": "C6", "action": "downgrade"},
+    {"claim_id": "C7", "action": "preserve"},
+    {"claim_id": "C5_split", "action": "downgrade"},
+    {"claim_id": "C8", "action": "preserve"},
+    {"claim_id": "C9", "action": "preserve"},
+    {"claim_id": "C10", "action": "preserve"},
+    {"claim_id": "C7_disproven", "action": "preserve"},
+    {"claim_id": "C11", "action": "downgrade"}
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause identified as east-node carrier feed infrastructure defect independent of allocation rules (C12). Primary hypothesis (v18 split-reservation incompatibility, C11) was tested via revert and DISPROVEN. East-node dock is normal (m8_r_dock), ruling out warehouse saturation. Evidence converges on carrier-side issue. Warehouse diagnostics will not narrow further without carrier escalation.",
+    "expected_information_gain": "Assessment complete. Root cause: east-node carrier feed defect. Status: v18 revert failed to resolve holds. Recommendation: escalate to carrier ops for carrier-side diagnostics and apply_slot_correction after lag confirmation."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "Establish the affected cohort with order identifiers and quantify impact. This is required before trace_cohort_handoffs can operate and will satisfy the impact_estimate requirement. Knowing the exact order IDs and their current states will enable targeted analysis of what went wrong.",
+    "expected_information_gain": "Order cohort definition (IDs, states, timestamps), quantified impact metric (count, duration, business impact), prerequisite data for subsequent diagnostics"
+  }
+}

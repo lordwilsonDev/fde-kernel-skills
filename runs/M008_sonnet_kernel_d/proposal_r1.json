@@ -1,0 +1,38 @@
+{
+ "claims": [
+  {
+   "claim_id": "C3",
+   "statement": "100% of currently-held orders fall within scope EXC-0921 (186 orders allocated under rule v18 with a split reservation, routed to the east node), and no held order falls outside it. This is a confirmed correlation, but the audit explicitly cannot separate an effect of the rule change's split-reservation handoff from a generic east-node-lane effect, because only rule-affected orders were routed to the east node during this window.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_exceptions", "m8_e10", "m8_e02", "m8_e03"],
+   "corroboration": "tier-1 verified exception_audit (inventory_control, discriminating) independently confirms the east-node/06:00 pattern from the tier-1 monitor alert and is consistent with the tier-2 support report; correlation itself is now established.",
+   "limitation": "Correlation only. The exception_audit itself states it cannot separate a rule-change effect from an east-node-lane effect, since only rule-affected orders were routed to that node. Does not yet establish a causal mechanism."
+  },
+  {
+   "claim_id": "C4",
+   "statement": "Leading hypothesis: the stuck orders result from a defect in how rule v18's split-reservation orders are handed off to carrier pickup scheduling (allocation_rule_defect), rather than a carrier-side feed lag or a dock-capacity issue specific to the east node.",
+   "kind": "hypothesis",
+   "status": "hypothesized",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_exceptions", "m8_e03", "m8_e10", "m8_e01", "m8_e09"],
+   "corroboration": "Built from the confirmed EXC-0921 correlation (C3), the rule v18 change record (C2), and carrier ops' own 'nothing obvious' read of the dock schedule (m8_e01), which weakly disfavors a dock-capacity explanation; the observability gap (m8_e09) explains why we cannot yet see the carrier side directly.",
+   "limitation": "Not yet discriminated from rival mechanisms (carrier_feed_lag, dock_capacity) that could independently affect east-node lanes. m8_r_exceptions explicitly warns it cannot separate rule effect from lane effect. Not eligible as root_cause until carrier-side or dock-side evidence rules out those alternatives."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "refine"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "confirm_with_carrier_ops",
+  "kind": "diagnostic",
+  "rationale": "C4's leading hypothesis (allocation_rule_defect via broken split-reservation handoff) is confounded with a possible carrier_feed_lag explanation, since only rule-affected orders were routed to the east node (per m8_r_exceptions). Confirming directly with Carrier Operations closes the observability gap noted in m8_e09 (Inventory Control cannot see carrier-side records) by revealing whether carriers ever received valid pickup manifests for EXC-0921 orders (pointing to a rule/handoff defect) or are instead experiencing their own feed delay on east-node lanes (pointing to carrier_feed_lag).",
+  "expected_information_gain": "Discriminates allocation_rule_defect (handoff never reached carrier) from carrier_feed_lag (carrier has the manifest but is delayed), directly addressing the confound left open by the exception audit."
+ }
+}

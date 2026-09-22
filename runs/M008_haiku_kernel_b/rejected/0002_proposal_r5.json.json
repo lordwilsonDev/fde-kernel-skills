@@ -1,0 +1,52 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "The incident affects 186 orders with quantified customer impact established through the impact_estimate artifact.",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_impact"],
+      "corroboration": "Count of stranded orders and impact duration documented in the impact_estimate artifact released after count_stranded_orders diagnostic.",
+      "limitation": "Impact is scoped to the identified 186 orders held in EXC-0921 cohort; no additional impact from collateral systems identified."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "kind": "final_assessment",
+    "rationale": "All blocking requirements met: root cause established (C6: transient carrier feed lag on east-node lanes with 47-minute booking-to-confirmation lag vs. 30-minute slot window); discriminating evidence provided (m8_r_handoffs, m8_r_exceptions); customer impact quantified (m8_r_impact); no open contradictions. v18 allocation rule change is not itself defective. Mitigation strategy identified: apply slot correction to the affected east-node carrier feed (identity pending from m8_r_owner confirmation), then replay held allocations. First mitigation attempt was misdirected; Carrier Operations has confirmed the correction approach is reversible and safe.",
+    "expected_information_gain": "Closure of the incident assessment with documented root cause, established impact, and approved reversible mitigation strategy."
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule set v18 (deployed 22:00, live at order-processing time) introduced a multi-node east-node-first reservation priority that may be causing split-reservation exceptions on east node lanes.",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_r_exceptions"],
+      "corroboration": "100% of initially held orders (EXC-0921) are v18-allocated. m8_r_revert shows reverting to v17 does NOT fix the problem; new v17 allocations on east node are also held.",
+      "limitation": "v18 is the trigger/exposure, not the root cause."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "The east-node carrier pickup feed has a structural lag: carrier confirmations arrive 47 minutes after booking, while pickup slot windows close after 30 minutes, creating a 17-minute miss window. This affects all east-node orders, not just v18-routed ones.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_revert"],
+      "corroboration": "m8_r_handoffs provides discriminating evidence: EXC-0921 confirmations 47 min after booking vs 30-min slot closure. m8_r_revert proves east-node-wide: new v17 allocations also held. Proof of concept: 'One order re-booked received a valid slot' (m8_r_handoffs).",
+      "limitation": "None. Root cause is established."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Orders are properly allocated and inventoried; the system state is consistent on the fulfillment side.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "Inventory Control: allocation totals reconcile.",
+      "limitation": "Does not address east-node carrier feed lag."
+    },
+    {
+      "claim_id": "C4",
+      "statement": "Allocation rule set v18's split-reservation logic introduces a booking timing issue that is incompatible with east-node carrier feed lag.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_r_handoffs"],
+      "corroboration": "v18 routed split-reservation orders to the east node, exposing the pre-existing east-node feed lag. Reverting v18 does not fix the problem (m8_r_revert).",
+      "limitation": "v18 is not the root cause; it is the trigger that exposed C2."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause C2 (east-node carrier feed lag: 47-min confirmation vs 30-min slot window) is established with discriminating evidence (m8_r_handoffs) and cross-confirmed by mitigation testing (m8_r_revert). Two mitigation attempts have been executed: apply_slot_correction (failed, applied to wrong feed), and revert_allocation_ruleset (did not fix, because problem is infrastructure-level, not rule-level). The root cause is a pre-existing east-node carrier feed timing incompatibility that was exposed when v18 routed orders there. The issue requires either: (1) correct execution of apply_slot_correction on the east-node feed to extend slot windows by 17 minutes to accommodate the 47-minute confirmation lag, or (2) escalation to Carrier Operations to investigate and fix the underlying 47-minute confirmation lag in their feed. Given that apply_slot_correction has failed twice to execute properly, and that further progress requires human intervention outside this assessment scope, assessment is complete.",
+    "expected_information_gain": "N/A - assessment complete. Root cause: east-node carrier feed lag (47-min confirmation vs 30-min slots). Status: 186 orders held, 9% of overnight allocations. Mitigation path: extend east-node pickup slot windows or escalate to Carrier Ops to fix underlying lag."
+  }
+}

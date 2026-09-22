@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C04",
+      "statement": "The customer-records app is evaluating authorization requests against cached entitlements version 41, while the directory successfully synced version 42 for all 214 affected users. The version mismatch causes the app to deny access to users whose new entitlements (v42) do not exist in its cached state (v41).",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": [
+        "m7_r_traces",
+        "m7_e03",
+        "m7_e02"
+      ],
+      "corroboration": "Trace sample (m7_r_traces, tier 1, discriminating) shows version mismatch. Directory change record (m7_e03) confirms v42 sync succeeded. Manual refresh in trace converted v41 request to v42 success, proving version mismatch is the blocker. Failure cohort (214) exactly matches directory sync cohort.",
+      "limitation": "Traces are sampled; full scope of version 41 vs 42 distribution unknown. Does not explain why cache wasn't refreshed after the directory sync, only confirms the mismatch exists."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C01",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C02",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C03",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "read_service_settings",
+    "kind": "diagnostic",
+    "rationale": "Now that root cause (stale_authz_cache/version mismatch) is confirmed, the next highest-value diagnostic is to understand why the app's cache wasn't refreshed after the 02:10 directory sync. Service settings will reveal cache TTL, refresh triggers, and whether the app has automatic or manual refresh mechanisms. This informs whether the outage will self-resolve, or if intervention (rerun_role_sync or evict_entitlement_entries) is needed.",
+    "expected_information_gain": "Will show cache expiry time and refresh behavior. If cache TTL is very long and no auto-refresh is configured, explains the 6-hour gap. Will guide decision on whether to propose a reversible mitigation."
+  }
+}

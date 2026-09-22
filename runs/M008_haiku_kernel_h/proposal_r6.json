@@ -1,0 +1,38 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C4",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "Obtain final count of orders affected by the replay action to confirm impact is resolved. This provides the impact_estimate artifact required before final_assessment.",
+    "expected_information_gain": "Will show how many of the original 186 EXC-0921 orders successfully transitioned to confirmed pickup status after replay."
+  }
+}

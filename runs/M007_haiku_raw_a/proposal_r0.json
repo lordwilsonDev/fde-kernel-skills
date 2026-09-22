@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_1",
+      "statement": "214 support agents whose roles were synced last night at 02:10 now receive 403 on all customer-record opens starting around 08:30",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "unknown",
+      "sources": ["m7_e01", "m7_e02", "m7_e11"],
+      "limitation": "Multiple independent reports from support lead and incident channel"
+    },
+    {
+      "claim_id": "inf_1",
+      "statement": "The directory role sync job completed successfully and reported verification passed, so the source data in the directory is correct for these 214 users",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "other",
+      "sources": ["m7_e03"],
+      "limitation": "Relies on job log truthfulness; does not verify whether the app received or cached the updates"
+    },
+    {
+      "claim_id": "hyp_1",
+      "statement": "The customer-records app entitlement cache was not invalidated or reloaded after the directory sync, causing it to serve stale cached role assignments (e.g., 'version 41') and deny the newly-assigned roles",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e08", "m7_e10"],
+      "limitation": "Contractor log is unverified and low-trust (4); observability gap prevents direct confirmation"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "pull_sampled_traces",
+    "kind": "diagnostic",
+    "rationale": "Sampled traces of 403 failures should show which entitlement version (e.g., v41 vs v42+) was applied to denied requests. This directly tests the stale-cache hypothesis from the contractor log clue. If traces confirm the app is serving pre-sync entitlements, root cause is confirmed and we can propose a reversible cache eviction."
+  }
+}

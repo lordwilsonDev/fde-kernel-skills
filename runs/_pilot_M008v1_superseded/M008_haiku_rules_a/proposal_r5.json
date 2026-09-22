@@ -1,0 +1,48 @@
+{
+  "claims": [
+    {
+      "claim_id": "C13",
+      "statement": "Carrier Operations has confirmed a reversible correction procedure for the east-node issue: identify the affected carrier feed and its lag, apply slot correction (limited to that feed), then replay held allocations",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_owner"],
+      "corroboration": "Carrier Ops confirmation (tier-1, Carrier Operations) explicitly describes the mitigation procedure",
+      "limitation": "Response implies a carrier feed issue but does not explicitly name the root cause or feed identifier"
+    },
+    {
+      "claim_id": "ROOT2",
+      "statement": "Carrier feed lag or slot synchronization issue at east node is the root cause: orders allocated to east node are not receiving pickup slot assignments or the assignments are misaligned, causing orders to remain stuck in 'allocated, awaiting pickup' state",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_dock", "m8_r_owner"],
+      "corroboration": "Discriminating evidence chain: (1) All east-node orders stuck regardless of allocation rule (m8_r_revert) rules out allocation defect; (2) Dock has capacity (m8_r_dock) rules out physical constraint; (3) Orders never reach dock staging (m8_e02 + m8_r_dock) indicates handoff failure; (4) Carrier Ops describes a feed lag correction procedure (m8_r_owner), implying lag is the issue; (5) No west/south/north node issues (m8_e02) rules out system-wide problem",
+      "limitation": "Carrier Ops response implies but does not explicitly state root cause; requires slot correction action to confirm and resolve"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "H2_NARROWED",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "H4",
+      "action": "downgrade"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Explicit identification of the affected carrier feed (which lanes/carriers have slot lag at east node)",
+      "reason": "Needed before executing slot correction, but Carrier Ops has indicated they will identify and scope the correction"
+    }
+  ],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "ROOT2 is established with strong discriminating evidence: (1) allocation rule change is not the cause (revert didn't fix it), (2) dock capacity is not the constraint (normal capacity confirmed), (3) orders never reach dock staging (indicating handoff failure), (4) Carrier Ops describes a slot correction procedure for feed lag. ROOT2 has no contradictions and cites discriminating evidence (m8_r_revert, m8_r_dock, m8_r_owner). Apply slot correction is reversible and scoped to the affected feed only per Carrier Ops authority. Once slots are corrected, the held orders can be replayed. This mitigation is the path forward to resolve the incident",
+    "expected_information_gain": "Applying slot correction will allow the 186 held orders to progress through carrier pickup scheduling, and subsequent allocations to east node will be handled correctly. The incident will be resolved and service restored"
+  }
+}

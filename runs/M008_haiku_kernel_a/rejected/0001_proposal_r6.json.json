@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C5",
+      "statement": "Allocation rule v18's split-reservation behavior for east-node lanes was not validated for carrier booking and scheduling integration. The rule logic is correct (verified by replay) but the feature breaks downstream at the carrier system level where split-reservations are not recognized or supported",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_r_rulehist"],
+      "corroboration": "m8_r_exceptions shows 100% of held orders are v18's EXC-0921 split-reservations (discriminating); m8_r_rulehist confirms allocation logic is correct but replay did not exercise carrier scheduling; e03 confirms v18 went live 22:00 and changed reservation priority",
+      "limitation": "Dock capacity check incomplete; cannot eliminate concurrent dock_capacity hypothesis, but allocation_rule_defect is the discriminating root cause"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Root cause established with discriminating evidence (m8_r_exceptions: 100% correlation of held orders with v18's EXC-0921 split-reservations; m8_r_rulehist: allocation logic verified but carrier scheduling untested). The evidence chain is clear: v18 (22:00 deploy) introduced split-reservations → all held orders are split-reservations → only orders routed to east node are held → no non-EXC-0921 orders are held. The defect is upstream at the allocation rule layer (incorrect feature design for carrier integration), not downstream at dock/carrier feed layers. Mitigation options (revert_allocation_ruleset) are available and reversible per Carrier Ops.",
+    "expected_information_gain": "Mission complete. Root cause identified. Reversible mitigation path available."
+  }
+}

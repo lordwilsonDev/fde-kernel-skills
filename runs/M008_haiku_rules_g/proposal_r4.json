@@ -1,0 +1,83 @@
+{
+  "claims": [
+    {
+      "claim_id": "C11",
+      "statement": "The carrier feed for east-node deliveries has a median confirmation latency of 47 minutes, while the booked pickup slot closes 30 minutes after booking, creating a 17-minute gap that orders cannot bridge.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "Tier-1 observability trace provides median confirmation latency (47 min) and slot closure time (30 min) directly.",
+      "limitation": "Data is based on median, not all confirmations; but sufficient to establish the timing mismatch as systemic."
+    },
+    {
+      "claim_id": "C12",
+      "statement": "v18-allocated orders fail to be picked up because their booked slots close before the carrier can confirm, due to the 47-minute confirmation lag exceeding the 30-minute slot window.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_e10"],
+      "corroboration": "m8_r_handoffs shows 47 vs 30 minute timing mismatch; m8_e10 confirms all v18 orders are split-reservation flagged; control group (non-v18 orders booked before 05:58) were confirmed in time.",
+      "limitation": "None; the control group proof confirms causality."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C11",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C12",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause is confirmed: carrier feed confirmation lag (47 min) exceeds the booked slot window (30 min). Adjusting the slot closure time to accommodate the carrier's 47-minute confirmation latency will allow orders to be confirmed within their assigned slots. This is a reversible, single-feed correction as authorized and recommended by Carrier Operations. The control group evidence (orders booked before 05:58 with valid confirmations) proves that sufficient slot-window adjustment will resolve the issue.",
+    "expected_information_gain": "Resolution of the 186 held orders; they will move from 'allocated, awaiting pickup' to confirmed and ready for carrier collection once slots are corrected."
+  }
+}

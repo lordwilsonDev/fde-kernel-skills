@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "claim_id": "c10_impact_quantified",
+      "statement": "The incident affects 186 orders (approximately 9% of overnight allocations) that are held in 'allocated, awaiting pickup' state. No stock is lost; these are delays rather than cancellations. The count is verified but order-level detail is not yet available.",
+      "kind": "impact",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_impact"],
+      "limitation": "The impact is quantified in aggregate, but individual order IDs and their exact state transitions are not yet documented."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The evidence shows that every held order was flagged as a split-reservation exception, but we do not yet have the specific order identifiers or details of those exceptions. Auditing the allocation exceptions will reveal the specific orders, their exception types, when the exceptions were created, and any patterns in how split-reservation exceptions interact with the carrier pickup queue. This will enable both the handoff trace and a more precise understanding of whether the exception state itself is preventing carrier pickup."
+  }
+}

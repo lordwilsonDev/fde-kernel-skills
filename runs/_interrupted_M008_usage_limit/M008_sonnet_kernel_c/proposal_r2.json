@@ -1,0 +1,39 @@
+{
+ "claims": [
+  {
+   "claim_id": "C5",
+   "statement": "Root cause: for the EXC-0921 cohort (186 east-node orders with a split reservation under v18), carrier confirmation arrives a median of 47 minutes after booking, but the booked pickup slot closes 30 minutes after booking - so the slot closes before confirmation completes and the order is left 'allocated, awaiting pickup' with no carrier collection. East-node orders outside the cohort booked before 05:58 confirmed inside their slots (control group unaffected), and one cohort order re-booked after carrier data refreshed received a valid slot, showing the fix (re-timing the slot to the confirmation) resolves it. This is a carrier-confirmation-timing/feed lag specific to the split-reservation cohort, not a general east-node dock or allocation-total defect.",
+   "kind": "root_cause",
+   "status": "inferred",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e02"],
+   "corroboration": "m8_r_handoffs is a tier-1, verified, discriminating handoff trace from Observability with an internal control comparison (non-cohort east-node orders unaffected) and a natural experiment (re-booked order succeeded after data refresh). m8_r_exceptions (tier-1, Inventory Control) confirms the cohort scope is exactly the held orders.",
+   "limitation": "Not yet independently corroborated by Carrier Operations (the process owner for pickup scheduling per m8_e06); status kept at inferred rather than established pending that second-owner confirmation. Discriminates against dock_capacity and a general allocation-total defect (both ruled out by the control group and by allocation totals reconciling per m8_e01), but does not rule out an upstream cause for why split-reservation confirmations specifically run long."
+  },
+  {
+   "claim_id": "C6",
+   "statement": "Impact: 186 orders (9% of overnight east-node allocations), all in scope EXC-0921, are currently stranded in 'allocated, awaiting pickup' since about 06:00.",
+   "kind": "impact",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_exceptions", "m8_e02"],
+   "corroboration": "Two distinct tier-1 owners agree on scale: Inventory Control's exception audit (186 orders, EXC-0921) and Observability's monitor alert (9% of overnight allocations, east-node only).",
+   "limitation": "Reflects orders held as of the diagnostics run; does not include downstream customer-facing impact (e.g. SLA breaches), which was not measured and is not inferred from support-contact proxy counts."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "apply_slot_correction",
+  "kind": "mitigation",
+  "rationale": "Gate conditions are now met: C5 is a root_cause claim at status=inferred, citing discriminating evidence (m8_r_handoffs), with no open contradiction. The confirmed mechanism is a carrier-confirmation lag (median 47min) that exceeds the booked pickup slot window (30min) specifically for the EXC-0921 cohort. apply_slot_correction is scoped exactly to this: reversible, scoped to the affected carrier feed's pickup slots only, and its precondition ('run only after the lag on that feed is confirmed') is satisfied by m8_r_handoffs. This is the minimal, reversible, in-scope action that addresses the confirmed mechanism without touching inventory, dropping feeds, or contacting customers.",
+  "expected_information_gain": "If approved and applied, corrects the pickup slot timing for the affected feed so already-confirmed/soon-to-confirm carrier pickups fall inside a valid slot window, which can then be checked against whether held orders begin clearing - a direct test of the root-cause claim in addition to remediating the incident."
+ }
+}

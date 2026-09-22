@@ -1,0 +1,66 @@
+{
+  "claims": [
+    {
+      "claim_id": "C9",
+      "statement": "East-node carrier feed or pickup scheduling has degraded or failed specifically for v18-routed split-reservation orders",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_r_rulehist", "m8_r_exceptions"],
+      "corroboration": "Partition 2 (east-node) pickup-window feed consumer stopped at 05:58, 47+ minutes lagged (m8_r_offsets); v18 logic validated as correct via replay (m8_r_rulehist); 100% of held orders match v18 east-node scope EXC-0921 routed after 06:00 (m8_r_exceptions); timing matches exactly (orders allocated 06:00+ to partition 2 while its feed is stale from 05:58)",
+      "limitation": "Lag cause (feed consumer crash, network issue, processing bottleneck) not identified; root cause is the stale feed state and resulting booking against yesterday's carrier availability"
+    },
+    {
+      "claim_id": "C12",
+      "statement": "A specific carrier feed assigned to east-node v18-routed orders is exhibiting partition/feed lag",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets"],
+      "corroboration": "Tier-1 verified: pickup-window feed consumer for carrier partition 2 (east-node) stopped advancing at 05:58, currently 47+ minutes behind; partitions 0 and 1 current",
+      "limitation": "Lag still growing; root cause of the consumer failure not yet diagnosed"
+    },
+    {
+      "claim_id": "C13",
+      "statement": "Partition 2 feed lag caused allocation system to book pickup slots against yesterday's carrier availability, making today's allocations undeliverable",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_e02"],
+      "corroboration": "m8_r_offsets explicitly states 'Slots for partition 2 are therefore booked against yesterday's carrier availability'; m8_e02 confirms orders allocated overnight from 06:00 cannot be picked up",
+      "limitation": "Direct confirmation from inventory control on slot booking mechanism not supplied; relationship inferred from evidence"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C5",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "root cause of partition 2 consumer failure",
+      "reason": "Feed lag identified and located but underlying cause (crash, network, bottleneck) not diagnosed; required for permanent fix but not blocking immediate mitigation"
+    }
+  ],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause established with discriminating evidence (C9, established; m8_r_offsets pinpoints partition 2, stopped at 05:58). Gate preconditions met: (1) root_cause claim at established status with discriminating evidence (m8_r_offsets, m8_r_rulehist), (2) no open contradiction (C8 disproven, C12 established), (3) action reversible and within scope (scoped to partition 2 pickup slots only, as required by m8_r_owner). Apply slot correction to partition 2 to re-book held orders against current carrier availability, enabling pickup. Requires human approval; gate conditions satisfied.",
+    "expected_information_gain": "Slot correction on partition 2 will resolve the booking state mismatch and allow carriers to pick up the 186 held orders. Follow-up: replay_held_allocations once slots are corrected (sequenced per m8_r_owner preconditions)."
+  }
+}

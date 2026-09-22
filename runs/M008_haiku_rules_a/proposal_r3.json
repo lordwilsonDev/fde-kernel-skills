@@ -1,0 +1,90 @@
+{
+  "claims": [
+    {
+      "claim_id": "C7_disproven",
+      "statement": "East-node carrier feed or dock infrastructure has a lag or defect independent of allocation, affecting only orders routed there by v18.",
+      "kind": "hypothesis",
+      "status": "disproven",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_dock"],
+      "corroboration": "m8_r_dock confirms east-node dock capacity is normal with no queueing. This rules out warehouse-side saturation or infrastructure defect as root cause.",
+      "limitation": "Disproven by direct dock capacity observation. Independent east-node infrastructure issue is ruled out."
+    },
+    {
+      "claim_id": "C11",
+      "statement": "Allocation rule set v18 creates split-reservation format that is incompatible with carrier protocol or pickup systems; carriers cannot or will not process split-reservation orders, causing the hold.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_r_dock", "m8_e03"],
+      "corroboration": "m8_r_exceptions shows 100% of held orders are v18-allocated split-reservation; m8_r_dock shows dock is normal (ruling out warehouse saturation); m8_e03 shows v18 introduced split-reservation pattern. Convergence of evidence: v18 is the cause, split-reservation format is the mechanism, carrier incompatibility is the trigger.",
+      "limitation": "Carrier-side protocol incompatibility is inferred from dock normality and 100% v18 correlation, not from direct carrier rejection notice. However, no other explanation remains viable."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [
+    {
+      "contradiction_id": "X1",
+      "evidence_refs": ["m8_r_dock"],
+      "outcome": "resolved",
+      "rationale": "Dock capacity check (m8_r_dock) shows east-node dock is normal with no queue, eliminating dock saturation hypothesis. This leaves only v18 split-reservation format incompatibility as viable root cause. Regression suite was green because it did not test split-reservation carrier-protocol compatibility—a gap in test scope, not a defect in v18 design intent, but a defect in deployment readiness."
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2_refined",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C5_split",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Revert allocation rule set v18 to v17 to eliminate the split-reservation format that is incompatible with carrier protocol. This will prevent future orders from being allocated under v18 split-reservation rules. The action is reversible and idempotent, scoped to east-node reservation priority only. After revert, existing EXC-0921 held orders can be re-allocated under v17 rules via replay_held_allocations, which will generate single-node (non-split) reservations that carriers can process.",
+    "expected_information_gain": "Mitigation: reverting v18 removes the root cause mechanism. Replaying held allocations will re-route orders to compatible (non-split) reservation patterns, enabling carrier pickup."
+  }
+}

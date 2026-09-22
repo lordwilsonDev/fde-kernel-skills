@@ -1,0 +1,19 @@
+{
+ "claims": [
+  {
+   "claim_id": "c13",
+   "statement": "The slot correction for the affected carrier feed (partition 2) succeeded: pickup slots were realigned to current carrier availability and new bookings now confirm inside their slots. The action is confirmed reversible. However, the 186 already-held EXC-0921 orders remain held until their allocation windows are replayed -- the correction alone does not clear the existing backlog.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_slot"],
+   "limitation": "Tier-1 observability confirmation of the mitigation's direct effect; matches the precondition path Carrier Operations specified in c11 (correct slots, then replay)."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "replay_held_allocations",
+  "kind": "mitigation",
+  "rationale": "Carrier Operations' stated precondition (c11) is now satisfied: pickup slots for the affected feed have been corrected (c13) before replay is attempted, matching their required sequencing exactly. Replaying the held allocations for the EXC-0921 cohort is the action that actually clears the 186 stuck orders using the now-realigned slot data, is scoped to the already-identified affected feed/cohort, and is a single reversible mitigation consistent with the authority boundary (m8_e07) and the human gate's approval path already established for this mechanism (c10/c12)."
+ }
+}

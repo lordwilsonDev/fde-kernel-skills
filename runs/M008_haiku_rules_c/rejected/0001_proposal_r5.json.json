@@ -1,0 +1,56 @@
+{
+  "claims": [
+    {
+      "claim_id": "C9",
+      "statement": "Reverting allocation rule v18 to v17 did not resolve the held orders; 186 original orders remain held and new east-node allocations continue to be held under v17, indicating the carrier system is fundamentally backlogged, not just overwhelmed by v18 volume.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert"],
+      "corroboration": "Rule set revert outcome (m8_r_revert, tier-1) explicitly states: 'held orders unchanged at 186 and new east-node allocations are still held.' This proves the issue persists even after eliminating the v18 volume pattern, indicating the carrier system has entered a sustained backlogged state affecting all east-node allocations.",
+      "limitation": "Does not identify whether the backlog is temporary (requiring time to drain) or systemic (requiring operational intervention)."
+    },
+    {
+      "claim_id": "C10",
+      "statement": "The root cause is carrier confirmation lag for east-node allocations (median 47 minutes vs. 30-minute slot window). The mitigation requires identifying the specific carrier feed and applying slot correction, but the feed identity remains unknown despite diagnostic attempts.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions"],
+      "corroboration": "Handoff trace (m8_r_handoffs) confirms 47-minute median confirmation lag exceeds 30-minute slot window for affected orders. Exception audit (m8_r_exceptions) confirms 100% of held orders are in the lag-affected cohort. Evidence is discriminating (shows lag mechanism) but mitigation is blocked.",
+      "limitation": "Mitigation (apply_slot_correction) requires specific carrier feed ID. Confirm_with_carrier_ops returned procedural requirements but not the feed ID. Without this, slot correction risks repeating R2's failure (application to wrong feed)."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "downgrade"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Specific carrier feed identification",
+      "reason": "The root cause has been identified (carrier confirmation lag), but mitigation is blocked by inability to identify the specific carrier feed responsible for processing east-node orders. Carrier Ops confirmed procedures but did not provide feed identity."
+    },
+    {
+      "capability": "Carrier system backlog drain capability",
+      "reason": "Reverting the allocation rule did not clear the backlog; the carrier system continues to hold new allocations. Unclear whether operational intervention or time-based drainage is required."
+    }
+  ],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Root cause has been established with discriminating evidence: carrier confirmation lag (47-minute median response vs. 30-minute slot window) prevents pickup slot confirmation for east-node allocations. However, mitigation is blocked on two fronts: (1) apply_slot_correction requires identifying the specific carrier feed (not provided by diagnostics), and (2) revert_allocation_ruleset did not resolve the backlog, indicating deeper systemic congestion. Escalation to operations with specific feed identity is needed to proceed. The 186 held orders are recoverable via slot correction and replay once the feed is identified.",
+    "expected_information_gain": "Assessment complete. Root cause identified. Mitigation path identified but blocked by operational data (carrier feed ID)."
+  }
+}

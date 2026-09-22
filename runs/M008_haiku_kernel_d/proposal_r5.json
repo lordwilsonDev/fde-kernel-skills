@@ -1,0 +1,34 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Audit the split-reservation exceptions flagged on the 186 stranded orders to determine whether they are malformed (indicating v18's logic creates invalid reservations) or structurally correct (indicating the issue is in carrier integration or downstream handling). If exceptions are malformed, that discriminates toward v18 having a logic defect. If exceptions are correct but carrier systems reject them, that discriminates toward a carrier-integration incompatibility. This evidence will determine the precise nature of the root cause.",
+    "expected_information_gain": "Whether split-exception orders have valid or invalid reservation structures; whether the exceptions follow the expected format for multi-node orders; what downstream system rejects them and why"
+  }
+}

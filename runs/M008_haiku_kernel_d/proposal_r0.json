@@ -1,0 +1,49 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule v18 (multi-node east-node-first reservation) went live at 22:00; all 186 stranded orders were allocated after this change, routed to east node, and flagged as split-reservation exceptions",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "corroboration": "e03 is tier-1 verified owner record; e10 is tier-2 support report. Both describe same cohort and flag.",
+      "limitation": "Establishes timeline and pattern but not causation"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "The issue is geographically isolated to east-node carrier lanes; other nodes show normal pickup; this suggests the root cause is specific to east-node allocation or scheduling, not a system-wide defect",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02"],
+      "corroboration": "Monitor alert explicitly states 9% held on east-node only, other nodes normal. Tier-1 verified source from observability team.",
+      "limitation": "Geographic isolation does not yet confirm mechanism (carrier-side vs allocation-side)"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Carrier Ops reports 'nothing obvious' when looking at dock schedule; allocation totals reconcile on inventory side. This suggests the problem is not a simple inventory shortage or dock capacity issue on our side",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "Incident channel report from on-call Carrier Ops and Inventory Control. Tier-2 non-authoritative but from two distinct owners.",
+      "limitation": "Negative result (nothing obvious) does not establish absence of carrier-side issue; Inventory Control cannot see carrier records per e09"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Observability of carrier confirmation status",
+      "reason": "e09 confirms dashboards do not show how booked pickups relate to carrier's own confirmation; this gap prevents attribution without direct carrier confirmation"
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Discriminate between allocation-side defect (rule v18 creating invalid/unpickable reservations) and carrier-side issue (feed lag, booking rejection). If carrier confirms they have NO pickup booking records for these 186 orders, root cause points to our allocation rule. If they confirm bookings exist but refuse to pick up, root cause points to carrier-side (scheduling, dock, feed lag). This is the most direct discriminator.",
+    "expected_information_gain": "Carrier's view of whether bookings exist and are valid; whether the problem originates from our systems or theirs"
+  }
+}

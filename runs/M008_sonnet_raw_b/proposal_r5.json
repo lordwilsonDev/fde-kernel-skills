@@ -1,0 +1,28 @@
+{
+ "claims": [
+  {
+   "claim_id": "c9",
+   "statement": "Root cause (confirmed): the carrier-confirmation feed consumer for partition 2 (east-node carriers) stopped advancing at 05:58 and is 47 minutes behind and growing, while partitions 0 and 1 (other nodes) are current. Because bookings for partition 2 are made against stale ('yesterday's') carrier availability, orders on that partition are booked into pickup slots that close (~30 min) before a current carrier confirmation can arrive (~47 min lag) -- leaving them permanently in 'allocated, awaiting pickup'. v18's split-reservation flow is the exposure mechanism (it is what routes multi-node orders onto the east-node/partition-2 path); the stalled partition-2 consumer is the proximate cause. This fully explains the scope (east-node lanes only, 9% of overnight allocations, all in cohort EXC-0921), the onset (~06:00, immediately after the 05:58 stall), and the exact 47-minute figure seen in the handoff trace.",
+   "kind": "root_cause",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_offsets", "m8_r_handoffs", "m8_r_exceptions", "m8_e03", "m8_e02"],
+   "limitation": "Discriminating, tier-1 evidence from the owning team (carrier_ops, per m8_e06 the owner of carrier integration/pickup scheduling): partition-level offsets directly show partition 2 stalled at 05:58 while 0/1 are current, and the 47-minute lag figure matches the independently measured 47-minute median confirmation delay for the same cohort. No contradicting evidence. This also explains both prior mitigation failures: replay (round 2) ran before any slot correction so it re-booked against the same stale availability; slot correction (round 3) was applied to the wrong feed/partition (not partition 2) and so had no effect."
+  },
+  {
+   "claim_id": "c12",
+   "statement": "Two prior mitigation failures are now fully explained rather than open questions: replay_held_allocations failed because it ran before any correction to the stale-availability booking; apply_slot_correction failed because it was not scoped to the actual faulty feed, partition 2. Neither failure contradicts the mechanism in c9 -- both are consistent with it once the correct partition is identified.",
+   "kind": "inference",
+   "status": "inferred",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_offsets", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+   "limitation": "Inference from combining the partition-offset diagnostic with the two earlier negative-outcome observations (c10, c11); not itself independently tested."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "apply_slot_correction",
+  "kind": "mitigation",
+  "rationale": "read_partition_offsets (m8_r_offsets, tier-1, carrier_ops-owned) now positively identifies the fault: carrier feed partition 2 (east-node carriers) stalled at 05:58 and is 47 minutes behind, causing cohort EXC-0921 bookings to be made against stale carrier availability and miss their slot windows. This is a precisely scoped repeat of the round-3 action, this time correctly targeted at partition 2 / cohort EXC-0921 specifically (the prior attempt failed only because it targeted the wrong feed, per m8_r_slot_ineff, not because the action type was wrong). Dropping or purging the feed/queue is explicitly unauthorized (m8_e07), so slot correction -- re-deriving pickup slots for the affected cohort against current carrier availability -- is the narrowest authorized corrective action available; a replay of the corrected cohort would likely still be needed afterward to actually clear the held orders. This is a production change under Inventory Control/Carrier Operations ownership requiring on-call plus incident-commander approval; proposing for human-gate review rather than executing unilaterally."
+ }
+}

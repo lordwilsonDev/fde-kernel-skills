@@ -1,0 +1,593 @@
+{
+ "world": "M008",
+ "mode": "raw",
+ "enforce": false,
+ "round": 9,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c1_timing_correlation",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c2_east_node_localization",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c3_split_reservation_exception",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c4_regression_test_gap",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c5_inventory_not_root_cause",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c6_carrier_ops_no_pickup",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "The strongest temporal and mechanical correlation points to allocation rule set v18. The split-reservation exception and east-node localization are consistent with the new multi-node reservation logic. Review the detailed change history of v18 to understand: (1) exactly which logic changed, (2) whether split-reservation scenarios were tested, (3) whether the change is known to interact with carrier pickup scheduling. This diagnostic will confirm or refute the allocation_rule_defect hypothesis with evidence specific to the exact code change."
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c4_regression_test_gap",
+      "from": "hypothesized",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c7_split_reservation_carrier_interaction",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c8_allocation_logic_not_defective",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup"
+    ]
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "The allocation logic is verified correct, and the orders exist in the correct state (allocated, awaiting pickup). The problem must be in how these orders transition from allocation to carrier pickup. Tracing the cohort handoffs will show: (1) whether pickup signals are being generated for split-reservation orders, (2) whether they reach the carrier system, (3) at what point in the handoff they become stuck. This will either confirm the carrier integration hypothesis or reveal a different system boundary where the breakdown occurs."
+   },
+   "sim": {
+    "released": "m8_r_handoffs_wait",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c9_handoff_trace_requires_cohort",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective"
+    ]
+   },
+   "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "To proceed with tracing how the held orders move through the system, we must first identify the specific order IDs that are stuck in 'allocated, awaiting pickup' state since 06:00 on the east node. The count_stranded_orders diagnostic will provide the scoped cohort of affected orders, which will enable the next handoff trace to show the exact point at which these orders become stuck."
+   },
+   "sim": {
+    "released": "m8_r_impact",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c10_impact_quantified",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort"
+    ]
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The evidence shows that every held order was flagged as a split-reservation exception, but we do not yet have the specific order identifiers or details of those exceptions. Auditing the allocation exceptions will reveal the specific orders, their exception types, when the exceptions were created, and any patterns in how split-reservation exceptions interact with the carrier pickup queue. This will enable both the handoff trace and a more precise understanding of whether the exception state itself is preventing carrier pickup."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c11_cohort_identified",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified"
+    ]
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Now that the EXC-0921 scope is defined, trace the handoffs to see exactly where and when these orders become stuck. The trace will show: (1) whether pickup signals are generated for EXC-0921 orders, (2) if signals reach the carrier system or get blocked, (3) at which handoff boundary the orders stop progressing. This will distinguish whether the root cause is in the allocation-to-carrier interface, the carrier's handling of split-reservation orders, or an east-node-specific problem."
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c12_root_cause_confirmation_delay",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c13_recovery_mechanism_demonstrated",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified"
+    ]
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "Given the established root cause (carrier confirmation latency exceeding booking slot window for split-reservation orders), replay_held_allocations will re-book the 186 held orders in EXC-0921 after their carrier confirmations have completed. This is a reversible action aligned with the demonstrated recovery mechanism (re-booking after confirmation). The re-booking should issue new pickup slots and allow carriers to collect the orders. This mitigates the immediate incident while the underlying latency issue is investigated by Carrier Operations."
+   },
+   "sim": {
+    "released": "m8_r_replay_ineff",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified",
+     "c12_root_cause_confirmation_delay",
+     "c13_recovery_mechanism_demonstrated"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via c12_root_cause_confirmation_delay"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c14_replay_ineffective_due_to_slots",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified",
+     "c12_root_cause_confirmation_delay",
+     "c13_recovery_mechanism_demonstrated"
+    ]
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The root cause is a carrier confirmation latency that causes orders to miss their initial pickup slots. The replay_held_allocations action failed because the closed slots were not cleared first. apply_slot_correction will correct the expired slot state, allowing the 186 orders to be assigned fresh pickup slots. After slot correction, the orders should be able to receive valid confirmations and be collected by carriers. This is a reversible action that directly addresses the slot timing problem demonstrated in the handoff trace."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified",
+     "c12_root_cause_confirmation_delay",
+     "c13_recovery_mechanism_demonstrated",
+     "c14_replay_ineffective_due_to_slots"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via c12_root_cause_confirmation_delay"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 7,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c15_slot_correction_failed",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c16_v18_regression_link_established",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified",
+     "c12_root_cause_confirmation_delay",
+     "c13_recovery_mechanism_demonstrated",
+     "c14_replay_ineffective_due_to_slots"
+    ]
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The investigation has established that allocation rule set v18 creates split-reservation exception orders that trigger a carrier confirmation latency (median 47 minutes) exceeding their booking slot window (30 minutes). Reverting v18 is a reversible action that will halt the creation of new split-reservation orders, preventing the problem from affecting additional shipments while Carrier Operations investigates the root cause of the confirmation latency. The 186 currently held orders still require Carrier Ops intervention to re-book after their confirmations complete, but reverting v18 stops the bleeding of new incidents."
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified",
+     "c12_root_cause_confirmation_delay",
+     "c13_recovery_mechanism_demonstrated",
+     "c14_replay_ineffective_due_to_slots",
+     "c15_slot_correction_failed",
+     "c16_v18_regression_link_established"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via c12_root_cause_confirmation_delay"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 8,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c17_revert_worsened_problem",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c18_east_node_carrier_latency",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "contra_v18_causation",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified",
+     "c12_root_cause_confirmation_delay",
+     "c13_recovery_mechanism_demonstrated",
+     "c14_replay_ineffective_due_to_slots",
+     "c15_slot_correction_failed",
+     "c16_v18_regression_link_established"
+    ]
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The revert experiment proves the root cause is not allocation rule set v18, but a systemic carrier confirmation latency on east-node lanes that affects all orders. The allocation layer cannot fix this; Carrier Operations must investigate why east-node confirmation latencies are median 47 minutes when other nodes are normal, and correct the carrier feed or booking slot configuration. The revert has created secondary problems (duplicate pick lists) and should be rolled forward; v18 should be restored and the east-node carrier latency addressed at the carrier integration level."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "c1_timing_correlation",
+     "c2_east_node_localization",
+     "c3_split_reservation_exception",
+     "c4_regression_test_gap",
+     "c5_inventory_not_root_cause",
+     "c6_carrier_ops_no_pickup",
+     "c7_split_reservation_carrier_interaction",
+     "c8_allocation_logic_not_defective",
+     "c9_handoff_trace_requires_cohort",
+     "c10_impact_quantified",
+     "c11_cohort_identified",
+     "c12_root_cause_confirmation_delay",
+     "c13_recovery_mechanism_demonstrated",
+     "c14_replay_ineffective_due_to_slots",
+     "c15_slot_correction_failed",
+     "c16_v18_regression_link_established",
+     "c17_revert_worsened_problem",
+     "c18_east_node_carrier_latency"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  }
+ ]
+}

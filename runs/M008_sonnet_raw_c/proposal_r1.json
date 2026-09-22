@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c9",
+      "statement": "Allocation exception audit confirms 100% of the 186 held orders fall within scope EXC-0921 (v18 split-reservation, east-node routed), and no held order falls outside that scope.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "The audit itself states this cannot separate an effect of the rule change from an effect specific to the east-node lanes, because only rule-affected orders were routed to the east node at all (perfect confound: cohort and route are identical). It confirms scope, not mechanism."
+    },
+    {
+      "claim_id": "c4",
+      "statement": "Working hypothesis: v18's east-first multi-node reservation logic is producing split-reservation exceptions that leave east-node orders allocated but not releasable to carrier pickup.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02", "m8_e03", "m8_e10", "m8_r_exceptions"],
+      "limitation": "Still not discriminating: the exception audit (m8_r_exceptions) confirms the cohort is exactly the rule-v18/east-node set but explicitly cannot separate a rule-side defect from an east-node-side (carrier/dock) effect, since every order in that cohort was also routed to the same node. Handoff-to-carrier evidence is needed to discriminate allocation_rule_defect from carrier_feed_lag/dock_capacity."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "The exception audit (m8_r_exceptions) confirmed scope but is explicitly confounded and cannot distinguish a rule-side defect from an east-node-side effect. The observability gap (m8_e09/c7) says dashboards don't show how a booked pickup relates to the carrier's own confirmation. Tracing handoffs for scope EXC-0921 directly targets that gap: if allocation never handed these orders off to a carrier pickup booking, that points to allocation_rule_defect; if handoff completed but the carrier never confirmed/collected, that points to carrier_feed_lag or dock_capacity. This is the highest-information read-only diagnostic available and stays within authorized bounds (m8_e07)."
+  }
+}

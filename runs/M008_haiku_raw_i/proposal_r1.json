@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c4_regression_test_gap",
+      "statement": "Allocation rule set v18 passed replay testing against 14 days of historical orders, and the rule logic matches its specification. However, the replay testing explicitly does NOT exercise carrier scheduling integration. The split-reservation exception state is a new behavior introduced by v18, and its interaction with carrier-side pickup scheduling has not been tested.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_rulehist", "m8_e03"],
+      "limitation": "Establishes a testing gap in carrier scheduling integration; does not directly prove the carrier system cannot handle the new state."
+    },
+    {
+      "claim_id": "c7_split_reservation_carrier_interaction",
+      "statement": "Orders flagged as split-reservation exceptions may not be correctly signaled to the carrier pickup system, or the carrier system may not recognize this new exception state as a valid 'awaiting pickup' order. The observability gap prevents direct verification of what the carrier system sees.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e09", "m8_e10"],
+      "limitation": "Plausible given the evidence, but unconfirmed without carrier-side diagnostics or order tracing."
+    },
+    {
+      "claim_id": "c8_allocation_logic_not_defective",
+      "statement": "The allocation rule logic in v18 is not defective; replay testing against 14 days of orders verified that the rule path matches specification and behaves as designed. The problem lies in the interaction between the allocation system's output state and downstream systems.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_rulehist"],
+      "limitation": "Narrows the scope of the root cause away from allocation rule logic itself and toward integration with carrier scheduling."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "The allocation logic is verified correct, and the orders exist in the correct state (allocated, awaiting pickup). The problem must be in how these orders transition from allocation to carrier pickup. Tracing the cohort handoffs will show: (1) whether pickup signals are being generated for split-reservation orders, (2) whether they reach the carrier system, (3) at what point in the handoff they become stuck. This will either confirm the carrier integration hypothesis or reveal a different system boundary where the breakdown occurs."
+  }
+}

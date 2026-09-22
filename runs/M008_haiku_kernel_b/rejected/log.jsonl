@@ -1,0 +1,2 @@
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "next_action.action is not in the authority list", "path": "$.next_action.action", "n": 1, "at": "2026-09-22T11:35:16.430197+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "next_action.action is required", "path": "$.next_action.action", "n": 2, "at": "2026-09-22T11:35:32.158674+00:00"}

@@ -1,0 +1,56 @@
+{
+  "round": 0,
+  "claims": [
+    {
+      "claim_id": "obs_001",
+      "statement": "186 orders allocated overnight to east node are stuck in 'allocated, awaiting pickup' since approximately 06:00, with carriers not collecting them",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "limitation": "Incident channel and alert corroborate; timing and scope confirmed"
+    },
+    {
+      "claim_id": "obs_002",
+      "statement": "Every held order was flagged by the overnight allocator as a 'split-reservation exception'",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "limitation": "Single source (customer support report); specific mechanism unknown but nomenclature suggests multi-node stock split issue"
+    },
+    {
+      "claim_id": "obs_003",
+      "statement": "Allocation rule set v18 (multi-node orders reserve stock from east node first) was deployed at 22:00 last night; regression suite was green",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "limitation": "Deployment time and change content verified; regression suite passing does not eliminate field defects"
+    },
+    {
+      "claim_id": "hyp_001",
+      "statement": "The v18 allocation rule change may be causing the split-reservation exception flag to trigger incorrectly or incompletely, leaving orders in awaiting-pickup state without carrier notification",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "limitation": "Timing correlation is suggestive but not deterministic; alternate causes (carrier system lag, inventory count drift, dock capacity) not yet ruled out"
+    },
+    {
+      "claim_id": "obs_004",
+      "statement": "No observability exists to see how a booked pickup relates to carrier-side confirmation; Inventory Control cannot see carrier records",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e09"],
+      "limitation": "This is a gap that prevents diagnosis; carrier operations has not yet reported an anomaly from their end"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The 'split-reservation exception' flag on all 186 held orders is the strongest diagnostic clue. Auditing these exceptions will reveal whether v18 is causing malformed reservations, incomplete handoffs to carrier systems, or other allocation-side defects. This is the highest-information action within authority (read-only diagnostic) and directly targets the most likely mechanism (allocation_rule_defect). It does not assume v18 is the cause, but tests the hypothesis with evidence."
+  }
+}

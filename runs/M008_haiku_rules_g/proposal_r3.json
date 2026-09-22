@@ -1,0 +1,85 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "East-node stock counts match the system of record; reservations in EXC-0921 reconcile; no inventory drift is present.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_counts"],
+      "corroboration": "Tier-1 verified check from Inventory Control confirms reconciliation.",
+      "limitation": "None stated; direct observation of inventory state."
+    },
+    {
+      "claim_id": "C9",
+      "statement": "Allocation rule set v18 is functioning correctly: its split-reservation logic produces valid allocations that reconcile with inventory.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_counts"],
+      "corroboration": "m8_r_counts confirms inventory reconciliation (C8); this eliminates the hypothesis that v18 creates invalid or corrupt allocations.",
+      "limitation": "Inference relies on absence of drift as proof of correctness; a systematic defect that perfectly balances on both sides (allocation and inventory) is logically possible but implausible."
+    },
+    {
+      "claim_id": "C10",
+      "statement": "The root cause of the 186 held orders is a carrier feed lag or dock constraint on the east-node lanes, not an allocation rule defect.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_counts", "m8_r_exceptions", "m8_e02"],
+      "corroboration": "m8_r_counts eliminates allocation defect hypothesis (C9). m8_r_exceptions confirms all held orders are v18-affected and routed to east node (perfect correlation with east-node lanes). m8_e02 confirms all stuck orders are on east-node lanes. Combined: the cause is east-node-specific, not allocation-specific.",
+      "limitation": "The specific carrier feed and its lag have not yet been identified; the general mechanism (carrier side) is inferred from evidence that allocation and inventory are correct."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "With allocation and inventory ruled out as the cause, the issue is carrier-side. Tracing cohort handoffs for the 186 held orders in EXC-0921 will identify (a) which specific carrier feed(s) they are bound for, and (b) where in the pickup scheduling pipeline they stall. This identifies the feed lag and prepares for the mitigation (apply_slot_correction scoped to that feed).",
+    "expected_information_gain": "Identification of the specific affected carrier feed and the point at which pickup scheduling fails; this enables the targeted mitigation recommended by Carrier Operations."
+  }
+}

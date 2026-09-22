@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c9",
+      "statement": "Revert of rule v18 to v17 did not clear the 186 held orders; they remain held and new east-node allocations are also held",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_revert"],
+      "limitation": "Rule revert was necessary to prevent NEW orders from being allocated with broken timing, but existing held orders need re-allocation to get valid slots."
+    },
+    {
+      "claim_id": "c10",
+      "statement": "The 186 held orders from v18 allocation remain stuck because their pickup slots closed during the 47-minute carrier confirmation latency; reverting the rule does not re-open or refresh their closed slots",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_revert", "m8_r_handoffs"],
+      "limitation": "Impact requires active remediation beyond rule revert: re-allocation of the 186 orders or slot-window correction to reopen them for carrier confirmation."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "Root cause mitigated by rule v17 restore, but impact remains: 186 orders stuck in closed slots. Replaying allocation for scope EXC-0921 will re-run them through corrected v17 logic with new booking slots that accommodate carrier confirmation latency. This follows the stale runbook advice (m8_e05) adapted to the evidence: rule revert + re-run allocation for affected orders. This is the remaining reversible action within authorized scope."
+  }
+}

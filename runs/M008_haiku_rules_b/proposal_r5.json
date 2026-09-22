@@ -1,0 +1,73 @@
+{
+  "claims": [
+    {
+      "claim_id": "C12",
+      "statement": "The apply_slot_correction action was attempted but failed due to scope error: the correction was applied to the wrong carrier feed, confirming that the east-node slot lag identified in C10 requires more precise intervention",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "corroboration": "Tier-1 observability report confirms the feed mismatch and lack of impact",
+      "limitation": "The mitigation approach was correct (fix slot closure), but the implementation scope was wrong"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C11",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C12",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "C10 established the root cause as the timing mismatch created by v18's split-reservation routing to east node. C12 shows the slot-correction approach failed in implementation. Reverting v18 (east-node reservation priority) is reversible and idempotent per the human gate conditions; it will prevent the split-reservation routing that creates orders booking to the east-node feed with insufficient slot closure window. This is a more reliable mitigation than attempting a scoped slot correction that requires precise feed identification.",
+    "expected_information_gain": "Reverting v18 will move EXC-0921 orders back to the previous allocation rule set, which did not route them to the east node; this should release the held orders for carrier pickup and demonstrate that v18's routing change is the root cause."
+  }
+}

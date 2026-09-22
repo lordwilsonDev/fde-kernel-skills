@@ -1,0 +1,344 @@
+{
+ "world": "M008",
+ "mode": "raw",
+ "enforce": false,
+ "round": 5,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c_r0_01",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r0_02",
+      "from": null,
+      "to": "established",
+      "result": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)",
+      "reason": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)"
+     },
+     {
+      "claim_id": "c_r0_03",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r0_04",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r0_05",
+      "from": null,
+      "to": "established",
+      "result": "violation:quarantined_cited",
+      "reason": "violation:quarantined_cited"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "All 186 held orders are flagged as split-reservation exceptions following deployment of rule v18. To determine whether the root cause is a defect in allocation rule v18's reservation logic, an exception handler, or downstream carrier integration, we must inspect the exception records and their processing. This diagnostic is read-only and will discriminate between allocation-side and carrier-side failure modes, guiding whether rollback, targeted fix, or carrier escalation is appropriate. This action is within authorized scope (read-only diagnostic)."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "c_r0_01",
+     "c_r0_02",
+     "c_r0_03",
+     "c_r0_04",
+     "c_r0_05"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c_r1_01",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r1_02",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r1_03",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c_r0_01",
+     "c_r0_02",
+     "c_r0_03",
+     "c_r0_04",
+     "c_r0_05"
+    ]
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "To determine whether the split-reservation exception and east-node routing are intended behaviors of rule v18 or defects, we must review the exact change made in the rule deployment. If split-reservation + east-node routing are by design and other nodes have no such orders, the issue is carrier/dock side; if other nodes should have split-reservation orders but don't, the rule logic itself is defective. This diagnostic is read-only and will clarify the mechanism: allocation logic vs. carrier integration."
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "c_r0_01",
+     "c_r0_02",
+     "c_r0_03",
+     "c_r0_04",
+     "c_r0_05",
+     "c_r1_01",
+     "c_r1_02",
+     "c_r1_03"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c_r2_01",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r2_02",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r2_03",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c_r0_01",
+     "c_r0_02",
+     "c_r0_03",
+     "c_r0_04",
+     "c_r0_05",
+     "c_r1_01",
+     "c_r1_02",
+     "c_r1_03"
+    ]
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "To determine whether orders in EXC-0921 are being transmitted to the carrier, are queued but unprocessed, or are being rejected/dropped, we must trace the handoff path from allocation to carrier. The rule logic is correct (verified by replay); the blockage is in carrier integration. Tracing will show whether the issue is feed transmission, queue backlog, carrier acknowledgment, or dock capacity."
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "c_r0_01",
+     "c_r0_02",
+     "c_r0_03",
+     "c_r0_04",
+     "c_r0_05",
+     "c_r1_01",
+     "c_r1_02",
+     "c_r1_03",
+     "c_r2_01",
+     "c_r2_02",
+     "c_r2_03"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c_r3_01",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r3_02",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r3_03",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r3_04",
+      "from": null,
+      "to": "established",
+      "result": "violation:impact requires an impact_estimate artifact, not proxies",
+      "reason": "violation:impact requires an impact_estimate artifact, not proxies"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c_r0_01",
+     "c_r0_02",
+     "c_r0_03",
+     "c_r0_04",
+     "c_r0_05",
+     "c_r1_01",
+     "c_r1_02",
+     "c_r1_03",
+     "c_r2_01",
+     "c_r2_02",
+     "c_r2_03"
+    ]
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The root cause is confirmed: rule set v18 routes orders to a carrier/lane with confirmation latency exceeding the slot window, causing immediate blockage. Reverting v18 will reroute affected orders away from split-reservation logic, allowing them to clear pickup slots. This is a reversible action within the single-action authorization limit. Once reverted, the 186 orders can resume normal progression. Post-incident: Carrier Operations must investigate and resolve the elevated confirmation latency on split-reservation lanes before v18 can be safely re-deployed."
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "c_r0_01",
+     "c_r0_02",
+     "c_r0_03",
+     "c_r0_04",
+     "c_r0_05",
+     "c_r1_01",
+     "c_r1_02",
+     "c_r1_03",
+     "c_r2_01",
+     "c_r2_02",
+     "c_r2_03",
+     "c_r3_01",
+     "c_r3_02",
+     "c_r3_03",
+     "c_r3_04"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via c_r3_03"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c_r4_01",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r4_02",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c_r4_03",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c_r0_01",
+     "c_r0_02",
+     "c_r0_03",
+     "c_r0_04",
+     "c_r0_05",
+     "c_r1_01",
+     "c_r1_02",
+     "c_r1_03",
+     "c_r2_01",
+     "c_r2_02",
+     "c_r2_03",
+     "c_r3_01",
+     "c_r3_02",
+     "c_r3_03",
+     "c_r3_04"
+    ]
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause is established and confirmed by revert evidence: East-node carrier confirmation latency (median 47 minutes) exceeds the pickup slot window (30 minutes), causing orders to expire before carrier confirmation. Rule v18 is not the defect but a trigger that routes more orders to the affected east-node path. Mitigation: Escalate to Carrier Operations to investigate and resolve the elevated confirmation latency on the east-node carrier system. Once resolved, rule v18 can be safely re-deployed and the 186 original orders can be re-allocated."
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+{
+ "claims": [
+  {
+   "claim_id": "C6",
+   "statement": "Root cause: for the 186 EXC-0921 orders (multi-node orders that rule v18 routes to reserve stock from the east node first, with a split reservation), the carrier's pickup confirmation arrives a median of 47 minutes after booking, but the booked pickup slot closes after only 30 minutes. The slot closes before confirmation completes, so no valid confirmed slot exists at close and carriers do not collect. This is specific to the split-reservation cohort: east-node orders outside EXC-0921 booked before 05:58 confirmed normally inside their slots, and one EXC-0921 order that was re-booked after carrier data refreshed received a valid slot. This rules out a generic east-node carrier_feed_lag or dock_capacity explanation (those would also delay the unaffected east-node orders) and isolates the defect to how rule v18's split-reservation handoff interacts with the fixed 30-minute slot window.",
+   "kind": "root_cause",
+   "status": "inferred",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03", "m8_e02"],
+   "corroboration": "tier-1 discriminating handoff_trace (observability) directly measures confirmation-vs-slot-window timing for the EXC-0921 cohort against a control group of unaffected east-node orders, the discriminating comparison that rules out rival mechanisms; consistent with the v18 change record (m8_e03), the confirmed EXC-0921 scope (m8_r_exceptions), and the east-node/06:00 alert pattern (m8_e02). No open contradiction.",
+   "limitation": "Inferred from converging timing and cohort-comparison data, not a confirmed code-level defect ticket; the single successful re-book-after-refresh case is suggestive but not independent proof of the fix mechanism. Customer impact remains unquantified (only proxy support-contact counts exist; count_stranded_orders has not been run)."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "refine"},
+  {"claim_id": "C5", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "apply_slot_correction",
+  "kind": "mitigation",
+  "rationale": "Root-cause claim C6 (status inferred) cites discriminating evidence (m8_r_handoffs) with no open contradiction, satisfying the human-gate conditions. The lag on the affected feed is now confirmed (47-minute median confirmation vs 30-minute slot window) as required by this action's scope. apply_slot_correction is the least invasive reversible fix available: it corrects the pickup slot window for the affected carrier feed only, rather than reverting the east-node reservation-priority rule (which would also change stock-reservation behavior unrelated to the timing defect) or blindly replaying allocations before the slot problem is fixed.",
+  "expected_information_gain": "If approved and applied, resolves the immediate stuck-order condition for the EXC-0921 cohort by widening/aligning the pickup slot to the confirmation SLA, and confirms (via subsequent state) whether the slot-window mismatch was the full explanation."
+ }
+}

@@ -1,0 +1,31 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "trace_cohort_handoffs and read_partition_offsets both require pre-scoped order list",
+      "reason": "Diagnostics need specific order identifiers or cohort scope to function. Must audit exceptions first to identify affected orders."
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Examine the split-reservation exceptions directly. This will reveal: (1) the exact nature and pattern of the exceptions, (2) whether they are a known behavior or new in v18, (3) which orders are affected, enabling downstream diagnostics. The support report says all 186 held orders were flagged as split-reservation exceptions by the overnight allocator—this is the highest-discriminating evidence about v18's behavior.",
+    "expected_information_gain": "Determines whether v18 is creating an anomalous exception pattern (allocation_rule_defect hypothesis) or if split-reservations are normal behavior. Also provides order identifiers for cohort tracing."
+  }
+}

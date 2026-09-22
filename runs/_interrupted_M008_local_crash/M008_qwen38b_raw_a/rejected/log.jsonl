@@ -1,0 +1,1 @@
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "proposal is not valid JSON (or nests too deeply)", "path": "$", "n": 1, "at": "2026-09-22T11:33:25.321506+00:00"}

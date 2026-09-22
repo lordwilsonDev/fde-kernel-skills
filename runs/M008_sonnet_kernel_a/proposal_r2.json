@@ -1,0 +1,38 @@
+{
+ "claims": [
+  {
+   "claim_id": "C4",
+   "statement": "Root cause: rule set v18's east-node split-reservation logic (live 22:00) requires a carrier confirmation round-trip that arrives a median of 47 minutes after booking, while the booked pickup slot closes 30 minutes after booking. For the 186 orders in cohort EXC-0921, this means the pickup slot lapses before carrier confirmation lands, leaving the order stuck in 'allocated, awaiting pickup'. Non-cohort east-node orders (no split reservation) confirm inside their slots, and a cohort order that was re-booked after carrier data refreshed received a valid slot, confirming the mechanism is a timing/interaction defect rather than a general east-node capacity or feed outage.",
+   "kind": "root_cause",
+   "status": "inferred",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e02", "m8_e03", "m8_e10", "m8_r_exceptions", "m8_r_handoffs"],
+   "corroboration": "Two independent tier-1 verified, discriminating sources converge: m8_r_exceptions shows 100% overlap of held orders with the v18 split-reservation cohort (EXC-0921); m8_r_handoffs shows confirmation-latency (47 min median) exceeding the slot-close window (30 min) for that exact cohort, plus a successful re-book after carrier data refresh. No open contradiction.",
+   "limitation": "Inferred from strong correlational/timing evidence and one successful re-book, not from direct code/config inspection of the confirmation pipeline; why split-reservation confirmations specifically take 47 minutes has not been diagnosed at the implementation level."
+  },
+  {
+   "claim_id": "C5",
+   "statement": "A general, node-wide carrier/dock capacity issue is not supported as the driver: non-cohort east-node orders confirm within their slots, and the confirmation delay is specific to the v18 split-reservation cohort (EXC-0921), not the east node as a whole.",
+   "kind": "hypothesis",
+   "status": "disproven",
+   "mechanism_tag": "dock_capacity",
+   "sources": ["m8_e01", "m8_e09", "m8_r_handoffs"],
+   "corroboration": "m8_r_handoffs directly shows non-cohort east-node orders (booked before 05:58) confirmed inside their slots, isolating the delay to the split-reservation cohort rather than the node generally.",
+   "limitation": "Does not fully rule out a minor secondary carrier-feed effect, but it is not the primary mechanism given the delay tracks the split-reservation cohort precisely rather than the node as a whole; superseded by root-cause claim C4."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "count_stranded_orders",
+  "kind": "diagnostic",
+  "rationale": "Root cause is now inferred with discriminating evidence, but customer impact is still unquantified beyond the incident-chat proxy figure (186) and the exception-audit cohort size. An authoritative, current count of stranded orders establishes a defensible impact_estimate before deciding mitigation urgency/scope and before final assessment.",
+  "expected_information_gain": "Moderate-high: converts a proxy/point-in-time figure into an authoritative current impact_estimate artifact, which the checklist flags as still missing."
+ }
+}

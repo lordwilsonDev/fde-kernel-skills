@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c15_slot_correction_failed",
+      "statement": "The apply_slot_correction action was applied to the wrong carrier feed and did not change the state of held orders. This indicates that the slot correction requires precise targeting of the correct feed and source of the carrier confirmation latency. Without clear identification of which feed is responsible for the 47-minute latency, corrective actions at the allocation layer are ineffective.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": "The failure reveals a gap between the allocation system and carrier operations; the correct feed to correct is known to Carrier Operations but not yet identified to the assessment."
+    },
+    {
+      "claim_id": "c16_v18_regression_link_established",
+      "statement": "All 186 held orders are in the EXC-0921 scope, which contains exclusively orders allocated under rule set v18 with split-reservation exceptions. No held orders exist outside this scope. The regression is not in the v18 rule logic (verified by replay), but in the interaction between split-reservation orders and the carrier confirmation feed. Reverting v18 will prevent new split-reservation orders from being created, stopping the regression while Carrier Operations investigates the confirmation latency.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_exceptions", "m8_r_handoffs", "m8_r_rulehist"],
+      "limitation": "Reversion addresses future incidents but does not clear the 186 held orders; those still require Carrier Operations' intervention to re-book after confirmation completes."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The investigation has established that allocation rule set v18 creates split-reservation exception orders that trigger a carrier confirmation latency (median 47 minutes) exceeding their booking slot window (30 minutes). Reverting v18 is a reversible action that will halt the creation of new split-reservation orders, preventing the problem from affecting additional shipments while Carrier Operations investigates the root cause of the confirmation latency. The 186 currently held orders still require Carrier Ops intervention to re-book after their confirmations complete, but reverting v18 stops the bleeding of new incidents."
+  }
+}

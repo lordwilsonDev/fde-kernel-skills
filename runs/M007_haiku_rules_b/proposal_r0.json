@@ -1,0 +1,101 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "214 support agents received role changes via nightly directory sync; the sync completed successfully with no errors logged.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m7_e03", "m7_e11"],
+      "corroboration": "m7_e01 confirms 214 agents given new roles; m7_e03 verifies directory sync succeeded at 02:10",
+      "limitation": "Does not indicate whether app received/processed these changes"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "Authorization failures on customer-records app reached 31% since 08:30, while other apps remain normal.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m7_e02"],
+      "corroboration": "Verified observability alert with timing and scope",
+      "limitation": "Alert cannot attribute cause; no visibility into which entitlement version was applied"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "All reporters losing access are among the 214 users whose roles changed overnight.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m7_e11"],
+      "corroboration": "Perfect correlation between affected users and role-change scope",
+      "limitation": "Does not prove causation; could be coincidental timing"
+    },
+    {
+      "claim_id": "C4",
+      "statement": "Directory appears correct from IT Identity's perspective; verification passed.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m7_e03"],
+      "corroboration": "IT confirmed directory verification passed",
+      "limitation": "Does not confirm the customer-records app has received or correctly processed these changes"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "The customer-records app entitlements may be served from a local cache at version 41, per contractor authorization log.",
+      "kind": "hypothesis",
+      "status": "reported",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e08"],
+      "corroboration": "Mentions specific version number and 'local store', suggesting application-side caching",
+      "limitation": "Trust tier 4 (unverified contractor source); not independently confirmed"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "There is a version mismatch between the directory's current role assignments and what the customer-records app is serving from its local entitlement cache.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e08", "m7_e10"],
+      "corroboration": "m7_e08 suggests local store version 41; m7_e10 documents observability gap - dashboards do not show entitlement version applied to requests",
+      "limitation": "C5 is unverified; discriminating evidence needed to confirm version mismatch exists"
+    },
+    {
+      "claim_id": "C7",
+      "statement": "Release r7 shipped last week with no functional changes to authorization, only performance tuning and dependency updates.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m7_e04"],
+      "corroboration": "Release notes verified",
+      "limitation": "'No functional changes listed' does not guarantee dependencies did not alter behavior"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "Directory sync succeeded and directory is correct (C4)",
+      "claim_b": "All affected users were given new roles that they cannot now access (C3)",
+      "description": "Directory shows correct new roles, but app denies access to these users. This suggests either (1) app has not received the directory updates, (2) app is serving stale cached entitlements, or (3) app is correctly enforcing but there is a different permission model issue.",
+      "discriminating_evidence_needed": "Confirm whether app entitlements match directory; check for version mismatch between directory and app cache; verify if app has received sync updates"
+    }
+  ],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "visibility into entitlement version served to requests",
+      "reason": "m7_e10 notes dashboards show authorization failures but not entitlement version; needed to discriminate between stale cache (C6) and other causes"
+    },
+    {
+      "capability": "confirmation of app-level sync status",
+      "reason": "Unknown whether customer-records app has received and processed the 02:10 directory sync; directory succeeded but app behavior suggests it may not have the updates"
+    }
+  ],
+  "next_action": {
+    "action": "pull_sampled_traces",
+    "kind": "diagnostic",
+    "rationale": "Sampled request traces will show which entitlement version the app is serving to affected users. If traces show version 41 (or any version prior to the 02:10 sync), this directly discriminates between stale_authz_cache (C6) and other root causes. This is the highest-information diagnostic within authority.",
+    "expected_information_gain": "Determine whether app entitlements are stale (version mismatch hypothesis) or if a different mechanism is blocking access (role_sync_error, dependency change). This evidence is necessary to reach root_cause status."
+  }
+}

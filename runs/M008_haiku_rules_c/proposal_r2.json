@@ -1,0 +1,47 @@
+{
+  "claims": [
+    {
+      "claim_id": "C5",
+      "statement": "The carrier confirmation system experiences a median 47-minute response lag for EXC-0921 orders, exceeding the 30-minute pickup slot closing window. Non-EXC-0921 orders confirm within their slots, indicating the lag is specific to the volume/booking-pattern introduced by v18.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "Handoff trace (m8_r_handoffs, tier-1, verified) shows: EXC-0921 median confirmation time = 47 minutes; slot closing time = 30 minutes post-booking; non-EXC-0921 orders booked before 05:58 were confirmed inside slots; one re-booked order (post-carrier-refresh) received valid slot. The evidence discriminates carrier_feed_lag from allocation_rule_defect: the rule is not broken; the carrier system cannot keep pace with the v18 volume/rate pattern.",
+      "limitation": "Trace does not explain the mechanism of the lag (queue buildup, processing bottleneck, network latency); only that it exists and exceeds slot windows. Does not quantify whether lag is temporary or sustained."
+    },
+    {
+      "claim_id": "C3_downgraded",
+      "statement": "Carrier-side systems have a confirmation lag or are not acknowledging pickup availability for orders waiting on the east-node feed.",
+      "kind": "hypothesis",
+      "status": "disproven",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "Handoff trace confirms carrier IS responding and IS acknowledging (confirmations arrive), but with insufficient speed relative to slot windows. The issue is lag magnitude, not absence of response.",
+      "limitation": "Original C3 stated lag 'or are not acknowledging'; evidence disproves the latter and confirms the former."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C2_refined",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The root cause is carrier confirmation lag exceeding slot windows for EXC-0921 orders. Re-booking orders after carrier data refreshes resolves the lag (per m8_r_handoffs: one re-booked order received valid slot). Slot correction is reversible, scoped to affected carrier feed (east-node EXC-0921), and addresses the lag directly by re-opening or extending pickup slots to accommodate carrier response time.",
+    "expected_information_gain": "Slot correction will re-align the 47-minute carrier confirmation lag with the extended slot closing window, allowing EXC-0921 orders to receive carrier confirmations within valid pickup slots. This unblocks the 186 stuck orders."
+  }
+}

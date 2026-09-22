@@ -1,0 +1,72 @@
+{
+ "claims": [
+  {
+   "claim_id": "C1",
+   "statement": "9% of overnight allocations on east-node lanes have been held in 'allocated, awaiting pickup' for more than 90 minutes since 06:00; all other nodes are normal.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "unknown",
+   "sources": ["m8_e02"],
+   "corroboration": "Single tier-1 verified source from observability owner; sufficient alone per established rule.",
+   "limitation": "Alert cannot attribute cause; does not show relation to carrier-side confirmation."
+  },
+  {
+   "claim_id": "C2",
+   "statement": "Allocation rule set v18 went live at 22:00 last night, changing multi-node orders to reserve stock from the east node first; change review passed and regression suite was green.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03"],
+   "corroboration": "Single tier-1 verified source, owner Inventory Control.",
+   "limitation": "Passing review/regression does not rule out an unanticipated interaction with carrier pickup handoff."
+  },
+  {
+   "claim_id": "C3",
+   "statement": "Held orders were routed to the east node and flagged by the overnight allocator as a split-reservation exception; reports began about 06:00 and continue.",
+   "kind": "observation",
+   "status": "reported",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10"],
+   "corroboration": "Single tier-2 non-authoritative source (customer_support); not corroborated by an authoritative allocation-system record yet.",
+   "limitation": "Cannot be upgraded to established without a tier-1 source or a second distinct-owner tier<=2 source; conflicts with Inventory Control's informal reconciliation claim in m8_e01."
+  },
+  {
+   "claim_id": "C4",
+   "statement": "The v18 east-node-first reservation change is a plausible cause of the stuck east-node orders via split-reservation exceptions blocking release to carrier pickup.",
+   "kind": "hypothesis",
+   "status": "hypothesized",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03", "m8_e02", "m8_e10"],
+   "corroboration": "Time correlation (v18 live 22:00, issue from 06:00) and lane-scope correlation (east-node only) plus an unverified support report of matching exceptions.",
+   "limitation": "Correlation only; no discriminating evidence yet. Competing hypotheses (carrier_feed_lag, dock_capacity) not ruled out. Inventory Control's own reconciliation check (m8_e01) reported nothing wrong, which is in tension with C3."
+  },
+  {
+   "claim_id": "C5",
+   "statement": "A carrier-side pickup/dock issue (feed lag or capacity) on east-node lanes has not been ruled out; carrier ops on-call found nothing obvious on an initial look at the dock schedule.",
+   "kind": "hypothesis",
+   "status": "hypothesized",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_e01", "m8_e09"],
+   "corroboration": "Incident chat (non-authoritative, informal look) plus a known observability gap: dashboards cannot relate booked pickup state to carrier-side confirmation.",
+   "limitation": "Very weak; single informal source, no diagnostic run yet. Kept open as an alternative to C4 pending discriminating evidence."
+  }
+ ],
+ "contradictions": [
+  {
+   "id": "X1",
+   "claim_a": "m8_e01 (Inventory Control: allocation totals reconcile, nothing looks wrong)",
+   "claim_b": "C3 / m8_e10 (support report: held orders flagged as split-reservation exceptions)",
+   "description": "Inventory Control's informal reconciliation check found nothing wrong, but customer support reports every held order was flagged with a split-reservation exception by the overnight allocator. These cannot both be fully accurate as stated.",
+   "discriminating_evidence_needed": "An authoritative, queryable record of allocation exceptions for the held order cohort (not a channel message or a support summary)."
+  }
+ ],
+ "resolutions": [],
+ "dispositions": [],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "audit_allocation_exceptions",
+  "kind": "diagnostic",
+  "rationale": "Directly tests the specific, falsifiable claim in C3/C4 (held orders carry a split-reservation exception from the overnight allocator) against an authoritative system record rather than a support summary or chat. This will either promote C3/C4 toward established/root_cause with discriminating evidence, or refute it and redirect toward the carrier-side hypothesis (C5), and it resolves contradiction X1.",
+  "expected_information_gain": "High: distinguishes allocation_rule_defect from carrier-side mechanisms and upgrades or disproves the only concrete mechanism claim currently on the table."
+ }
+}

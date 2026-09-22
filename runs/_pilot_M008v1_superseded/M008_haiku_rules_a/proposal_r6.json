@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim_id": "C14",
+      "statement": "Slot correction was applied before identifying the affected carrier feed; the correction was applied to the wrong feed and produced no improvement",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_slot_ineff"],
+      "corroboration": "Slot correction outcome (tier-1, Observability) shows the correction ran but was applied to wrong feed and held orders remain unchanged",
+      "limitation": "Does not identify which carrier feed is correct"
+    },
+    {
+      "claim_id": "C15",
+      "statement": "Carrier Ops' precondition for slot correction was not met: the affected feed and its lag were not identified before applying correction",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_owner", "m8_r_slot_ineff"],
+      "corroboration": "Carrier Ops stated correction 'must run only after the affected feed and its lag are identified' (m8_r_owner); outcome confirms correction was applied to wrong feed (m8_r_slot_ineff)",
+      "limitation": "None"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Identification of which specific carrier feed (route/lane/carrier) is affected by the lag and is holding the 186 orders",
+      "reason": "Required before re-applying slot correction to the correct feed, per Carrier Ops' precondition"
+    }
+  ],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "ROOT2 (carrier feed lag) remains valid, but the first mitigation attempt failed because the precondition was not met. Carrier Ops explicitly stated that slot correction must run 'only after the affected feed and its lag are identified.' Tracing the 186 orders through the system (cohort EXC-0921) will reveal: (1) which carrier or carrier feed is assigned to the east-node orders, (2) where in the handoff chain the orders get stuck, (3) which feed needs slot correction. Once the correct feed is identified, slot correction can be re-applied to the right feed and held orders can progress. This diagnostic is essential before retry",
+    "expected_information_gain": "Identify the specific carrier feed that is holding the east-node orders, enabling correct slot correction in the next round"
+  }
+}

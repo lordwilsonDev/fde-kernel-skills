@@ -1,0 +1,99 @@
+{
+  "claims": [
+    {
+      "claim_id": "C15",
+      "statement": "Carrier partition 2 (east-node carriers) stopped advancing at 05:58 and is 47 minutes behind; slots for orders after 05:58 are booked against yesterday's carrier availability and cannot be confirmed within the 30-minute slot window.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets"],
+      "corroboration": "Tier-1 Carrier Operations data directly identifies partition 2 as the affected feed, its offset lag (47 min), and the causative timing (stopped at 05:58).",
+      "limitation": "None; the cause and feed are definitively identified."
+    },
+    {
+      "claim_id": "C16",
+      "statement": "The 186 orders in EXC-0921 are bound for carrier partition 2, the stalled east-node feed; they cannot be picked up until partition 2's consumer is advanced and its slot windows are corrected.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_e02"],
+      "corroboration": "m8_r_offsets identifies partition 2 as the stalled feed for east-node orders; m8_e02 confirms all held orders are on east-node lanes.",
+      "limitation": "None; the binding between EXC-0921 orders and partition 2 is now clear."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C11",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C12",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C13",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C14",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C15",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C16",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The affected carrier feed is now identified: partition 2 (east-node carriers), which stopped advancing at 05:58 and is 47 minutes behind. Correcting the slot windows for partition 2 to account for the 47-minute lag will allow orders booked after 05:58 to be confirmed within their assigned slots. This is reversible, scoped to partition 2 only, and meets all gate conditions: root cause is established (C10), with discriminating evidence (m8_r_offsets identifying the specific feed), no contradictions, and the action is reversible and scoped as required.",
+    "expected_information_gain": "Resolution of the 186 held orders as partition 2's slot windows expand to accommodate its confirmation latency."
+  }
+}

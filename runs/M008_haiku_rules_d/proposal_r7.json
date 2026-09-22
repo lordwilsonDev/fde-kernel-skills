@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim_id": "C19",
+      "statement": "Replay of held allocations failed because pickup slots were not corrected before re-booking; orders were re-booked into expired slot windows and remain held",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_replay_ineff"],
+      "corroboration": "Observability confirmed replay attempted before slot correction; orders remain held in closed slots",
+      "limitation": "Confirms the operational sequence failed; does not address the underlying slot duration configuration"
+    },
+    {
+      "claim_id": "C20",
+      "statement": "The root cause of the 186 stuck orders is that split-reservation orders (v18 EXC-0921) are booked with 30-minute pickup slot windows, but carrier confirmation latency is 47 minutes median, causing confirmations to arrive after slots close",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_handoffs", "m8_e03"],
+      "corroboration": "Handoff trace explicitly measures timing mismatch (30 min slot vs 47 min confirmation). Orders booked before rule change succeeded; one re-booked order with corrected slots succeeded. Issue coincides with v18 deployment at 22:00.",
+      "limitation": "The specific code/config causing slot duration mismatch is not identified; requires investigation into booking system configuration"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "review_rule_history",
+      "reason": "To understand whether v18 changed slot duration settings, or whether the slot mismatch is in the booking system configuration"
+    }
+  ],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "Before final assessment, check whether v18 rule change includes slot duration modifications, or whether the 30-minute slot windows are a booking system issue independent of v18. This will complete the root cause investigation.",
+    "expected_information_gain": "Determines whether the slot mismatch is a v18 rule defect or a booking system configuration issue"
+  }
+}

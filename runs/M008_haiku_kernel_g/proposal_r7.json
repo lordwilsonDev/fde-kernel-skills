@@ -1,0 +1,46 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "All dispositions addressed. Root cause C7 (carrier_feed_lag) established with inferred status, citing discriminating evidence (m8_r_exceptions, m8_r_offsets). No open contradictions. Mitigations approved and executed: apply_slot_correction (approved by human gate, corrected partition 2 slots) and replay_held_allocations (approved by human gate, replayed allocation for 186 held orders with corrected availability). Mission objective achieved: explained why orders were stuck (carrier feed lag) and decided on authorized next steps (reversible mitigations within scope).",
+    "expected_information_gain": "Mission complete. Final root cause: Carrier partition 2 feed consumer stopped at 05:58, causing 186 overnight-allocated orders to be routed to stale slot availability. Mitigation: corrected slots and replayed allocations."
+  }
+}

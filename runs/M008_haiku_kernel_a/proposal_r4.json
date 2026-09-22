@@ -1,0 +1,30 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Determine carrier-side state of EXC-0921 orders. Specifically: (1) Have these orders been transmitted to carrier systems? (2) What state are they in (booked, rejected, pending)? (3) Is there a known limitation with split-reservation bookings? (4) Are east-node carrier lanes operational? This will discriminate between allocation_rule_defect (carrier can't process split-reservations), carrier_feed_lag (orders not transmitted or confirmation stalled), and dock_capacity (carrier operational but node-level constraint).",
+    "expected_information_gain": "Determines whether the failure point is in order transmission, carrier booking acceptance, or pickup confirmation flow"
+  }
+}

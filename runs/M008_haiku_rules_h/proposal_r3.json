@@ -1,0 +1,71 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule set v18 (deployed 22:00, live at order-processing time) introduced a multi-node east-node-first reservation priority that may be causing split-reservation exceptions on east node lanes.",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_r_exceptions"],
+      "corroboration": "Perfect correlation: 100% of held orders are in scope EXC-0921 (v18 rule-affected orders), and 0% of non-v18 orders are held.",
+      "limitation": "Root cause is C4, which refines C1 to the specific timing issue."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "The east-node-specific carrier pickup feed may have a lag or scheduling gap that prevents carriers from collecting orders that the system believes are ready.",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_e09", "m8_r_handoffs"],
+      "corroboration": "m8_r_handoffs shows east-node carrier confirmations for EXC-0921 arrive median 47 minutes after booking, while slot window closes after 30 minutes.",
+      "limitation": "This is a symptom of C4, not the root cause."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Orders are properly allocated and inventoried; the system state is consistent on the fulfillment side.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "Inventory Control states allocation totals reconcile.",
+      "limitation": "Does not address the timing issue."
+    },
+    {
+      "claim_id": "C4",
+      "statement": "Allocation rule set v18's split-reservation logic introduces a booking timing issue: EXC-0921 orders are booked with a 30-minute slot window, but carrier confirmations arrive 47 minutes after booking, causing confirmations to miss their slots and leaving orders stuck in 'allocated, awaiting pickup'.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_handoffs"],
+      "corroboration": "m8_r_handoffs provides discriminating evidence: (1) EXC-0921 orders have 47-min confirmation lag vs 30-min slot window (17-min gap); (2) East-node orders outside EXC-0921 confirm properly in their slots; (3) One re-booked order after data refresh received a valid slot. This proves v18 split-reservation timing is the root cause.",
+      "limitation": "Reverted mitigation (apply_slot_correction) failed because it was applied to wrong feed. Reverting the rule itself is the more direct mitigation."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Root cause C4 is established with discriminating evidence (m8_r_handoffs). The root cause is v18's split-reservation logic which creates a timing incompatibility (30-min slot window vs 47-min confirmation lag). The apply_slot_correction mitigation was applied to the wrong feed and failed. Reverting v18 directly removes the problematic split-reservation logic and restores the previous allocation behavior, which worked correctly for non-v18 orders and for east-node orders outside EXC-0921. This is reversible, idempotent, and scoped to the east-node reservation priority (the specific change introduced by v18). This will clear the stuck orders and allow us to diagnose v18's split-reservation issue separately before re-deploying it.",
+    "expected_information_gain": "N/A - this is the mitigation. Expected outcome: EXC-0921 orders will be re-allocated under the previous rule set, should confirm within their pickup slot windows, and will clear 'allocated, awaiting pickup' state."
+  }
+}

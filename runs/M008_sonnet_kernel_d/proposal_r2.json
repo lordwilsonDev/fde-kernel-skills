@@ -1,0 +1,29 @@
+{
+ "claims": [
+  {
+   "claim_id": "C5",
+   "statement": "Carrier Operations confirms that any correction they apply is reversible, scoped to a single carrier feed, and must be applied only after the affected feed and its lag are identified; replaying held allocations is safe only after pickup slots are corrected.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_r_owner"],
+   "corroboration": "tier-1 verified owner_confirmation directly from Carrier Operations, the action owner, sufficient as a single authoritative source for a procedural/scope statement.",
+   "limitation": "Procedural and scope confirmation only, marked non-discriminating. It does not indicate whether carriers actually received (or failed to receive) pickup manifests for EXC-0921 orders, so it does not resolve the open confound between allocation_rule_defect and carrier_feed_lag for these orders."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "trace_cohort_handoffs",
+  "kind": "diagnostic",
+  "rationale": "The confirm_with_carrier_ops result (m8_r_owner) returned only mitigation-scope/procedural information, not data on whether carriers received pickup manifests for EXC-0921 orders, so C4's confound between allocation_rule_defect and carrier_feed_lag/dock_capacity remains open. Tracing the actual allocation-to-carrier handoff for the EXC-0921 cohort will show directly whether split-reservation orders failed to produce a valid handoff record (supporting allocation_rule_defect) versus handoffs completing normally while carriers still failed to collect (supporting carrier_feed_lag or dock_capacity).",
+  "expected_information_gain": "Direct, discriminating evidence on where in the allocation-to-pickup chain the EXC-0921 orders stall, isolating a rule/handoff defect from a carrier- or dock-side cause."
+ }
+}

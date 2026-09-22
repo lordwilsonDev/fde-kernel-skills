@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1_refined",
+      "statement": "Allocation rule v18 created split-reservation exceptions (scope EXC-0921). All 186 held orders are in this scope. The split-reservation flag may itself be blocking carrier pickup, or the flag may be incidental and the issue is an independent east-node feed/capacity problem.",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions", "m8_e10", "m8_e02"],
+      "corroboration": "m8_r_exceptions confirms 100% of held orders are in EXC-0921 (rule v18 split-reservation scope); m8_e03 documents rule deployed 22:00; m8_e10 confirms split-reservation flag on all held orders; m8_e02 shows timing/isolation to east node.",
+      "limitation": "m8_r_exceptions limitation: cannot separate rule defect effect from east-node lanes effect since only rule-affected orders were routed there. Carrier confirmation needed to determine if split-reservation flag itself blocks pickup."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Carrier Ops can directly answer: are the split-reservation exceptions blocking carrier pickup, or are carriers seeing normal orders? This discriminates between rule defect (C1) causing the hold vs downstream east-node issue (C2/C3). If Carrier Ops reports the split-reservation flag prevents pickup, C1 becomes root cause. If they report normal visibility and a feed/capacity issue on their end, C2 or C3 is more likely.",
+    "expected_information_gain": "Very high: direct carrier feedback on whether the split-reservation flag is the obstacle."
+  }
+}

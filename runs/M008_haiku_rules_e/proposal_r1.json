@@ -1,0 +1,80 @@
+{
+  "claims": [
+    {
+      "claim_id": "C3",
+      "statement": "All held orders are flagged as 'split-reservation exception' by the allocation system",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "corroboration": "Tier-2 source; additional tier-1 corroboration from m8_r_exceptions",
+      "limitation": "m8_e10 alone is insufficient for 'established'; m8_r_exceptions confirms 100% match to EXC-0921 scope but is tier-1 so combined establishes fact"
+    },
+    {
+      "claim_id": "C7",
+      "statement": "All 186 held orders belong to scope EXC-0921 (v18 split-reservation allocations); no orders outside EXC-0921 are held",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Tier-1 verified audit from inventory control; this establishes exclusivity of v18 scope to held orders",
+      "limitation": "Audit cannot distinguish whether the rule change itself is defective or whether east-node lanes have a separate issue affecting only v18-routed orders"
+    },
+    {
+      "claim_id": "C8",
+      "statement": "Allocation rule set v18 defect is creating invalid or problematic split-reservations",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "corroboration": "Perfect correlation: v18 deployed 22:00, held orders begin 06:00, 100% of held orders are v18-routed (C7); timing and scope suggest causal link",
+      "limitation": "Correlation does not establish mechanism; need review of rule logic to determine if splits are invalid (rule bug) vs. valid but blocked downstream (carrier issue)"
+    },
+    {
+      "claim_id": "C9",
+      "statement": "East-node carrier feed or pickup scheduling has degraded specifically for v18-routed split-reservation orders",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01", "m8_r_exceptions"],
+      "corroboration": "Carrier ops found 'nothing obvious' on dock schedule; v18-routed orders held exclusively on east-node lanes; split-reservations may be valid but uncollectable",
+      "limitation": "Observability gap (C4) and lack of carrier confirmation prevent testing this hypothesis without additional diagnostics"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "C8 (v18 rule defect creating invalid splits)",
+      "claim_b": "C9 (valid splits blocked by carrier-side issue)",
+      "description": "Either v18 has a logic defect producing impossible split-reservations, or v18 is working correctly but orders cannot be picked up due to carrier feed lag. These are mutually exclusive root causes.",
+      "discriminating_evidence_needed": "Review of v18 rule implementation to confirm if splits being created are logically valid for the order cohort, or review of carrier pickup queue/confirmation status for EXC-0921 orders"
+    }
+  ],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "confirm whether split-reservations are logically valid or rule-defective",
+      "reason": "need review of v18 rule implementation and logic to test whether splits match order requirements or represent a logic error"
+    },
+    {
+      "capability": "confirm whether carrier feed is operational and aware of EXC-0921 orders",
+      "reason": "need confirmation from carrier ops that pickup orders exist in their queue and any timing/lag data"
+    }
+  ],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "The exclusive correlation between v18 scope and held orders (C7) establishes v18 as the pivot point. Review of v18 rule implementation and prior rule versions will determine whether v18 creates logically valid splits (supporting C9: carrier issue) or invalid/impossible splits (supporting C8: rule defect). This directly tests the mechanism.",
+    "expected_information_gain": "Rule diff will show whether v18 logic produces valid splits for multi-node orders or whether there is a logic error. This resolves contradiction X1 and narrows root cause."
+  }
+}

@@ -1,0 +1,679 @@
+{
+ "world": "M008",
+ "mode": "raw",
+ "enforce": false,
+ "round": 9,
+ "done": true,
+ "denials": [
+  {
+   "claim_id": "c8_04",
+   "from": null,
+   "to": "established",
+   "result": "violation:impact requires an impact_estimate artifact, not proxies",
+   "reason": "violation:impact requires an impact_estimate artifact, not proxies"
+  }
+ ],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c0_01",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c0_02",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c0_03",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "v18 is the strongest temporal and scope correlation. Need to understand what changed in split-reservation logic and whether the deployed version matches reviewed version. This is the highest-leverage diagnostic to confirm or exclude allocation-rule-defect as root cause."
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "c0_01",
+     "c0_02",
+     "c0_03"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c1_01",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c1_02",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c1_03",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c0_01",
+     "c0_02",
+     "c0_03"
+    ]
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Allocation logic validated. Carrier not collecting despite 186 orders in 'allocated, awaiting pickup' state. Need carrier ops to confirm: (1) did they receive pickup signals for these 186 orders? (2) what is east-node dock capacity/schedule status? (3) is there any system integration issue between our allocation signal and their pickup scheduling? This will disambiguate carrier_feed_lag vs dock_capacity vs other carrier-side defect."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c2_01",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c2_02",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c2_03",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03"
+    ]
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "All stuck orders are split-reservation exceptions. Need to understand: (1) what makes these orders split-reservation exceptions? (2) do they have incompatible pickup slot assignments? (3) is there a systematic pattern in how v18 assigns slots that causes carrier feed incompatibility? This audit will determine if the root cause is allocation logic defect, pickup slot misconfiguration, or feed compatibility issue."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c3_01",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c3_02",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c3_03",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03"
+    ]
+   },
+   "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Perfect correlation between EXC-0921 and held orders indicates v18 created a load pattern the system can't handle. East-node dock capacity is the most likely physical constraint. Checking dock utilization, available slots, and queue depth will determine if this is a capacity-based root cause or if we need to investigate feed compatibility or carrier pickup scheduling defect."
+   },
+   "sim": {
+    "released": "m8_r_dock",
+    "flagged_for_revalidation": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c4_01",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c4_02",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c4_03",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03"
+    ]
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Dock capacity is normal; allocation logic is sound. Problem is in carrier workflow. Trace the handoff of EXC-0921 split-reservation orders through: allocation \u2192 order transmission \u2192 carrier feed ingestion \u2192 pickup slot assignment \u2192 carrier scheduling. Identify exact failure point: are orders rejected by carrier feed, lost in queue, or assigned incompatible slots?"
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03",
+     "c4_01",
+     "c4_02",
+     "c4_03"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c5_01",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c5_02",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c5_03",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c5_04",
+      "from": null,
+      "to": "established",
+      "result": "violation:impact requires an impact_estimate artifact, not proxies",
+      "reason": "violation:impact requires an impact_estimate artifact, not proxies"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03",
+     "c4_01",
+     "c4_02",
+     "c4_03"
+    ]
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause is confirmed: v18 split-reservation orders expire before carrier can confirm due to undersized 30-minute slot windows. Mitigation is reversible and authorized: extend pickup slot windows for EXC-0921 scope to 60 minutes (accommodate 47-minute median + buffer). This allows carrier confirmations to arrive before slot expiration, unblocking the 186 held orders. This is a one-time correction to the specific affected cohort with no side effects to other orders or systems."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03",
+     "c4_01",
+     "c4_02",
+     "c4_03",
+     "c5_01",
+     "c5_02",
+     "c5_03",
+     "c5_04"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via c5_01"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c6_01",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c6_02",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03",
+     "c4_01",
+     "c4_02",
+     "c4_03",
+     "c5_01",
+     "c5_02",
+     "c5_03",
+     "c5_04"
+    ]
+   },
+   "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Before retrying slot correction, identify which specific carrier feed(s) are assigned to EXC-0921 orders at the east node. This will enable a targeted, correct slot correction to the right feed(s) where split-reservation orders are queued. Partition offsets will show feed lag, queue depth, and confirm which feed handles east-node split-reservation orders."
+   },
+   "sim": {
+    "released": "m8_r_offsets",
+    "flagged_for_revalidation": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03",
+     "c4_01",
+     "c4_02",
+     "c4_03",
+     "c5_01",
+     "c5_02",
+     "c5_03",
+     "c5_04",
+     "c6_01",
+     "c6_02"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 7,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c7_01",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c7_02",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c7_03",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03",
+     "c4_01",
+     "c4_02",
+     "c4_03",
+     "c5_01",
+     "c5_02",
+     "c5_03",
+     "c5_04",
+     "c6_01",
+     "c6_02"
+    ]
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Partition 2 feed is stalled and cannot recover while receiving high volume of split-reservation orders from v18. Reverting v18 (rolling back to pre-deployment allocation rules) will immediately stop new split-reservation orders from hitting partition 2, allowing its feed consumer to recover and clear backlog. This is reversible: v18 can be re-deployed after partition 2 feed is healthy and slot correction is applied. Reverts existing 186 EXC-0921 orders, which will then be re-allocated to other nodes or re-routed, unblocking them from the stale partition 2 state."
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03",
+     "c4_01",
+     "c4_02",
+     "c4_03",
+     "c5_01",
+     "c5_02",
+     "c5_03",
+     "c5_04",
+     "c6_01",
+     "c6_02",
+     "c7_01",
+     "c7_02",
+     "c7_03"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via c5_01"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 8,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "c8_01",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c8_02",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c8_03",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "c8_04",
+      "from": null,
+      "to": "established",
+      "result": "violation:impact requires an impact_estimate artifact, not proxies",
+      "reason": "violation:impact requires an impact_estimate artifact, not proxies"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "contra_1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": [
+     "c0_01",
+     "c0_02",
+     "c0_03",
+     "c1_01",
+     "c1_02",
+     "c1_03",
+     "c2_01",
+     "c2_02",
+     "c2_03",
+     "c3_01",
+     "c3_02",
+     "c3_03",
+     "c4_01",
+     "c4_02",
+     "c4_03",
+     "c5_01",
+     "c5_02",
+     "c5_03",
+     "c5_04",
+     "c6_01",
+     "c6_02",
+     "c7_01",
+     "c7_02",
+     "c7_03"
+    ]
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause definitively established: Carrier partition 2 feed consumer failure (stalled at 05:58, 47+ min behind). Evidence proves allocation logic is correct (reverting v18 did not fix stuck orders; new orders to partition 2 still stuck). This is infrastructure/operational failure owned by Carrier Operations. Mitigation requires: (1) Carrier Ops diagnose/restart partition 2 feed consumer, (2) Clear queue allow recovery, (3) Apply targeted slot correction to partition 2, (4) Replay 186 held orders. Assessment complete. Escalation to Carrier Operations for feed restoration."
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

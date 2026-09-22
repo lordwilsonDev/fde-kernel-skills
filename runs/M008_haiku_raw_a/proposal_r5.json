@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "c5_01",
+      "statement": "Split-reservation orders (EXC-0921) require median 47 minutes for carrier confirmation, but pickup slots are assigned 30-minute windows and close before confirmation arrives",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "None - mechanism is verified and reproducible"
+    },
+    {
+      "claim_id": "c5_02",
+      "statement": "v18 allocation rule correctly implements split-reservation logic but does not adjust pickup slot assignment timing for split-reservation confirmation lag",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_handoffs", "m8_r_rulehist"],
+      "limitation": "Root cause is in slot-assignment policy, not core allocation algorithm"
+    },
+    {
+      "claim_id": "c5_03",
+      "statement": "Orders re-booked after carrier refresh receive valid slots and can proceed; normal non-split-reservation orders assigned to east node complete successfully",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "None - demonstrates mechanism and validates mitigation approach"
+    },
+    {
+      "claim_id": "c5_04",
+      "statement": "Impact: 186 orders (9% of overnight allocation) held indefinitely until slot windows are extended or orders are re-booked with longer slot timeouts",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_e10"],
+      "limitation": "None"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause is confirmed: v18 split-reservation orders expire before carrier can confirm due to undersized 30-minute slot windows. Mitigation is reversible and authorized: extend pickup slot windows for EXC-0921 scope to 60 minutes (accommodate 47-minute median + buffer). This allows carrier confirmations to arrive before slot expiration, unblocking the 186 held orders. This is a one-time correction to the specific affected cohort with no side effects to other orders or systems."
+  }
+}

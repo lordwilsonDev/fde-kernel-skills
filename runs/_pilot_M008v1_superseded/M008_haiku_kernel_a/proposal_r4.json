@@ -1,0 +1,34 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C1_refined",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C_ROOT",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "After slot correction (m8_r_slot confirms success), replay held allocations for orders in EXC-0921 scope (the 186 overnight-allocated orders). This will send corrected notifications to carriers. Per m8_r_owner, replaying is safe only after slots are corrected, which is now done.",
+    "expected_information_gain": "Replay will notify carriers of the corrected pickup windows; orders should begin moving to pickup within normal carrier response times."
+  }
+}

@@ -1,0 +1,7 @@
+runs/*/state.db
+runs/*/ctx_r*.json
+__pycache__/
+.fde_blind
+runs/.out_*
+.DS_Store
+.mypy_cache/

@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "root_cause_slot_window_mismatch",
+      "statement": "Root cause: Pickup slot booking window (30 min) is too short for carrier confirmation latency (median 47 min). EXC-0921 orders are booked under these mismatched parameters, causing slots to close before carrier confirmations arrive, leaving orders stuck in 'allocated, awaiting pickup'. East-node orders booked before 05:58 and non-EXC-0921 orders confirm within their slots. One re-booked order after carrier data refresh received a valid slot, confirming re-booking path is viable.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e02"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "impact_186_orders_stuck",
+      "statement": "Impact: 186 orders (9% of overnight allocations) are stuck in 'allocated, awaiting pickup' since ~06:00. Carriers cannot collect because orders have expired pickup slots, blocking fulfillment until slots are corrected or orders re-booked.",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01", "m8_e02", "m8_r_handoffs"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "inf_v18_trigger_mechanism",
+      "statement": "V18 split reservation creates the EXC-0921 cohort, which is routed through a booking pipeline that assigns 30-min slot windows incompatible with 47-min carrier confirmation latency. V18 is the trigger that exposes a pre-existing slot window defect.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_r_handoffs", "m8_e03"],
+      "limitation": "Does not yet establish whether v18 scheduling is a new code path or whether pre-existing slot window is simply incompatible with carrier latency."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause firmly established with discriminating evidence: slot window (30 min) < carrier confirmation latency (47 min) for EXC-0921 cohort. V18 split reservations trigger routing through incompatible booking parameters. Diagnostic evidence includes successful re-booking after carrier data refresh. Apply slot correction to extend pickup windows for EXC-0921 orders, enabling them to confirm within corrected slot boundaries. This is reversible per m8_r_owner and required before replay_held_allocations. Mitigation is authorized as a single reversible action."
+  }
+}

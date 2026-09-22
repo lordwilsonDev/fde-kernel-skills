@@ -1,0 +1,45 @@
+{
+ "claims": [
+  {
+   "claim_id": "C3",
+   "statement": "Held orders were routed to the east node and flagged by the overnight allocator as a split-reservation exception under rule set v18 (scope EXC-0921); 100% of held orders are in EXC-0921 and no order outside it is held.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10", "m8_r_exceptions"],
+   "corroboration": "Now corroborated by a tier-1 verified authoritative exception-audit record (m8_r_exceptions, owner inventory_control) matching the earlier tier-2 support report exactly; established per a single tier-1 source.",
+   "limitation": "Confirms the exception/held-order correlation but the audit itself notes it cannot separate an effect of the rule change from an effect specific to the east-node lanes, because only rule-affected orders were routed there."
+  },
+  {
+   "claim_id": "C4",
+   "statement": "The v18 east-node-first reservation change is a plausible cause of the stuck east-node orders via split-reservation exceptions blocking release to carrier pickup.",
+   "kind": "hypothesis",
+   "status": "hypothesized",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e02", "m8_e03", "m8_e10", "m8_r_exceptions"],
+   "corroboration": "Exception audit now confirms 100% overlap between EXC-0921 (v18 split-reservation exceptions) and held orders, strengthening the correlation with an authoritative source.",
+   "limitation": "Still not discriminating for root cause: m8_r_exceptions explicitly states it cannot separate a rule-defect effect from an east-node-specific effect (e.g. carrier pickup/dock issue), since only rule-affected orders were routed to that node. Not yet promoted to root_cause; needs evidence that distinguishes where in the pipeline the block occurs (allocation/exception stage vs carrier handoff stage)."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [
+  {
+   "contradiction_id": "X1",
+   "evidence_refs": ["m8_r_exceptions"],
+   "outcome": "resolved_no_genuine_conflict",
+   "rationale": "The authoritative exception audit shows split-reservation exceptions align 100% with held orders. Inventory Control's informal chat comment ('allocation totals reconcile; nothing looks wrong') most plausibly referred to aggregate reservation totals, not per-order exception flags, so it does not actually conflict with the now-confirmed exception record. No remaining evidence conflict on this point."
+  }
+ ],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "trace_cohort_handoffs",
+  "kind": "diagnostic",
+  "rationale": "The confound flagged by m8_r_exceptions (rule-defect effect vs east-node-specific effect) is the key open question, and cohort EXC-0921 is now a concrete, queryable scope. Tracing the handoff steps for this cohort will show whether orders are stuck before ever being released by the allocation/exception process (supporting allocation_rule_defect, C4) or whether they were released and handed to carrier pickup but not collected (supporting the carrier-side hypothesis, C5). This directly resolves the confound the exception audit could not.",
+  "expected_information_gain": "High: distinguishes where in the pipeline (allocation-side vs carrier-side) the block actually occurs, which the exception audit alone cannot do."
+ }
+}

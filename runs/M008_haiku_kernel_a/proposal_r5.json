@@ -1,0 +1,30 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Test dock capacity hypothesis directly. Determine: (1) Is east-node dock at or near capacity? (2) Are there pending pickups or backlog? (3) Is capacity available for new orders? If dock is capacity-constrained, it would explain why carriers aren't collecting (no space). If dock has capacity, it points to carrier-side booking/feed issue with split-reservations. This discriminates between dock_capacity and allocation_rule_defect/carrier_feed_lag hypotheses.",
+    "expected_information_gain": "Determines if physical east-node dock capacity is the bottleneck or if the issue is upstream in carrier booking/feed processing"
+  }
+}

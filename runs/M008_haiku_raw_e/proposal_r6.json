@@ -1,0 +1,53 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_013",
+      "statement": "Reverting rule v18 to v17 resulted in 3,900 allocations being re-run, causing duplicate pick lists and system disruption",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_revert"],
+      "limitation": "Collateral damage from the revert mitigation; confirms that the revert was counterproductive"
+    },
+    {
+      "claim_id": "obs_014",
+      "statement": "After reverting rule v18, the 186 held orders remain unchanged and new east-node allocations under rule v17 are also held",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert"],
+      "limitation": "Indicates the root issue is not rule v18 itself, but the east-node carrier or scheduling latency"
+    },
+    {
+      "claim_id": "inf_004",
+      "statement": "The east-node carrier confirmation latency (47 minutes) is independent of whether rule v18 or v17 is active; both result in held orders",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_handoffs"],
+      "limitation": "Suggests a degradation or overload in the east-node carrier system itself, not an allocation rule defect"
+    },
+    {
+      "claim_id": "root_cause_002",
+      "statement": "The east-node carrier or scheduling system exhibits a degraded or overloaded state with 47-minute confirmation latency, which exceeds the 30-minute pickup slot window for any orders routed there, whether under rule v18 or v17",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_revert"],
+      "limitation": "The underlying cause of the east-node carrier latency (overload, system issue, or degradation) is not yet identified"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "contra_001",
+      "claim_a": "root_cause_001",
+      "claim_b": "root_cause_002",
+      "description": "root_cause_001 attributed the issue to rule v18's split-reservation structure; root_cause_002 shows the east-node carrier latency affects both rule v18 and v17 orders, indicating the root cause is the carrier latency itself, not the allocation rule"
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The revert mitigation failed and made things worse. The root cause is now clear: east-node carrier confirmation latency of 47 minutes exceeds the 30-minute slot window for any orders routed there, affecting both rule v18 and v17 orders. Engaging directly with carrier ops to understand the source of this latency (overload, system issue, degradation) is the highest-information authorized next step. This will inform whether the solution is to clear the backlog, increase carrier throughput, extend slot windows globally at the east node, or address an upstream carrier integration issue."
+  }
+}

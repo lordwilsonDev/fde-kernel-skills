@@ -1,0 +1,34 @@
+{
+  "claims": [
+    {
+      "claim_id": "C11",
+      "statement": "East-node dock and labour capacity are normal with no queueing, confirming orders are ready for pickup",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_dock"],
+      "corroboration": "Operations tier-1 verified report confirms dock is not saturated or unavailable",
+      "limitation": "None; direct operational measurement"
+    },
+    {
+      "claim_id": "C12",
+      "statement": "Carrier feed lag on the east-node lane is preventing timely pickup slot scheduling for the 186 stuck orders (scope EXC-0921)",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_r_dock", "m8_r_exceptions"],
+      "corroboration": "Carrier Ops references 'affected feed and its lag' and 'pickup slots have been corrected' as required preconditions (m8_r_owner); dock capacity is normal (m8_r_dock), ruling out capacity as cause; all stuck orders are in EXC-0921 scope routed to east node (m8_r_exceptions)",
+      "limitation": "Carrier Ops statement is procedural rather than explicit, but discriminating evidence rules out allocation defects and dock issues, leaving carrier feed lag as the only consistent explanation"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "Root cause (C12) is carrier feed lag on the affected carrier feed (east-node lane). Carrier Ops confirmed this is reversible and scoped to a single carrier feed. The action directly addresses the lag by correcting pickup slot scheduling. This is the highest-information authorized next step to unblock the 186 stuck orders.",
+    "expected_information_gain": "Applying slot correction will confirm whether the carrier feed lag is the true blocker (orders resume pickup), or whether there is an additional underlying issue (orders remain stuck despite slot correction)."
+  }
+}

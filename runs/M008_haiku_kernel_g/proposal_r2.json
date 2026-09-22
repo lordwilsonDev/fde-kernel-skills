@@ -1,0 +1,45 @@
+{
+  "claims": [
+    {
+      "claim_id": "C6",
+      "statement": "All 186 held orders belong to scope EXC-0921 (v18 rule-affected split reservations); 100% of held orders are in this scope; no order outside this scope is held",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Authoritative tier-1 exception audit; 100% correlation between v18 split reservations and held status",
+      "limitation": "Perfect correlation does not separate whether the rule change itself is the cause, or whether east-node carrier lanes have an independent issue that only affects v18-routed orders"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The exception audit shows perfect correlation between v18 split reservations and held orders. The next discriminator is whether the carrier system received and accepted these pickup orders. If carriers confirm they have the orders and are processing them, the issue is system lag. If they never received them, there is a feed lag. If they received them but rejected them, the split reservation format may be incompatible with their system. This will determine whether the root cause is a v18 rule compatibility issue or a carrier operations delay.",
+    "expected_information_gain": "Carrier-side confirmation will reveal if they see the orders, whether they accepted them, and their processing status. This is essential to discriminate between rule defect (carrier won't accept split reservations) and feed lag (orders stuck in transit)."
+  }
+}

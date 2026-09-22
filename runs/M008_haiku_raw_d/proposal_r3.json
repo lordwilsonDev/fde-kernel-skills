@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "c_r3_01",
+      "statement": "For orders in EXC-0921 (v18 split-reservation routed to east node), carrier confirmations arrive with a median latency of 47 minutes after booking, while booked pickup slots close 30 minutes after booking.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "Observability data does not explain why carrier latency is higher for EXC-0921 orders than for other east-node orders."
+    },
+    {
+      "claim_id": "c_r3_02",
+      "statement": "East-node orders outside EXC-0921 that were booked before 05:58 received carrier confirmation within their 30-minute pickup slot window and progressed normally.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "limitation": "This establishes that the problem is specific to EXC-0921, not a general east-node or carrier-wide latency."
+    },
+    {
+      "claim_id": "c_r3_03",
+      "statement": "Root cause: Rule set v18 routes split-reservation orders to east node, which are subject to a carrier confirmation latency (median 47 minutes) that exceeds the pickup slot window duration (30 minutes), causing orders to expire awaiting pickup before carrier confirmation arrives.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03"],
+      "limitation": "The root cause is confirmed as a timing race between slot window and carrier confirmation latency; the underlying reason for elevated carrier latency on split-reservation orders is not determined."
+    },
+    {
+      "claim_id": "c_r3_04",
+      "statement": "Impact: 186 orders are held indefinitely awaiting carrier confirmation that arrives too late to validate against an expired pickup slot, representing 9% of overnight allocations and an ongoing revenue/SLA impact.",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_r_handoffs"],
+      "limitation": "Impact is measured in order count and duration; customer SLA/revenue impact depends on order value and customer tier (not provided)."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The root cause is confirmed: rule set v18 routes orders to a carrier/lane with confirmation latency exceeding the slot window, causing immediate blockage. Reverting v18 will reroute affected orders away from split-reservation logic, allowing them to clear pickup slots. This is a reversible action within the single-action authorization limit. Once reverted, the 186 orders can resume normal progression. Post-incident: Carrier Operations must investigate and resolve the elevated confirmation latency on split-reservation lanes before v18 can be safely re-deployed."
+  }
+}

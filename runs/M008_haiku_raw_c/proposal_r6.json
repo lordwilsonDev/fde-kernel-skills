@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_replay_precondition_violation",
+      "statement": "Replay executed before pickup slots were corrected; orders re-booked into closed (expired) slots and remain held. This confirms m8_r_owner precondition: 'Replaying held allocations is safe only after their pickup slots have been corrected.'",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_replay_ineff"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "root_cause_confirmed_partition_2",
+      "statement": "Root cause fully established: Carrier partition 2 (east-node) feed consumer stopped at 05:58, 47 minutes behind; slots booked against stale carrier data. EXC-0921 orders have expired pickup windows (30 min slots vs 47 min confirmation lag). Consumer must be restarted to allow live data flow and enable slot correction.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_r_replay_ineff", "m8_r_slot_ineff", "m8_r_handoffs"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "mitigation_path_clear",
+      "statement": "Mitigation sequence: (1) Restart partition 2 feed consumer (DevOps/Carrier Ops); (2) Apply slot correction to partition 2 (reversible per m8_r_owner); (3) Replay allocations (safe after slots corrected per m8_r_owner precondition). Evidence: one re-booked order after carrier data refresh confirmed successfully (m8_r_handoffs).",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_r_handoffs"],
+      "limitation": "Consumer restart is outside incident assessor authority per m8_e07; requires escalation to platform team."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause firmly established with discriminating evidence: partition 2 feed consumer stuck at 05:58, creating 47-minute lag that exceeds 30-minute slot windows. V18 split reservations trigger routing to partition 2; this is the causal linkage. Impact: 186 orders stuck with expired slots. Mitigation: Restart partition 2 consumer, then apply slot correction, then replay allocations (all reversible per m8_r_owner). Consumer restart is outside assessed authority; escalate to DevOps/Carrier Operations platform team. Mission objective satisfied: root cause explained and mitigation path documented."
+  }
+}

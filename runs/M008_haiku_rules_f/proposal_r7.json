@@ -1,0 +1,29 @@
+{
+  "claims": [
+    {
+      "claim_id": "C14",
+      "statement": "The slot correction was applied to the wrong carrier feed; the east node has multiple carrier feeds and the specific feed handling the EXC-0921 orders must be identified before correction can be applied effectively",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "corroboration": "Verified from observability at trust_tier 1; the correction ran but had no effect on held orders",
+      "limitation": "Confirms multiple feeds exist; need to identify which specific feed the EXC-0921 orders are queued on"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Identification of the specific carrier feed (partition) that EXC-0921 orders are queued on",
+      "reason": "Multiple feeds serve the east node; the slot correction was applied to the wrong feed. Must identify which specific feed/partition the held orders are assigned to before reapplying the correction."
+    }
+  ],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "The previous slot correction failed because it was applied to the wrong carrier feed. The east node has multiple carrier feeds, and I need to identify which specific partition/feed the EXC-0921 orders are queued on. Reading partition offsets will show the exact feed assignment for the held orders, allowing the slot correction to be applied to the correct feed.",
+    "expected_information_gain": "Will identify the specific carrier feed (partition) handling EXC-0921 orders, enabling a targeted slot correction that extends the booking window on the correct feed to accommodate the 47-minute confirmation lag."
+  }
+}

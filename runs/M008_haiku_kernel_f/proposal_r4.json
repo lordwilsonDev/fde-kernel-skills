@@ -1,0 +1,56 @@
+{
+  "claims": [
+    {
+      "claim_id": "C005",
+      "statement": "Root cause is NOT allocation rule v18 logic defect; it is a downstream issue (carrier feed lag, inventory count drift, or dock capacity) on the east node affecting both split-reservation and standard allocations",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_e02"],
+      "corroboration": "Reverting v18 to v17 did not resolve held orders; new east-node allocations remain stuck under v17 rule. This conclusively disproves v18-logic defect and indicates a persistent downstream constraint affecting all east-node allocations.",
+      "limitation": "Cannot yet discriminate between carrier feed lag, inventory count drift, and dock capacity constraints; next diagnostic must isolate the specific downstream blocker"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X001",
+      "claim_a": "C003",
+      "claim_b": "C005",
+      "description": "C003 claims v18 split-reservation logic is the root cause; C005 claims the root cause is downstream (carrier/inventory/dock). Revert outcome (m8_r_revert) shows v18 is not the cause.",
+      "discriminating_evidence_needed": "Inventory count inspection and carrier feed status confirmation to isolate downstream blocker"
+    }
+  ],
+  "resolutions": [
+    {
+      "contradiction_id": "X001",
+      "evidence_refs": ["m8_r_revert"],
+      "outcome": "C003 disproven; C005 is the correct root cause",
+      "rationale": "m8_r_revert shows revert to v17 did not fix the held orders, meaning the allocation rule logic is not the cause. The issue persists under v17, indicating a downstream constraint."
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "C001",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C002",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C003",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C004",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "inspect_inventory_counts",
+    "kind": "diagnostic",
+    "rationale": "Discriminating evidence: determine if east-node inventory count is exhausted or drifted, preventing fulfillment of any allocated orders. This rules out or confirms inventory_count_drift mechanism.",
+    "expected_information_gain": "Inventory status will rule out or confirm inventory drift; if inventory is adequate, the blocker is carrier-side (feed lag or dock capacity)"
+  }
+}

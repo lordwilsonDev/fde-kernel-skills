@@ -1,0 +1,96 @@
+{
+  "claims": [
+    {
+      "claim_id": "C2_refined",
+      "statement": "All 186 held orders (EXC-0921 cohort) were allocated under v18 with split-reservation flag and routed to east node; 100% of held orders are in EXC-0921; no held orders outside EXC-0921.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Verified through inventory control's allocation exception audit. Tier-1 source directly addressing the exception pattern.",
+      "limitation": "Audit limitation: cannot separate v18 rule defect from east-node infrastructure issue because only v18-affected orders were routed to east node. Both hypotheses remain open."
+    },
+    {
+      "claim_id": "C6",
+      "statement": "The split-reservation format created by v18 is incompatible with carrier pickup systems or east-node carrier-integration protocol.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "corroboration": "v18 introduced multi-node east-first reservation; all split-reservation orders are now held. Timing and 100% correlation suggest causation in reservation format.",
+      "limitation": "Carriers have not yet reported back on whether they see the orders, whether they accept them, or whether they reject split-reservation format. Need carrier ops confirmation."
+    },
+    {
+      "claim_id": "C7",
+      "statement": "East-node carrier feed or dock infrastructure has a lag or defect independent of allocation, affecting only orders routed there by v18.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e02", "m8_r_exceptions"],
+      "corroboration": "Issue is geographically isolated to east-node lanes and timing aligns with when v18 began routing orders there.",
+      "limitation": "No direct evidence of east-node infrastructure issue; currently indistinguishable from v18 split-reservation incompatibility. Requires carrier ops report and dock capacity check."
+    },
+    {
+      "claim_id": "C5_split",
+      "statement": "Root cause is narrowed to: either (a) v18 creates split-reservation format carriers cannot accept, or (b) east-node carrier feed has lag/blockage independent of allocation.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e02"],
+      "corroboration": "m8_r_exceptions confirms EXC-0921 is 100% v18-affected and 100% held. Limitation ensures both branches remain live hypotheses.",
+      "limitation": "Both branches remain open. Requires carrier confirmation (branch a discriminator) and dock/feed status (branch b discriminator)."
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "X1",
+      "claim_a": "Regression suite was green and change review passed for v18.",
+      "claim_b": "v18 deployment led to split-reservation exceptions and order holds within 8 hours.",
+      "description": "If v18 was regression-tested, why did the split-reservation pattern not appear in test? Either: (1) test data lacked multi-node order volume/pattern, (2) split-reservation is expected behavior but causes downstream carrier incompatibility not tested, or (3) carrier integration test was missing.",
+      "discriminating_evidence_needed": "Review of v18 test scope (did it include multi-node order volume? carrier integration simulation?) and review of regression suite results to determine what was tested."
+    }
+  ],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Carrier confirmation: do carriers see EXC-0921 orders? Can they process split-reservation format?",
+      "reason": "Discriminates between v18 creating incompatible reservations (carriers don't accept) vs. east-node feed lag (carriers don't see or cannot reach orders). Critical for root cause."
+    },
+    {
+      "capability": "East-node dock capacity and feed status during 06:00-current window.",
+      "reason": "Discriminates between carrier-side and warehouse-side issues; needed if carrier ops confirms they can pick up the orders."
+    },
+    {
+      "capability": "v18 regression test scope and results for multi-node and carrier integration scenarios.",
+      "reason": "Resolves X1 contradiction. If tests were incomplete, explains why split-reservation pattern was not caught pre-deployment."
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Request carrier ops to confirm: (1) Do carriers have visibility into EXC-0921 orders in their system? (2) Can carriers accept and process split-reservation format orders? (3) Is there a dock/pickup lag on their side for east-node lanes, or is the issue outbound from our system? This discriminates root cause between v18 reservation format defect and independent carrier feed lag.",
+    "expected_information_gain": "High. If carriers do not see orders or cannot accept split-reservation format, root cause is v18 defect (branch a). If carriers see orders and can pick but haven't (dock delay), root cause is carrier lag or dock blockage (branch b). Response will enable root_cause claim at inferred status."
+  }
+}

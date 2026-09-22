@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "C5",
+      "statement": "Allocation rule v18's change to east-node-first multi-node reservation creates split-exception orders routed to the east-node lane; these orders are stuck in 'allocated, awaiting pickup' because the carrier integration layer does not correctly handle the split-exception pattern introduced by v18's routing change, specifically for east-node lanes",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10", "m8_r_rulehist", "m8_e02"],
+      "corroboration": "m8_r_rulehist (tier-1, verified) is discriminating: it shows the rule logic is correct and passed regression, BUT 'Replay does not exercise carrier scheduling' - meaning the bug is in the carrier integration layer. m8_e03 shows v18 changed east-node routing. m8_e10 shows all held orders are split-exceptions. m8_e02 shows failure is isolated to east-node. This pattern discriminates toward v18's routing change breaking carrier handoff for split-exceptions on east-node.",
+      "limitation": "Root cause is framed as integration-layer defect triggered by v18 routing change, not a defect in v18's reservation logic itself. The exact nature of the carrier integration failure (lag, incompatibility, missing handler) requires deeper diagnostic (trace_cohort_handoffs), but the causal chain is clear."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "The root cause (v18's east-node-first routing breaking carrier integration) is directly addressed by reverting v18's rule set to the prior version. This is reversible, idempotent for east-node reservation priority, and the only authorized mitigation that directly stops the root cause. After revert, replay_held_allocations and re-sequencing can restore delivery flow. This is warranted given 186 orders are stuck and impact is growing ('reports keep arriving' per e10).",
+    "expected_information_gain": "Confirmation that reverting v18 restores carrier pickup flow for east-node orders; this validates the root cause hypothesis. If revert succeeds, the orders will transition to pickup state."
+  }
+}

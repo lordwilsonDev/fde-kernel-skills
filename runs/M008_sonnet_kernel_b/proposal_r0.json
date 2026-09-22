@@ -1,0 +1,74 @@
+{
+ "claims": [
+  {
+   "claim_id": "C1",
+   "statement": "Allocation rule set v18 went live at 22:00 the prior night: multi-node orders now reserve stock from the east node first. Change review passed and regression suite was green.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03"],
+   "corroboration": "Single tier-1 verified source owned by Inventory Control (rule owner); sufficient for established per rules.",
+   "limitation": "Passing review/regression does not rule out an unanticipated interaction with multi-node split-reservation logic."
+  },
+  {
+   "claim_id": "C2",
+   "statement": "From 06:00, orders held in 'allocated, awaiting pickup' for more than 90 minutes reached 9% of overnight allocations, entirely on east-node lanes; other nodes are normal.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_e02"],
+   "corroboration": "Tier-1 verified monitor alert from observability.",
+   "limitation": "The alert itself states it cannot attribute a cause; east-node-only pattern is temporally correlated with C1 but not yet causally established."
+  },
+  {
+   "claim_id": "C3",
+   "statement": "Every held order was routed to the east node and flagged by the overnight allocator as a split-reservation exception; reports began about 06:00 and are ongoing.",
+   "kind": "hypothesis",
+   "status": "reported",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10"],
+   "corroboration": "Single tier-2 customer_support source; non-authoritative per its own flag.",
+   "limitation": "Not yet corroborated by an authoritative allocation-system source (Inventory Control owns allocation exceptions); cannot be established or used as root_cause discriminating evidence until audited directly."
+  },
+  {
+   "claim_id": "C4",
+   "statement": "Inventory Control reported (07:20) that allocation totals reconcile and nothing looks wrong on their side.",
+   "kind": "observation",
+   "status": "reported",
+   "mechanism_tag": "inventory_count_drift",
+   "sources": ["m8_e01"],
+   "corroboration": "Single tier-2 incident_chat source, non-authoritative.",
+   "limitation": "Informal chat statement, not a system audit; tentatively weighs against inventory_count_drift as the mechanism but is not confirmatory."
+  },
+  {
+   "claim_id": "C5",
+   "statement": "Carrier ops on-call (07:31) found nothing obvious in the dock schedule.",
+   "kind": "observation",
+   "status": "reported",
+   "mechanism_tag": "dock_capacity",
+   "sources": ["m8_e01"],
+   "corroboration": "Single tier-2 incident_chat source, non-authoritative, preliminary look only.",
+   "limitation": "Preliminary/informal; does not rule out dock_capacity or carrier_feed_lag causes, just no obvious finding yet."
+  },
+  {
+   "claim_id": "C6",
+   "statement": "Dashboards only count orders by state; they cannot show how a booked pickup relates to the carrier's own confirmation, and Inventory Control has no visibility into carrier-side records.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_e09"],
+   "corroboration": "Tier-1 verified source from observability.",
+   "limitation": "This is a structural observability gap affecting the investigation, not evidence of root cause itself."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "audit_allocation_exceptions",
+  "kind": "diagnostic",
+  "rationale": "C3 (split-reservation exceptions on held orders) rests on a single non-authoritative support_report source and is the only lead directly tying the 06:00 stuck cohort to the v18 rule change (C1). Auditing allocation exceptions directly from the authoritative allocation system (owned by Inventory Control) can corroborate or refute C3 from a distinct, higher-trust owner, and can reveal whether the exceptions are specifically caused by the east-node-first reservation logic in v18 versus some other mechanism (carrier feed lag, dock capacity, inventory drift).",
+  "expected_information_gain": "Either establishes C3 with a second distinct-owner source (moving toward established/root_cause-eligible with discriminating evidence linking v18 to the stuck orders), or refutes/narrows it, ruling allocation_rule_defect in or out before considering carrier- or dock-side diagnostics."
+ }
+}

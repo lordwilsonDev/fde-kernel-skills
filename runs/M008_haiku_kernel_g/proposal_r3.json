@@ -1,0 +1,54 @@
+{
+  "claims": [
+    {
+      "claim_id": "C7",
+      "statement": "Carrier pickup slot booking feed to east-node carrier has a lag that prevents timely slot confirmation, blocking pickup collection for all orders routed to that feed",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner", "m8_r_exceptions", "m8_e02"],
+      "corroboration": "m8_r_owner (tier-1 Carrier Ops): explicitly references 'the affected feed and its lag'; m8_r_exceptions (tier-1 DISCRIMINATING): 100% of held orders are v18-routed to east node; m8_e02 (tier-1): lag only on east-node lanes, other nodes normal",
+      "limitation": "Lag mechanism (booking queue, sync delay, partition offset) not yet identified; would be confirmed by read_partition_offsets or trace_cohort_handoffs"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Direct visibility into carrier system pickup slot acceptance",
+      "reason": "m8_e09 documents gap: dashboards cannot show booked pickup relationship to carrier's own confirmation"
+    }
+  ],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Root cause identified as carrier feed lag. This diagnostic will confirm whether the lag is in message partition offsets (unprocessed pickup requests), queue depth, or a sync delay between our allocation booking and carrier's slot confirmation system. This completes the discriminating evidence before mitigation.",
+    "expected_information_gain": "Will show if east-node carrier feed partition has lagged offsets or if the booking queue has accumulated unprocessed requests, confirming the feed lag mechanism and readiness for apply_slot_correction mitigation."
+  }
+}

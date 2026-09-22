@@ -1,0 +1,42 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [
+    {
+      "contradiction_id": "X1",
+      "evidence_refs": ["m8_r_owner"],
+      "outcome": "both_possible",
+      "rationale": "m8_r_owner confirms mitigation preconditions but does not disambiguate. We need dock capacity and partition offset evidence to discriminate whether the lag is physical (dock capacity) or logical (allocation logic). Proceeding with diagnostic to check_dock_capacity."
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "impact_estimate",
+      "reason": "Customer impact (duration, scope, financial/operational) requires formal impact assessment, not proxy counts. Blocked until obtained."
+    }
+  ],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Directly test whether the east-node dock has physical capacity constraints or if it's a logical issue. This discriminates C3 (rule logic defect) from C4 (carrier feed lag). If dock has capacity for these orders, points to rule-logic mishandling; if dock is saturated, points to carrier-side constraint.",
+    "expected_information_gain": "Will show east-node dock current capacity, utilization, and pickup slot availability. Combined with partition offset analysis, will resolve X1 (rule vs. carrier lag)."
+  }
+}

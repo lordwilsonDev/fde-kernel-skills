@@ -1,0 +1,44 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Allocation rule v18 (live 22:00 last night) reserves multi-node orders from east node first, which may cause split-reservation exceptions that conflict with carrier booking expectations",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "corroboration": "e10 reports all held orders flagged as split-reservation exceptions; e03 confirms v18 implements east-first reservation",
+      "limitation": "Change review and regression suite passed; unknown if split-reservation handling is carrier-compatible"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "Carrier feed processing is lagged or stalled on east-node lanes, preventing pickup confirmations from reaching the allocation system",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01", "m8_e02"],
+      "corroboration": "e01 reports carriers not collecting; e02 shows 9% of east-node allocations held >90min, other nodes normal (strong node-specific signal)",
+      "limitation": "No carrier-side observability; dock schedule shows nothing obvious (per Carrier Ops)"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "East node dock capacity is constrained or unavailable, preventing carrier pickups",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_e02"],
+      "corroboration": "e02 shows only east node affected; problem is geographically scoped",
+      "limitation": "Carrier Ops stated nothing obvious on dock schedule; needs direct capacity verification"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "Determine if carrier feed pipeline is processing orders or stalled. If offsets are lagged, points to feed processing issue (e.g., consumer lag, broker backlog). If current, points away from feed infrastructure toward order/booking mismatch.",
+    "expected_information_gain": "Discriminates between carrier_feed_lag and allocation_rule_defect/dock_capacity hypotheses"
+  }
+}

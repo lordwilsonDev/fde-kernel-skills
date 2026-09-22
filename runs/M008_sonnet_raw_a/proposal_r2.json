@@ -1,0 +1,46 @@
+{
+ "claims": [
+  {
+   "claim_id": "c10",
+   "statement": "Root cause: for the EXC-0921 cohort (split-reservation orders under v18, routed to east node), carrier pickup confirmations arrive a median of 47 minutes after booking, but the booked pickup slot closes after only 30 minutes -- so slots systematically expire before carrier confirmation lands, leaving these orders stuck in 'allocated, awaiting pickup'. This is specific to the split-reservation cohort, not a general east-node problem: east-node orders outside the cohort, booked before 05:58, confirmed fine within their slots. A single order that was re-booked after the carrier data refreshed received a valid slot, directly demonstrating the fix.",
+   "kind": "root_cause",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e09"],
+   "limitation": "Two distinct tier-1 owners (observability's handoff trace, inventory_control's exception audit) corroborate the mechanism and the timing gap is discriminating (cohort vs non-cohort east-node orders behave differently, and the one re-booked order confirms the causal direction). Not yet confirmed directly by Carrier Operations, the process owner for pickup scheduling and carrier integration (m8_e06), which is the next check before mitigating."
+  },
+  {
+   "claim_id": "c5",
+   "statement": "Hypothesis: v18's east-node-first reservation logic is producing split-reservation exceptions on multi-node orders that leave stock allocated but never handed off to a carrier-collectible pickup state.",
+   "kind": "hypothesis",
+   "status": "reported",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03", "m8_e10"],
+   "limitation": "Refined by c10: the reservation/allocation step itself is not shown to be defective -- v18's split-reservation flow is the trigger that exposes a downstream carrier-confirmation-vs-slot-window timing mismatch (c10), not a broken allocation rule per se. Downgraded from hypothesized pending further owner confirmation; superseded by c10 as the operative mechanism."
+  },
+  {
+   "claim_id": "c7",
+   "statement": "Hypothesis: carrier-side pickup confirmation/feed lag is an alternative or contributing mechanism, since carrier ops found nothing obvious on the dock schedule and the system cannot see carrier-side confirmation state.",
+   "kind": "hypothesis",
+   "status": "inferred",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_e01", "m8_e09", "m8_r_handoffs"],
+   "limitation": "Upgraded from unknown to inferred: m8_r_handoffs now provides positive, cohort-specific timing evidence supporting this mechanism as the operative one (folded into root_cause c10)."
+  },
+  {
+   "claim_id": "c9",
+   "statement": "The EXC-0921 correlation was confounded because only rule-affected orders were routed to the east node under v18.",
+   "kind": "inference",
+   "status": "inferred",
+   "mechanism_tag": "unknown",
+   "sources": ["m8_r_exceptions", "m8_e09"],
+   "limitation": "Resolved by c10: m8_r_handoffs shows non-cohort east-node orders confirm fine within their slots, which separates the node effect from the cohort-specific carrier-confirmation-timing effect, breaking the confound."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "confirm_with_carrier_ops",
+  "kind": "diagnostic",
+  "rationale": "Carrier Operations owns carrier integration and pickup scheduling (m8_e06), and any mitigation that re-books or corrects pickup slots touches their domain. Before proposing a mitigation (e.g. replaying the held allocations now that carrier confirmation data has caught up, as the one anecdotal re-booked order in m8_r_handoffs suggests would work), the owner should confirm the carrier feed has actually caught up / stabilized and that a replay or slot correction is safe now. This verifies the precondition for mitigation rather than acting on inference alone, and stays within read-only diagnostic authority."
+ }
+}

@@ -1,0 +1,66 @@
+{
+  "claims": [
+    {
+      "claim_id": "c0_1",
+      "statement": "Allocation rule set v18 went live at 22:00 and orders became stuck at 06:00 on the east node only, establishing a temporal and operational correlation",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e02"],
+      "limitation": null
+    },
+    {
+      "claim_id": "c0_2",
+      "status": "reported"
+    },
+    {
+      "claim_id": "c0_3",
+      "status": "reported"
+    },
+    {
+      "claim_id": "c0_4",
+      "status": "hypothesized"
+    },
+    {
+      "claim_id": "c1_1",
+      "status": "established"
+    },
+    {
+      "claim_id": "c1_2",
+      "status": "hypothesized"
+    },
+    {
+      "claim_id": "c2_1",
+      "statement": "EXC-0921 orders (v18 split-reservation orders) are booked at a timing that causes them to miss the carrier confirmation window: median confirmation arrival is 47 minutes post-booking, but pickup slots close after 30 minutes, whereas non-EXC-0921 orders booked before 05:58 receive confirmations within their slot windows",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_handoffs"],
+      "limitation": null
+    },
+    {
+      "claim_id": "c2_2",
+      "statement": "The root cause is that v18's allocation behavior changed the booking timing for split-reservation orders, placing them outside the carrier confirmation window",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03"],
+      "limitation": "The exact change in v18 that caused the timing shift has not been reviewed; this is inferred from the perfect correlation between v18 deployment, EXC-0921 scope, and the timing window miss"
+    },
+    {
+      "claim_id": "c2_3",
+      "statement": "The impact is 186 orders held in 'awaiting pickup' state, representing 9% of overnight allocations, blocking customer fulfillment",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e02", "m8_e01"],
+      "limitation": null
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The discriminating evidence shows EXC-0921 orders miss their carrier confirmation window due to booking timing. Re-booking these orders with a corrected slot that provides sufficient time for the 47-minute median confirmation latency will allow them to clear their slots when confirmations arrive. This is a surgical, reversible action that addresses the root cause without rolling back v18. One order already cleared when re-booked after the carrier data refreshed, confirming the mitigation path. Authority allows one reversible mitigation action."
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "claims": [
+    {
+      "claim_id": "c0_1",
+      "statement": "Allocation rule set v18 went live at 22:00 and orders became stuck at 06:00 on the east node only, establishing a temporal and operational correlation",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e02"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "c0_2",
+      "status": "reported"
+    },
+    {
+      "claim_id": "c0_3",
+      "status": "reported"
+    },
+    {
+      "claim_id": "c0_4",
+      "status": "hypothesized"
+    },
+    {
+      "claim_id": "c1_1",
+      "status": "established"
+    },
+    {
+      "claim_id": "c1_2",
+      "status": "hypothesized"
+    },
+    {
+      "claim_id": "c2_1",
+      "statement": "EXC-0921 orders (v18 split-reservation orders) are booked at a timing that causes them to miss the carrier confirmation window: median confirmation arrival is 47 minutes post-booking, but pickup slots close after 30 minutes, whereas non-EXC-0921 orders booked before 05:58 receive confirmations within their slot windows",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_handoffs"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "c2_2",
+      "statement": "The root cause is that v18's allocation behavior changed the booking timing for split-reservation orders, placing them outside the carrier confirmation window",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e03"],
+      "limitation": "The exact parameter/logic change in v18 that shifted booking timing requires code review; the root mechanism is established via discriminating evidence"
+    },
+    {
+      "claim_id": "c2_3",
+      "statement": "The impact is 186 orders held in 'awaiting pickup' state, representing 9% of overnight allocations, blocking customer fulfillment",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e02", "m8_e01"],
+      "limitation": ""
+    },
+    {
+      "claim_id": "c3_1",
+      "statement": "The applied mitigation (slot correction) failed because it was directed to the wrong feed before confirmation of the exact failure mechanism",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": ""
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Root cause is established with discriminating evidence: v18 changed allocation behavior such that split-reservation orders (EXC-0921, 100% of stuck orders) are booked at a timing that places them outside the carrier confirmation window (47-minute median latency vs. 30-minute slot closure). Non-rule-affected orders booked earlier were confirmed successfully. The attempted mitigation (slot correction) failed due to being applied to the wrong feed, requiring human operator involvement to correct. The next steps—detailed code review of v18, adjustment of booking timing or partial rollback, and re-application of the correction—fall outside automated incident assessment and require engineering decision-making."
+  }
+}

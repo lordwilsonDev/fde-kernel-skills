@@ -1,0 +1,38 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C4",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Root cause established (C6: carrier partition 2 feed consumer stopped at 05:58, blocking pickup-window updates). Mitigations executed: (1) apply_slot_correction - corrected partition 2 pickup slots to current availability (m8_r_slot, reversible); (2) replay_held_allocations - replayed 186 held orders into corrected slot windows (m8_r_replay, reversible). Impact confirmed (m8_r_impact): 186 orders held, 9% of overnight allocations, orders delayed not cancelled. No stock loss. All pending claims have dispositions.",
+    "expected_information_gain": "Assessment complete. Root cause identified, mitigations authorized and applied, impact quantified."
+  }
+}

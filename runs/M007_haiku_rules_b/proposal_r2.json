@@ -1,0 +1,34 @@
+{
+  "claims": [
+    {
+      "claim_id": "C10",
+      "statement": "The mitigation action (evict_entitlement_entries) successfully resolved the incident; authorization failures dropped from 31% to 1% within 3 minutes after cache eviction.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_evict"],
+      "corroboration": "Tier-1 verified observability data showing measurable impact",
+      "limitation": "1% baseline reflects normal application error rate, not persistent incident"
+    },
+    {
+      "claim_id": "C11",
+      "statement": "The root cause of the support agent access failures was confirmed to be a stale authorization cache in the customer-records app that served version 41 entitlements for users whose roles had been updated to version 42.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e03", "m7_e02", "m7_r_traces", "m7_r_evict"],
+      "corroboration": "Multiple tier-1 sources form complete chain: directory change at 02:10 (m7_e03), failures at 08:30 (m7_e02), version mismatch confirmed (m7_r_traces), mitigation resolved via cache eviction (m7_r_evict). No competing hypotheses remain viable.",
+      "limitation": "Root cause identification complete; underlying mechanism of why app cache failed to refresh remains undiagnosed but not necessary for incident resolution"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Mission objective complete. Root cause established: stale authorization cache in customer-records app serving v41 when directory held v42 for 214 role-updated users. Timeline: directory synced 02:10 → incident began 08:30 → eviction mitigation applied and succeeded (31%→1% in 3min). Highest-information authorized next step was taken (evict_entitlement_entries) and was approved and executed by human gate. Incident resolved.",
+    "expected_information_gain": "N/A - assessment complete"
+  }
+}

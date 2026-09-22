@@ -1,0 +1,13 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Trace whether split-exception orders are progressing through our internal handoff logic (order → allocation → carrier integration → carrier pickup) or stuck at a specific handoff boundary. If split-exception orders are stuck in OUR handoff layer (not reaching carrier systems), this is discriminating evidence that v18's change broke OUR carrier integration, not a carrier-side issue. This directly discriminates between allocation-rule-side defect vs carrier-side lag/issue.",
+    "expected_information_gain": "Where exactly split-exception orders from the east-node cohort are stuck in the handoff pipeline; which system boundary (ours/carrier) they fail to cross; whether the failure is consistent across all 186 orders or selective"
+  }
+}

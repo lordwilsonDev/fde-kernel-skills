@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim_id": "C13",
+      "statement": "The east-node carrier's median confirmation time is 47 minutes after booking, while our booked pickup slots close after 30 minutes. Orders booked after 05:58 have their slots close before receiving carrier confirmation, trapping them in 'allocated, awaiting pickup'",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs"],
+      "corroboration": "Verified from observability at trust_tier 1; discriminating evidence is that orders booked before 05:58 were confirmed within their slots, and re-booked orders received valid slots after carrier data refreshed",
+      "limitation": "Specific carrier feed operations and why confirmation takes 47 minutes not detailed; only the timing mismatch is quantified"
+    },
+    {
+      "claim_id": "C10",
+      "statement": "The root cause is a slot-timing mismatch on the east-node carrier feed: the carrier requires a median 47 minutes to confirm pickups, but our booking system closes slots after 30 minutes. The 186 held orders (booked after 05:58) have slots that expired before receiving carrier confirmation, trapping them in an unresolvable awaiting-pickup state.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_exceptions", "m8_e02"],
+      "corroboration": "Median 47-minute confirmation lag vs 30-minute slot window (m8_r_handoffs); all 186 held orders routed to east node (m8_r_exceptions); timing aligns with booking window starting 05:58 (m8_r_handoffs, m8_e02)",
+      "limitation": "Root cause fully established with discriminating evidence and no contradiction"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C10",
+      "action": "refine"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The root cause is now fully established: slot-timing mismatch. The east-node carrier needs ~47 minutes to confirm pickups but our system closes booking slots after 30 minutes, creating a 17-minute gap during which orders are trapped. The mitigation is to apply_slot_correction to the east-node carrier feed, extending pickup slot windows to accommodate the documented 47-minute confirmation lag. This is reversible, scoped to the affected feed (east node), and the lag is confirmed (47 minutes median). Correcting the slot timing will allow carrier confirmations to arrive within valid pickup windows.",
+    "expected_information_gain": "Applying slot correction will resolve the timing mismatch and allow the 186 held orders to complete their pickup confirmations within valid slots, unblocking the incident."
+  }
+}

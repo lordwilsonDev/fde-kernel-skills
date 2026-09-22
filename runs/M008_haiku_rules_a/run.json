@@ -1,0 +1,325 @@
+{
+ "world": "M008",
+ "mode": "rules",
+ "enforce": false,
+ "round": 5,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "established",
+      "result": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)",
+      "reason": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [
+     "See carrier-side confirmation of pickup receipt and readiness.",
+     "Detailed meaning of split-reservation exception flag in allocation context."
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Audit all split-reservation exceptions from overnight allocations in the last 24 hours (before and after v18 deployment). This isolates whether split-reservation is a v18-specific output or a pre-existing pattern. If split-reservation exceptions did not occur pre-v18 but do post-v18, this discriminates C5 hypothesis toward the allocation rule defect branch.",
+    "expected_information_gain": "High. Will establish whether v18 fundamentally changed exception output, narrowing root cause to allocation rule defect vs. coincidental carrier lag."
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C5"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C2_refined",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C6",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C7",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C5_split",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [
+     "Carrier confirmation: do carriers see EXC-0921 orders? Can they process split-reservation format?",
+     "East-node dock capacity and feed status during 06:00-current window.",
+     "v18 regression test scope and results for multi-node and carrier integration scenarios."
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Request carrier ops to confirm: (1) Do carriers have visibility into EXC-0921 orders in their system? (2) Can carriers accept and process split-reservation format orders? (3) Is there a dock/pickup lag on their side for east-node lanes, or is the issue outbound from our system? This discriminates root cause between v18 reservation format defect and independent carrier feed lag.",
+    "expected_information_gain": "High. If carriers do not see orders or cannot accept split-reservation format, root cause is v18 defect (branch a). If carriers see orders and can pick but haven't (dock delay), root cause is carrier lag or dock blockage (branch b). Response will enable root_cause claim at inferred status."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C5",
+     "C2_refined",
+     "C6",
+     "C7",
+     "C5_split"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C8",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C9",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C10",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [
+     {
+      "contradiction": "X1",
+      "result": "opened"
+     }
+    ],
+    "resolutions": [],
+    "gaps": [
+     "East-node dock capacity, queue depth, and congestion status during 06:00-current window.",
+     "Carrier-side confirmation: do they see and accept split-reservation format, or do they reject it?"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "Verify east-node dock capacity, queue depth, and congestion during the 06:00-current window. If dock is at capacity or backed up, lag is likely infrastructure-limited and independent of v18; if dock is normal, v18's split-reservation pattern likely triggered carrier feed lag. This discriminates root cause: revert v18 (if carrier format incompatibility) vs. apply slot corrections (if dock saturation)",
+    "expected_information_gain": "High. Dock capacity check isolates the root cause mechanism within the confirmed carrier-feed lag, enabling decision between revert_allocation_ruleset and apply_slot_correction mitigations."
+   },
+   "sim": {
+    "released": "m8_r_dock",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C5",
+     "C2_refined",
+     "C6",
+     "C7",
+     "C5_split",
+     "C8",
+     "C9",
+     "C10"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C7_disproven",
+      "from": null,
+      "to": "disproven",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C11",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [
+     {
+      "contradiction": "X1",
+      "result": "violation:resolved_without_discriminating_evidence"
+     }
+    ],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "Revert allocation rule set v18 to v17 to eliminate the split-reservation format that is incompatible with carrier protocol. This will prevent future orders from being allocated under v18 split-reservation rules. The action is reversible and idempotent, scoped to east-node reservation priority only. After revert, existing EXC-0921 held orders can be re-allocated under v17 rules via replay_held_allocations, which will generate single-node (non-split) reservations that carriers can process.",
+    "expected_information_gain": "Mitigation: reverting v18 removes the root cause mechanism. Replaying held allocations will re-route orders to compatible (non-split) reservation patterns, enabling carrier pickup."
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C3",
+     "C5",
+     "C2_refined",
+     "C6",
+     "C7",
+     "C5_split",
+     "C8",
+     "C9",
+     "C10",
+     "C11"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C10"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C11_disproven",
+      "from": null,
+      "to": "disproven",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C12",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C13",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause identified as east-node carrier feed infrastructure defect independent of allocation rules (C12). Primary hypothesis (v18 split-reservation incompatibility, C11) was tested via revert and DISPROVEN. East-node dock is normal (m8_r_dock), ruling out warehouse saturation. Evidence converges on carrier-side issue. Warehouse diagnostics will not narrow further without carrier escalation.",
+    "expected_information_gain": "Assessment complete. Root cause: east-node carrier feed defect. Status: v18 revert failed to resolve holds. Recommendation: escalate to carrier ops for carrier-side diagnostics and apply_slot_correction after lag confirmation."
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

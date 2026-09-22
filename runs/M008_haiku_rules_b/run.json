@@ -1,0 +1,348 @@
+{
+ "world": "M008",
+ "mode": "rules",
+ "enforce": false,
+ "round": 7,
+ "done": true,
+ "denials": [],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C1",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C2",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C3",
+      "from": null,
+      "to": "reported",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "audit_allocation_exceptions",
+     "confirm_with_carrier_ops"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "The split-reservation exception is the most specific signal; understanding why every held order carries this flag will discriminate between allocation-rule defect and carrier-integration lag",
+    "expected_information_gain": "Clarify whether v18's east-node priority is causing over-reservation, under-reservation, or a fence-post error in split-order handling"
+   },
+   "sim": {
+    "released": "m8_r_exceptions",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C4",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C5",
+      "from": null,
+      "to": "established",
+      "result": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)",
+      "reason": "violation:single non-authoritative source (need tier-1 or >=2 distinct tier<=2 owners)"
+     },
+     {
+      "claim_id": "C6",
+      "from": null,
+      "to": "hypothesized",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "confirm_with_carrier_ops"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "C4 establishes that the 186 held orders are all v18-affected; C5 rules out inventory drift. Now need to determine if carrier has acknowledged slots for these orders or if the issue is purely on the allocation rule side. This is the highest-information next step to narrow the root cause.",
+    "expected_information_gain": "If carrier confirms no pickup slots recorded for EXC-0921 orders, the defect is in v18 allocation logic. If carrier has slots on file, the issue is a feed integration lag on our side."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C4",
+     "C5",
+     "C6"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C7",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "review_rule_history"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "We have two plausible mechanisms: (1) v18 allocation logic is defective, causing split-reservation that prevents valid pickup, or (2) v18 is working correctly but interacts with a carrier feed lag. Reviewing the rule change history will clarify the intent and implementation of v18's east-node priority logic, discriminating between these hypotheses.",
+    "expected_information_gain": "Understanding what v18 changed will reveal whether the split-reservation is an intended side effect or a defect, and whether it could prevent carrier pickup integration"
+   },
+   "sim": {
+    "released": "m8_r_rulehist",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C4",
+     "C5",
+     "C6",
+     "C7"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C8",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C9",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "trace_cohort_handoffs"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "C8 establishes that carrier scheduling was untested in v18 regression. C9 infers that the issue is at the intersection of v18 split-reservation and carrier scheduling. Tracing the cohort handoffs will show precisely where EXC-0921 orders stall and with what system they interact at that point.",
+    "expected_information_gain": "Reveal whether the bottleneck is: (a) the allocation-to-carrier-feed transition, (b) dock capacity/assignment logic, or (c) confirmed carrier-side lag; this will discriminate whether reverting v18 or correcting slots is the appropriate mitigation"
+   },
+   "sim": {
+    "released": "m8_r_handoffs",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C10",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C11",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "C10 establishes the root cause as the timing mismatch between 30-minute slot window and 47-minute carrier lag on the east-node feed. apply_slot_correction is reversible and scoped to the affected feed, and the lag has been explicitly confirmed. This is safer and more surgical than reverting all of v18.",
+    "expected_information_gain": "Extending the slot closure window will allow carrier confirmations to arrive before slots expire, releasing the 186 held orders for pickup."
+   },
+   "sim": {
+    "released": "m8_r_slot_ineff",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C10"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C12",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "C10 established the root cause as the timing mismatch created by v18's split-reservation routing to east node. C12 shows the slot-correction approach failed in implementation. Reverting v18 (east-node reservation priority) is reversible and idempotent per the human gate conditions; it will prevent the split-reservation routing that creates orders booking to the east-node feed with insufficient slot closure window. This is a more reliable mitigation than attempting a scoped slot correction that requires precise feed identification.",
+    "expected_information_gain": "Reverting v18 will move EXC-0921 orders back to the previous allocation rule set, which did not route them to the east node; this should release the held orders for carrier pickup and demonstrate that v18's routing change is the root cause."
+   },
+   "sim": {
+    "released": "m8_r_revert",
+    "flagged_for_revalidation": [
+     "C1",
+     "C2",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12"
+    ]
+   },
+   "gate": [
+    true,
+    "conditions met via C10"
+   ],
+   "authority": [
+    "allowed",
+    "approved by human gate"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C13",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     },
+     {
+      "claim_id": "C14",
+      "from": null,
+      "to": "established",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "The investigation has conclusively established the root cause: the east-node carrier feed's 47-minute confirmation lag vs. the 30-minute slot closure window. V18 and attempted mitigations (slot correction to wrong feed, allocation rule revert) have both failed or been shown to address the wrong level. The root cause requires operational coordination with Carrier Operations to extend the east-node feed's slot window to accommodate the known confirmation lag. This assessment documents the root cause and supporting evidence for the incident commander and Carrier Operations to take next steps.",
+    "expected_information_gain": "Complete"
+   },
+   "sim": "final assessment received"
+  }
+ ]
+}

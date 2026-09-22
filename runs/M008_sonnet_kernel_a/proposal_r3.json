@@ -1,0 +1,29 @@
+{
+ "claims": [
+  {
+   "claim_id": "C6",
+   "statement": "186 orders (about 9% of overnight allocations) are currently held in 'allocated, awaiting pickup'. This is a count of totals only (no per-order manifest); no stock is lost and no order is cancelled, only delayed.",
+   "kind": "impact",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_impact", "m8_r_exceptions", "m8_e02"],
+   "corroboration": "Tier-1 verified authoritative count (m8_r_impact, owner observability) matches the earlier tier-1 exception-audit count (186, m8_r_exceptions) and the monitor alert's 9% figure (m8_e02); not a proxy support-contact count.",
+   "limitation": "Totals only; does not enumerate individual affected orders/customers, so downstream customer-facing impact (e.g. SLA breach count) is not itself quantified here."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "apply_slot_correction",
+  "kind": "mitigation",
+  "rationale": "Root-cause claim C4 (status=inferred, discriminating evidence m8_r_handoffs, no open contradiction) shows the east-node carrier feed's confirmation lag (median 47 min) exceeds the booked pickup slot's close window (30 min) for the v18 split-reservation cohort EXC-0921, so slots lapse before confirmation lands. apply_slot_correction's scope is 'reversible; scoped to the affected carrier feed's pickup slots only; run only after the lag on that feed is confirmed' - that lag is now confirmed for exactly this feed/cohort. This is more surgical than revert_allocation_ruleset (which would remove the intended east-node-priority business logic entirely, not just fix the timing defect) and is a precondition for replay_held_allocations (which requires slots to be corrected first). One cohort order that was re-booked after carrier data refreshed already received a valid slot, supporting that correcting the slot timing resolves the block.",
+  "expected_information_gain": "N/A (mitigation): directly remediates the confirmed timing defect for the affected feed/cohort within the human-gate's approved scope, without touching order/queue data."
+ }
+}

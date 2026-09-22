@@ -1,0 +1,65 @@
+{
+  "round": 0,
+  "claims": [
+    {
+      "claim_id": "c1_timing_correlation",
+      "statement": "The order-hold incident began approximately 06:00, coinciding with when overnight allocation using rule set v18 became active. Allocation rule set v18 went live at 22:00 the previous evening.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02", "m8_e03"],
+      "limitation": "Timing correlation alone does not establish causation; regression suite for v18 reportedly passed."
+    },
+    {
+      "claim_id": "c2_east_node_localization",
+      "statement": "The hold affects only east-node lanes (9% of overnight allocations), while other nodes operate normally. The change in v18 prioritizes east-node reservation for multi-node orders.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02", "m8_e03"],
+      "limitation": "Geographic correlation suggests but does not confirm the new reservation logic is at fault."
+    },
+    {
+      "claim_id": "c3_split_reservation_exception",
+      "statement": "Every held order was flagged by the overnight allocator as a split-reservation exception and routed to the east node. Split-reservation exceptions began arriving at 06:00 and continue.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "limitation": "The data establishes that split-reservation exceptions are present in all held orders, but not whether this exception state is the cause of the hold or a symptom."
+    },
+    {
+      "claim_id": "c4_regression_test_gap",
+      "statement": "Allocation rule set v18 passed its regression suite before deployment; however, the regression suite does not explicitly cover the new split-reservation exception scenario on east-node multi-node orders.",
+      "kind": "inference",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "limitation": "Regression suite status is verified, but its scope is not documented. Hypothesis that it missed split-reservation handling is plausible but unconfirmed."
+    },
+    {
+      "claim_id": "c5_inventory_not_root_cause",
+      "statement": "Inventory Control reports that allocation totals reconcile and nothing appears wrong on their side. The held orders exist and their stock is allocated.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "limitation": "Rules out inventory count drift or stock depletion as the root cause, but does not eliminate the possibility of a rule logic defect."
+    },
+    {
+      "claim_id": "c6_carrier_ops_no_pickup",
+      "statement": "Carriers are not collecting the orders, and Carrier Operations reports nothing obvious in the dock schedule. The observability gap means Carrier Ops cannot see how booked pickups relate to carrier confirmations.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01", "m8_e09"],
+      "limitation": "Carrier side may not be receiving pickup signals, or may be receiving conflicting signals; observability gap prevents diagnosis without explicit trace."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "The strongest temporal and mechanical correlation points to allocation rule set v18. The split-reservation exception and east-node localization are consistent with the new multi-node reservation logic. Review the detailed change history of v18 to understand: (1) exactly which logic changed, (2) whether split-reservation scenarios were tested, (3) whether the change is known to interact with carrier pickup scheduling. This diagnostic will confirm or refute the allocation_rule_defect hypothesis with evidence specific to the exact code change."
+  }
+}

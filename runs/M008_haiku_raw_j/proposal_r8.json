@@ -1,0 +1,9 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause fully established with discriminating evidence: allocation rule v18 routes split-reservation orders to carrier partition 2, whose pickup-window feed consumer broke at 05:58, creating 47-minute data staleness that exceeds the 30-minute slot window. This mechanism causes 186 orders (scope EXC-0921) to remain permanently held. Prevention mitigation: rule v18 reverted to v17 to stop new allocations. Remediation path: Carrier Ops must restart partition 2's consumer, re-correct pickup slots for EXC-0921, then replay allocations. Assessment complete; incident escalated to Carrier Operations."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "claim_id": "c13",
+      "statement": "The slot correction succeeded: pickup slots for the affected carrier feed (partition 2) were realigned to current carrier availability, and new bookings now confirm inside their slots. Held orders remain held until their allocation windows are replayed. The action is confirmed reversible.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot"],
+      "limitation": "Confirms the mitigation fixed the underlying feed/slot mismatch (c10/c12) but does not itself clear the 186 already-held orders; they need a replay against the corrected slots, per Carrier Operations' own stated sequencing (m8_r_owner)."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "Carrier Operations (m8_r_owner) stated replaying held allocations is safe only after pickup slots have been corrected. c13 (m8_r_slot) confirms the slot correction succeeded and new bookings now confirm inside their slots -- the stated precondition is now met. Replaying the held allocations for EXC-0921 is the remaining step to actually clear the 186 stuck orders against the now-correct carrier availability data. This is a reversible, read-order-preserving action within authorized bounds (m8_e07): it does not cancel, reroute, force-release, or purge anything, it re-runs allocation for the already-legitimately-allocated cohort."
+  }
+}

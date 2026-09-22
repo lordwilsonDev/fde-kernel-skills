@@ -1,0 +1,56 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "The customer-records app is serving entitlements at version 41 while the directory has been updated to version 42; after manual cache refresh one affected user succeeded with version 42.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces"],
+      "corroboration": "Tier-1 verified observability data; directly shows version mismatch and validates fix",
+      "limitation": "Sample may not represent all affected users, though the scope (214 changed roles) and timing match perfectly"
+    },
+    {
+      "claim_id": "C9",
+      "statement": "The root cause is a stale authorization cache in the customer-records app: the app failed to refresh entitlements after the directory role sync at 02:10, leaving it serving version 41 to users whose roles were updated to version 42.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e03", "m7_e02", "m7_r_traces"],
+      "corroboration": "Timeline: directory synced 02:10 with 214 role changes (m7_e03); failures began ~08:30 (m7_e02) affecting exactly those 214 users (m7_e11); traces confirm v41 cache not updated to v42 (m7_r_traces). Manual refresh fixes it. All evidence discriminates this from role_sync_error (directory succeeded) and idp_claim_error (directory correct).",
+      "limitation": "Root cause identifies cache staleness but not the underlying mechanism causing the app to fail its refresh (could be broken sync hook, timing issue, deployment side effect, etc.)"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "There is a version mismatch between the directory's current role assignments and what the customer-records app is serving from its local entitlement cache.",
+      "kind": "inference",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_traces"],
+      "corroboration": "m7_r_traces directly shows v41 in app vs v42 in directory; contractor observation (m7_e08) is now corroborated by tier-1 data",
+      "limitation": "Now refined with tier-1 evidence"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [
+    {
+      "contradiction_id": "X1",
+      "evidence_refs": ["m7_r_traces"],
+      "outcome": "resolved",
+      "rationale": "X1 asked how directory could be correct while app denies access. m7_r_traces proves both are correct: directory holds v42 (correct role update), app holds v41 (stale cache). The app is enforcing old entitlements against users with new roles, explaining the 403s. This is not a directory error, it is an app-level cache synchronization failure."
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "C5",
+      "action": "downgrade"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "evict_entitlement_entries",
+    "kind": "mitigation",
+    "rationale": "Root cause (C9) established: app cache at v41 vs directory at v42. Discriminating evidence (m7_r_traces) confirms version mismatch is the sole issue. Manual refresh proved the fix works. Evict_entitlement_entries is reversible, scoped to affected users only, and directly addresses the stale cache. This clears the old v41 entries, forcing the app to fetch v42 from the directory on next access.",
+    "expected_information_gain": "Mitigation success will confirm cache staleness was the issue; affected users will regain access to customer records within the refresh cycle."
+  }
+}

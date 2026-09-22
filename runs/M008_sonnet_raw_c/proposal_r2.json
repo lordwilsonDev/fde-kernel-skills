@@ -1,0 +1,82 @@
+{
+  "claims": [
+    {
+      "claim_id": "c1",
+      "statement": "186 orders allocated overnight to the east node are stuck in 'allocated, awaiting pickup'; the stuck-order alert independently confirms 9% of overnight allocations from 06:00 breached the 90-minute threshold, all on east-node lanes, with other nodes normal.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "limitation": "Preserved from round 0; unchanged by new evidence."
+    },
+    {
+      "claim_id": "c2",
+      "statement": "Allocation rule set v18 went live at 22:00, changing multi-node orders to reserve stock from the east node first; change review passed and regression suite was green.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "limitation": "Preserved from round 0. Note the tag reflects the change's topic, not a confirmed defect; see c10 for the now-favored mechanism."
+    },
+    {
+      "claim_id": "c3",
+      "statement": "Every held order was routed to the east node and flagged by the overnight allocator as a split-reservation exception, with reports beginning about 06:00 and continuing.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e10"],
+      "limitation": "Mechanism tag refined (was allocation_rule_defect): the handoff trace (m8_r_handoffs) shows split-reservation orders specifically require a carrier confirmation step whose lag exceeds the slot window, which is a more precise explanation than a generic rule-defect label. Still a single tier-2 source for the flag itself."
+    },
+    {
+      "claim_id": "c4",
+      "statement": "Working hypothesis: v18's east-first multi-node reservation logic is producing split-reservation exceptions that leave east-node orders allocated but not releasable to carrier pickup.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02", "m8_e03", "m8_e10", "m8_r_exceptions"],
+      "limitation": "Now disfavored: m8_r_handoffs shows a timing mechanism (47-min median carrier confirmation vs a 30-min slot window) that fully accounts for the stuck state without requiring a defect in the v18 reservation logic itself, and shows east-node orders outside the cohort booked before 05:58 confirmed fine. Kept at hypothesized (not discarded) rather than upgraded, since it has not been formally falsified by a rule-code inspection, only superseded in explanatory weight by c10."
+    },
+    {
+      "claim_id": "c5",
+      "statement": "Inventory Control reports allocation totals reconcile and nothing looks wrong on their side.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "inventory_count_drift",
+      "sources": ["m8_e01"],
+      "limitation": "Preserved from round 0. Consistent with c10: if the cause is carrier-side confirmation lag rather than an inventory/reservation defect, Inventory Control's totals would indeed reconcile."
+    },
+    {
+      "claim_id": "c6",
+      "statement": "Carrier ops on-call is reviewing the dock schedule and has found nothing obvious so far; no emergency overrides have been made.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_e01"],
+      "limitation": "Preserved from round 0. Dock capacity remains unconfirmed as a factor either way; c10 points to confirmation-feed timing rather than physical dock capacity, but this has not been directly ruled out by carrier ops themselves yet."
+    },
+    {
+      "claim_id": "c7",
+      "statement": "There is an observability gap: dashboards show order state only, not how a booked pickup relates to the carrier's own confirmation, and Inventory Control cannot see carrier-side records.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e09"],
+      "limitation": "Partially closed by m8_r_handoffs, which measured booking-to-confirmation timing directly for EXC-0921 despite the general dashboard gap. The underlying platform gap (no standing dashboard view) still exists."
+    },
+    {
+      "claim_id": "c10",
+      "statement": "Root cause: for the EXC-0921 cohort, carrier pickup-slot confirmations arrive a median of 47 minutes after booking, but the booked slot closes after 30 minutes -- the slot expires before confirmation registers, leaving these orders stuck in 'allocated, awaiting pickup' even though allocation itself succeeded. East-node orders outside the cohort booked before 05:58 confirmed inside their slots, and one order that was re-booked after the carrier data refreshed received a valid slot, showing the state is recoverable once fresh carrier data is used. This is a carrier confirmation-feed timing/lag problem, not a stock, inventory-totals, or dock-capacity problem, and not evidence of a defect in v18's reservation logic itself.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_e02", "m8_e09", "m8_r_exceptions"],
+      "limitation": "Discriminating evidence: m8_r_handoffs directly compares slot-close time (30 min) against confirmation-arrival time (47 min median) for the exact affected cohort, has a within-dataset control (pre-05:58 east-node orders confirmed fine), and a positive recovery case (re-booking after data refresh succeeded) -- ruling out allocation_rule_defect, inventory_count_drift, and dock_capacity as the primary mechanism. Not yet independently confirmed by Carrier Operations (the process owner for pickup scheduling per m8_e06); that confirmation is the next step before mitigating."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "m8_r_handoffs (observability-side) gives strong discriminating evidence for a carrier confirmation-feed timing root cause (c10), but Carrier Operations owns pickup scheduling and carrier integration (m8_e06) and has not yet confirmed this from their side -- their on-call was still 'looking at the dock schedule, nothing obvious' as of the incident channel. Confirming with the owning team verifies the precondition before proposing any mitigation (e.g. replay_held_allocations), reducing the risk of mitigating on a misattributed cause. This stays within authorized read-only bounds (m8_e07)."
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C4",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "With pickup slots now corrected by apply_slot_correction (m8_r_slot), the held orders in EXC-0921 can be replayed into the allocation windows that now overlap the corrected slots. This is reversible, idempotent, and the necessary next step to move held orders toward shipment.",
+    "expected_information_gain": "Replay will allow the 186 stuck orders to transition from 'allocated, awaiting pickup' to confirmed pickup status, enabling carrier collection."
+  }
+}

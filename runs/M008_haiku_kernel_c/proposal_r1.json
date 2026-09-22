@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "C4",
+      "statement": "Allocation rule v18 (live at 22:00, prioritizing east-node for multi-node orders) created split-reservation exceptions that concentrated orders on the east-node lane, exceeding its carrier pickup capacity or integration handling; this is the root cause of the stall.",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e03", "m8_e10", "m8_e02"],
+      "corroboration": "m8_r_exceptions (discriminating): 100% of 186 held orders are EXC-0921 (rule v18 split reservations routed to east). Rule v18 went live at 22:00 (m8_e03). All held orders flagged split-reservation (m8_e10). 9% of overnight east-node allocations held (m8_e02).",
+      "limitation": "m8_r_exceptions notes: cannot separate rule change effect from east-node-specific effect, because only rule-affected orders routed there. Need dock capacity or carrier confirmation diagnostic to confirm east-node as bottleneck."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "refine"
+    },
+    {
+      "claim_id": "C2",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "C3",
+      "action": "downgrade"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "check_dock_capacity",
+    "kind": "diagnostic",
+    "rationale": "To discriminate whether the root cause is east-node capacity exhaustion vs carrier integration lag. If dock is full or near capacity at the time the orders arrived, that confirms the bottleneck is physical capacity on the east lane.",
+    "expected_information_gain": "Will establish whether east-node dock is the limiting factor, or whether issue is elsewhere (carrier scheduling, allocation handler timeout, etc.)"
+  }
+}

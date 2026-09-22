@@ -1,0 +1,341 @@
+{
+ "world": "M008",
+ "mode": "kernel",
+ "enforce": true,
+ "round": 9,
+ "done": true,
+ "denials": [
+  {
+   "action": "replay_held_allocations",
+   "result": "escalate",
+   "reason": "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+  }
+ ],
+ "log": [
+  {
+   "round": 0,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": null,
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "carrier_feed_lag"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "Replaying held allocations may resolve the split-reservation exceptions caused by the east-node rule change, as this action is reversible and within the scope of the human gate.",
+    "expected_information_gain": "Confirm if replaying allocations resolves the issue, providing insight into the root cause."
+   },
+   "sim": "blocked (escalate: no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose)",
+   "gate": [
+    false,
+    "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+   ],
+   "authority": [
+    "escalate",
+    "approval required; converted to escalation"
+   ]
+  },
+  {
+   "round": 1,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "carrier_feed_lag diagnosis"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The root_cause claim cites support reports and rule change logs, which are non-authoritative but may be sufficient for a reversible mitigation action. The action is within the scope and reversible.",
+    "expected_information_gain": "Confirm if replaying held allocations resolves the issue, providing insight into the impact of the rule change."
+   },
+   "sim": "blocked (escalate: no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose)",
+   "gate": [
+    false,
+    "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+   ],
+   "authority": [
+    "escalate",
+    "approval required; converted to escalation"
+   ]
+  },
+  {
+   "round": 2,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "replay_held_allocations"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The root_cause claim cites support reports and rule change logs, which are non-discriminating. A discriminative evidence artifact is needed to justify this mitigation.",
+    "expected_information_gain": "Confirm if the split-reservation exceptions are indeed causing the carriers to fail processing, which would validate the need for replaying held allocations."
+   },
+   "sim": "blocked (escalate: no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose)",
+   "gate": [
+    false,
+    "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+   ],
+   "authority": [
+    "escalate",
+    "approval required; converted to escalation"
+   ]
+  },
+  {
+   "round": 3,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "confirm_with_carrier_ops"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Verify if carriers are unable to process the split-reservation exceptions, which would confirm the root cause and inform the next steps.",
+    "expected_information_gain": "Confirmation of carrier-side processing failure, which would support the root_cause claim and guide potential mitigation actions."
+   },
+   "sim": {
+    "released": "m8_r_owner",
+    "flagged_for_revalidation": [
+     "C001"
+    ]
+   },
+   "authority": [
+    "allowed",
+    "read-only/allowed"
+   ]
+  },
+  {
+   "round": 4,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "direct carrier-side processing evidence"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The root_cause claim cites discriminant evidence (m8_e03 and m8_e10), and the action is reversible and within scope. The human gate requires this action to be proposed for approval.",
+    "expected_information_gain": "Confirm if the split-reservation exceptions are causing the carriers to reject pickups, and if so, determine the affected carrier feeds and lag."
+   },
+   "sim": "blocked (escalate: no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose)",
+   "gate": [
+    false,
+    "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+   ],
+   "authority": [
+    "escalate",
+    "approval required; converted to escalation"
+   ]
+  },
+  {
+   "round": 5,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "replay_held_allocations"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The root_cause claim is inferred, but lacks discriminating evidence. Proposing mitigation to trigger human gate review for necessary evidence.",
+    "expected_information_gain": "Confirmation of carrier-side processing failure or alternative root causes."
+   },
+   "sim": "blocked (escalate: no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose)",
+   "gate": [
+    false,
+    "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+   ],
+   "authority": [
+    "escalate",
+    "approval required; converted to escalation"
+   ]
+  },
+  {
+   "round": 6,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "carrier_feed_lag diagnosis"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The root_cause claim cites support reports and rule change logs, which are non-authoritative but relevant. Replaying held allocations is reversible and scoped to the east-node lanes, as per the rule change and carrier_ops confirmation.",
+    "expected_information_gain": "Confirm if replaying allocations resolves the issue, providing evidence of the rule defect's impact."
+   },
+   "sim": "blocked (escalate: no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose)",
+   "gate": [
+    false,
+    "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+   ],
+   "authority": [
+    "escalate",
+    "approval required; converted to escalation"
+   ]
+  },
+  {
+   "round": 7,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "direct carrier-side processing validation"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The root_cause claim cites support reports and rule change logs, which are non-authoritative. However, the evidence suggests a potential defect in the allocation rules that may be causing the issue. Replaying held allocations could help resolve the stranded orders if the root_cause is confirmed.",
+    "expected_information_gain": "Confirm whether replaying held allocations resolves the stranded orders, providing insight into the effectiveness of the proposed mitigation."
+   },
+   "sim": "blocked (escalate: no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose)",
+   "gate": [
+    false,
+    "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+   ],
+   "authority": [
+    "escalate",
+    "approval required; converted to escalation"
+   ]
+  },
+  {
+   "round": 8,
+   "results": {
+    "claims": [
+     {
+      "claim_id": "C001",
+      "from": "inferred",
+      "to": "inferred",
+      "result": "accepted",
+      "reason": "ok"
+     }
+    ],
+    "contradictions": [],
+    "resolutions": [],
+    "gaps": [
+     "detect carrier-side processing failure"
+    ],
+    "next_action": null,
+    "pending_review": []
+   },
+   "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The root_cause claim cites support reports and rule change logs, which are non-discriminating. However, the action is reversible and within the scope stated for it. The human gate requires a root_cause claim at >= inferred with discriminating evidence, which is not currently present. Therefore, the next step is to propose the mitigation action for review.",
+    "expected_information_gain": "Confirm if the replay of held allocations resolves the issue, providing insight into the impact of the allocation rule change."
+   },
+   "sim": "blocked (escalate: no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose)",
+   "gate": [
+    false,
+    "no root_cause claim at >= inferred cites a discriminating evidence artifact; cite one (see evidence[].discriminating) and re-propose"
+   ],
+   "authority": [
+    "escalate",
+    "approval required; converted to escalation"
+   ]
+  }
+ ]
+}

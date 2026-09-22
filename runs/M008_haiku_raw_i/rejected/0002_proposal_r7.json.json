@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "c15_slot_correction_failed",
+      "statement": "The apply_slot_correction action was applied to the wrong carrier feed and did not change the state of held orders. This indicates that the slot correction requires precise targeting of the correct feed and source of the carrier confirmation latency. Without clear identification of which feed is responsible for the 47-minute latency, corrective actions at the allocation layer are ineffective.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": "The failure reveals a gap between the allocation system and carrier operations; the correct feed to correct is known to Carrier Operations but not yet identified to the assessment."
+    },
+    {
+      "claim_id": "c16_final_assessment_root_cause",
+      "statement": "The root cause of the incident is established: allocation rule set v18 creates split-reservation exception orders (EXC-0921) that experience a carrier confirmation latency of median 47 minutes, while their booking slots close after 30 minutes. This timing mismatch causes 186 orders to miss their pickup slots and remain stuck in 'allocated, awaiting pickup'. The orders are not fundamentally unable to be picked up (one order successfully received a slot after re-booking) and no stock is lost. The resolution requires investigation and correction by Carrier Operations to address the confirmation latency for split-reservation orders.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+      "limitation": "The assessment cannot determine why split-reservation orders specifically incur 47-minute confirmation latency; this requires carrier-side investigation. The short-term mitigations (replay and slot correction) cannot proceed without Carrier Operations' direct involvement."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "The investigation has established the root cause with high confidence: allocation rule set v18 introduces split-reservation exception orders that experience a carrier confirmation latency of median 47 minutes, exceeding the 30-minute booking slot window. This causes 186 orders (9% of overnight allocations) to miss their initial pickup slots. No stock is lost; the orders are delays not cancellations. The recovery mechanism is known (re-booking after confirmation), but implementing it requires Carrier Operations to identify and correct the source of the confirmation latency. The allocation system cannot independently resolve this issue. The incident is understood; the next step is escalation to Carrier Operations for root-cause investigation and remediation of the split-reservation order confirmation delay."
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "Orders allocated overnight to east node are stuck in 'allocated, awaiting pickup' state, with all affected orders flagged as split-reservation exceptions by the allocation system.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e02", "m8_e10"],
+      "corroboration": "Alert (m8_e02, tier-1) confirms 9% of overnight allocations held on east-node lanes since 06:00; fulfilment report (m8_e10, tier-2) confirms all held orders flagged as split-reservation exceptions.",
+      "limitation": "Observation confirms the symptom (stuck orders + split-reservation flags) but not the mechanism. Split-reservation exceptions could indicate a rule defect, insufficient inventory at east node, or a carrier-side failure to acknowledge."
+    },
+    {
+      "claim_id": "C2",
+      "statement": "Allocation rule set v18, deployed at 22:00, changed east-node stock reservation priority for multi-node orders and may be causally related to the morning allocation failures.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03"],
+      "corroboration": "Timing: rule went live 8 hours before stuck orders appeared (06:00). Pattern specificity: stuck orders limited to east node, matching the scope of v18 change (east-node priority for multi-node orders).",
+      "limitation": "Timing correlation is not causation. Change review passed and regression suite was green; those tests may not cover overnight multi-node allocations under the new east-node-first logic. No evidence yet of the specific defect."
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Carrier-side systems have a confirmation lag or are not acknowledging pickup availability for the subset of orders waiting on the east-node feed.",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e09"],
+      "corroboration": "Observability gap (m8_e09, tier-1) confirms internal dashboards cannot see how booked pickups relate to carrier-side confirmations. Carrier Ops initial check did not identify dock/schedule issues.",
+      "limitation": "No direct evidence of carrier system failure. Requires trace of carrier integration logs and confirmation handoff to rule in/out."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Carrier confirmation visibility",
+      "reason": "Cannot discriminate between allocation-rule-defect (v18 bug causing invalid splits) and carrier-feed-lag (valid allocations but carrier not picking up) without tracing the handoff from booked pickup to carrier-side confirmation."
+    }
+  ],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "Determine whether split-reservation exceptions are logically correct given v18 rule (inventory legitimately insufficient at east node to fulfill orders) or whether v18 has a defect (reserving incorrectly, failing to try fallback nodes). Discriminates between allocation-rule-defect and carrier-feed-lag hypotheses.",
+    "expected_information_gain": "If v18 is correctly splitting across nodes but carriers are not collecting, points to carrier-side issue. If v18 is incorrectly refusing to split or mis-reserving stock, points to rule defect in v18."
+  }
+}

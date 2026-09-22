@@ -1,0 +1,34 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "count_stranded_orders",
+    "kind": "diagnostic",
+    "rationale": "Now that trace_cohort_handoffs has run and revealed where split-exception orders are stuck in our system, count the exact number of stranded orders to quantify impact. This feeds the impact_estimate requirement and, combined with handoff trace results, provides a complete diagnostic picture for the mitigation decision.",
+    "expected_information_gain": "Exact count of orders currently stranded in 'allocated, awaiting pickup' state; confirmation of the 186 figure; breakdown by order characteristics if available"
+  }
+}

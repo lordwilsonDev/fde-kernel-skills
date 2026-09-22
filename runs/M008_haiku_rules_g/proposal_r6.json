@@ -1,0 +1,70 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C7",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C8",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C9",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C10",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C11",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C12",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C13",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C14",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "read_partition_offsets",
+    "kind": "diagnostic",
+    "rationale": "To identify the specific carrier feed(s) responsible for the 47-minute confirmation lag, I need to read the partition offsets for EXC-0921 orders. This will show which carrier feed(s) the 186 orders are routed to and help identify which feed's lag is causing the slot-timing mismatch. Once identified, apply_slot_correction can be re-run on the correct feed only.",
+    "expected_information_gain": "Identification of the specific carrier feed(s) from the partition data; this enables the next mitigation attempt."
+  }
+}

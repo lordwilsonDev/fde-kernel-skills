@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c4_01",
+      "statement": "East-node dock and labour capacity are normal with no queueing; physical bottleneck is ruled out",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "dock_capacity",
+      "sources": ["m8_r_dock"],
+      "limitation": "Absence of dock constraint does not eliminate other carrier-side issues"
+    },
+    {
+      "claim_id": "c4_02",
+      "statement": "Root cause is carrier feed integration or pickup slot assignment defect, not dock capacity or allocation logic",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_dock", "m8_r_exceptions", "m8_r_rulehist"],
+      "limitation": "Specific failure point in carrier workflow not yet identified"
+    },
+    {
+      "claim_id": "c4_03",
+      "statement": "v18-generated split-reservation order format appears incompatible with carrier pickup scheduling system",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_exceptions", "m8_e10"],
+      "limitation": "Incompatibility could be format-based, feed-lag-based, or slot-assignment-based"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "Dock capacity is normal; allocation logic is sound. Problem is in carrier workflow. Trace the handoff of EXC-0921 split-reservation orders through: allocation → order transmission → carrier feed ingestion → pickup slot assignment → carrier scheduling. Identify exact failure point: are orders rejected by carrier feed, lost in queue, or assigned incompatible slots?"
+  }
+}

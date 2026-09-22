@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "claim_id": "C8",
+      "statement": "Carrier Operations has procedures for handling carrier feed lag and pickup slot corrections, and these are reversible and can be scoped to single feeds",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "corroboration": "Verified from carrier_ops authority at trust_tier 1",
+      "limitation": "Confirms process readiness but does not confirm whether a carrier_feed_lag actually exists; still need to determine if lag is present and which feed is affected"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "We have established that 100% of held orders correlate perfectly with v18's split-reservation logic and east-node routing, but we cannot yet discriminate whether this is a defect in the rule logic itself or a carrier-side pickup issue. Reviewing v18's rule history will show whether this rule change introduced a known defect or whether the regression suite that passed actually covers this scenario. If v18 has a known issue or bypass, it would discriminate allocation_rule_defect. If history is clean, we should focus on carrier-side diagnostics.",
+    "expected_information_gain": "Will determine whether the allocation rule set v18 introduced a defect that can generate invalid split-reservation sequences, or whether the rule logic is correct and the problem is downstream (carrier feed lag, dock capacity, or handoff observability issue)."
+  }
+}

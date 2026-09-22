@@ -1,0 +1,41 @@
+{
+ "claims": [
+  {
+   "claim_id": "C3",
+   "statement": "Every held order was routed to the east node and flagged by the overnight allocator as a split-reservation exception (scope EXC-0921); reports began about 06:00 and are ongoing.",
+   "kind": "hypothesis",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10", "m8_r_exceptions"],
+   "corroboration": "Now corroborated by a tier-1 verified exception_audit from Inventory Control (the allocation-system owner), a distinct owner from the original tier-2 customer_support report; tier-1 source alone is sufficient for established.",
+   "limitation": "The audit itself states this cannot separate an effect of the rule change from an effect specific to the east-node lanes, because only rule-affected orders were routed there (100% overlap is confounded, not yet causal)."
+  },
+  {
+   "claim_id": "C7",
+   "statement": "The stuck cohort (186 orders, scope EXC-0921) is 100% coincident with orders that received a v18 split-reservation exception; no order outside EXC-0921 is held. This is a strong correlation between rule v18's east-node-first reservation logic and the stuck state, but not yet discriminating between an allocation-side defect and an unrelated east-node-specific carrier/dock issue, since only rule-affected orders were ever routed to the east node.",
+   "kind": "inference",
+   "status": "inferred",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_exceptions", "m8_e03", "m8_e02"],
+   "corroboration": "Tier-1 exception_audit (m8_r_exceptions) plus tier-1 rule record (m8_e03) and tier-1 monitor alert (m8_e02), all consistent.",
+   "limitation": "Confounded: cannot yet distinguish 'the split-reservation exception itself blocks pickup handoff' from 'something independent about east-node lanes (carrier feed lag, dock capacity) is the true blocker and the rule change is merely why orders went there'. Needs a diagnostic that traces where in the pipeline the block occurs."
+  }
+ ],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "refine"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C6", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "trace_cohort_handoffs",
+  "kind": "diagnostic",
+  "rationale": "m8_r_exceptions explicitly flags a confound: 100% of held orders are in EXC-0921, but only rule-affected orders were ever routed to the east node, so correlation with v18 cannot yet be separated from an unrelated east-node-specific issue (carrier feed lag, dock capacity). Now that the scope EXC-0921 is on record, tracing the cohort's handoffs from allocation through to carrier pickup will show precisely where the pipeline breaks (e.g., the split-reservation exception itself prevents the pickup handoff to the carrier, vs. the handoff completes normally and a separate east-node carrier/dock issue is blocking collection).",
+  "expected_information_gain": "Produces discriminating evidence that resolves the confound noted in C7/m8_r_exceptions, needed before any claim can be upgraded to kind=root_cause, and rules in or out carrier_feed_lag/dock_capacity as the true mechanism versus allocation_rule_defect."
+ }
+}

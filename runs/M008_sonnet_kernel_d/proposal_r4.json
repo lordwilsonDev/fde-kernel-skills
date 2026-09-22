@@ -1,0 +1,20 @@
+{
+ "claims": [],
+ "contradictions": [],
+ "resolutions": [],
+ "dispositions": [
+  {"claim_id": "C1", "action": "preserve"},
+  {"claim_id": "C2", "action": "preserve"},
+  {"claim_id": "C3", "action": "preserve"},
+  {"claim_id": "C4", "action": "preserve"},
+  {"claim_id": "C5", "action": "preserve"},
+  {"claim_id": "C6", "action": "preserve"}
+ ],
+ "capability_gaps": [],
+ "next_action": {
+  "action": "count_stranded_orders",
+  "kind": "diagnostic",
+  "rationale": "apply_slot_correction was approved and applied last round for the affected carrier feed. Now in the CORRECTING phase, the highest-information step is to verify the effect of the applied correction: count how many EXC-0921 orders remain stuck in 'allocated, awaiting pickup'. This both checks whether the mitigation actually resolved the stalled cohort (versus only partially or not at all) and produces the impact_estimate the checklist still flags as missing, since proxy support-contact counts cannot substitute for an actual stranded-order count.",
+  "expected_information_gain": "Post-mitigation stranded-order count, confirming whether the slot correction fixed the confirmation-vs-slot-window mismatch identified in C6 or whether the fix was insufficient and further correction (e.g., replay_held_allocations or escalation) is needed."
+ }
+}

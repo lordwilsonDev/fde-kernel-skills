@@ -1,0 +1,54 @@
+{
+  "claims": [
+    {
+      "claim_id": "c0_1",
+      "status": "established"
+    },
+    {
+      "claim_id": "c0_2",
+      "statement": "Every stuck order is flagged as a 'split-reservation exception' by the overnight allocator",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10"],
+      "limitation": "Single tier-2 source; downgrading from established to reported"
+    },
+    {
+      "claim_id": "c0_3",
+      "statement": "Inventory Control confirms that allocation totals reconcile and nothing looks wrong on their side",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "limitation": "Single tier-2 source; downgrading from established to reported"
+    },
+    {
+      "claim_id": "c0_4",
+      "status": "hypothesized"
+    },
+    {
+      "claim_id": "c1_1",
+      "statement": "All 186 stuck orders belong to allocation scope EXC-0921 (split-reservation orders under v18), and no order outside EXC-0921 is held, establishing perfect correlation between the rule change and the stuck state",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Correlation is complete but mechanism remains unknown: could be v18 logic defect, east-node infrastructure issue, or handoff disruption"
+    },
+    {
+      "claim_id": "c1_2",
+      "statement": "The root cause is either a defect in v18's split-reservation logic, an infrastructure failure specific to the east node, or a failure in the allocation-to-carrier handoff for EXC-0921 orders",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_e03"],
+      "limitation": "Three competing mechanisms remain unresolved; new evidence is needed to discriminate"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "trace_cohort_handoffs",
+    "kind": "diagnostic",
+    "rationale": "EXC-0921 orders are perfectly correlated with stuck state. To discriminate between a v18 logic defect and an east-node or carrier integration failure, we need to trace how these orders flow from allocation to carrier scheduling. If orders reach the carrier system but pickups are not confirmed, the problem is carrier-side or observability-driven. If orders do not reach the carrier system, the problem is in the allocation→carrier handoff, likely caused by v18 logic. This diagnostic is highest-leverage for narrowing the root-cause mechanism."
+  }
+}

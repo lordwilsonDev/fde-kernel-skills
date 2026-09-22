@@ -1,0 +1,53 @@
+{
+  "claims": [
+    {
+      "claim_id": "c8_01",
+      "statement": "Root cause: Carrier partition 2 pickup-window feed consumer failure (stopped 05:58, 47+ min behind). This is an infrastructure failure, not an allocation logic defect.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_offsets", "m8_r_revert"],
+      "limitation": "None - verified by evidence that reverting allocation logic did not resolve the issue"
+    },
+    {
+      "claim_id": "c8_02",
+      "statement": "v18 allocation rule is correct; reverting it did not fix held orders. ANY order routed to partition 2 gets stuck, proving the issue is downstream feed failure, not upstream allocation logic.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert"],
+      "limitation": "None - conclusive evidence"
+    },
+    {
+      "claim_id": "c8_03",
+      "statement": "Contributing factor: v18 concentrated 186 split-reservation multi-node orders to partition 2, amplifying the impact of partition 2's feed failure. But feed failure is the root cause; v18 merely exposed it.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "limitation": "v18 may have triggered or exacerbated feed failure but is not the root cause"
+    },
+    {
+      "claim_id": "c8_04",
+      "statement": "Impact: 186 orders held; 3,900 collateral allocations reshuffled with duplicates from failed mitigation attempt; partition 2 continues to accept orders that will immediately get stuck.",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert"],
+      "limitation": "None"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "contra_1",
+      "claim_a": "c5_02 (v18 allocation rule has defect in slot assignment)",
+      "claim_b": "c8_02 (v18 allocation logic is correct; reverting did not fix held orders)",
+      "description": "Evidence from m8_r_revert demonstrates that the allocation logic is correct; the root cause is partition 2's feed consumer, not v18's algorithm. Initial hypothesis was incorrect."
+    }
+  ],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause definitively established: Carrier partition 2 feed consumer failure (stalled at 05:58, 47+ min behind). Evidence proves allocation logic is correct (reverting v18 did not fix stuck orders; new orders to partition 2 still stuck). This is infrastructure/operational failure owned by Carrier Operations. Mitigation requires: (1) Carrier Ops diagnose/restart partition 2 feed consumer, (2) Clear queue allow recovery, (3) Apply targeted slot correction to partition 2, (4) Replay 186 held orders. Assessment complete. Escalation to Carrier Operations for feed restoration."
+  }
+}

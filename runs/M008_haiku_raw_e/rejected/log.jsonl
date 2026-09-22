@@ -1,0 +1,4 @@
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "status must be one of ['disproven', 'established', 'hypothesized', 'inferred', 'reported', 'stale', 'unknown']", "path": "$.claims[0].status", "n": 1, "at": "2026-09-22T12:31:27.453747+00:00"}
+{"ok": false, "error_code": "UNKNOWN_SOURCE", "message": "source 'root_cause_001' is not an artifact in this run", "path": "$.claims[1].sources[1]", "n": 2, "at": "2026-09-22T12:32:51.415595+00:00"}
+{"ok": false, "error_code": "UNKNOWN_SOURCE", "message": "source 'obs_014' is not an artifact in this run", "path": "$.claims[1].sources[2]", "n": 3, "at": "2026-09-22T12:34:07.671866+00:00"}
+{"ok": false, "error_code": "INVALID_PROPOSAL", "message": "next_action.action is not in the authority list", "path": "$.next_action.action", "n": 4, "at": "2026-09-22T12:34:15.504569+00:00"}

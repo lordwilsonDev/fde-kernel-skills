@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c_r1_01",
+      "statement": "All 186 held orders belong to exception scope EXC-0921 (allocated under rule set v18 with split reservation and routed to east node).",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Scope is defined by rule v18 routing to east node; cannot yet determine if problem is v18 logic or east-node-specific."
+    },
+    {
+      "claim_id": "c_r1_02",
+      "statement": "No held orders exist outside exception scope EXC-0921; all non-v18 orders are progressing normally.",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "limitation": "Confirms problem is specific to v18 split-reservation logic, not a general east-node or carrier-wide issue."
+    },
+    {
+      "claim_id": "c_r1_03",
+      "statement": "Rule set v18 introduced a change to reserve multi-node order stock from the east node first, which caused 100% of affected orders to be allocated as split-reservation exceptions and routed to the east node.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "limitation": "The rule change and the exception behavior are correlated; causality and mechanism remain to be determined via rule history review."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "To determine whether the split-reservation exception and east-node routing are intended behaviors of rule v18 or defects, we must review the exact change made in the rule deployment. If split-reservation + east-node routing are by design and other nodes have no such orders, the issue is carrier/dock side; if other nodes should have split-reservation orders but don't, the rule logic itself is defective. This diagnostic is read-only and will clarify the mechanism: allocation logic vs. carrier integration."
+  }
+}

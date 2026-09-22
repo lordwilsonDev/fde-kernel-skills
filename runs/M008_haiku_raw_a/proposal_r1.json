@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c1_01",
+      "statement": "Allocation rule set v18 replay testing passed - rule logic is correct and matches specification",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_rulehist"],
+      "limitation": "Replay does not exercise carrier scheduling integration; defect could still exist at carrier handoff"
+    },
+    {
+      "claim_id": "c1_02",
+      "statement": "Multi-node orders prioritizing east-node reservation is correctly implemented per v18 change",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_rulehist"],
+      "limitation": "Testing covered allocation logic only, not downstream carrier pickup workflow"
+    },
+    {
+      "claim_id": "c1_03",
+      "statement": "Problem is likely carrier-side: carrier not collecting despite successful allocation, and replay testing gap excludes carrier integration",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_rulehist", "m8_e10"],
+      "limitation": "Carrier-side state unknown; observability gap prevents seeing carrier confirmation"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "Allocation logic validated. Carrier not collecting despite 186 orders in 'allocated, awaiting pickup' state. Need carrier ops to confirm: (1) did they receive pickup signals for these 186 orders? (2) what is east-node dock capacity/schedule status? (3) is there any system integration issue between our allocation signal and their pickup scheduling? This will disambiguate carrier_feed_lag vs dock_capacity vs other carrier-side defect."
+  }
+}

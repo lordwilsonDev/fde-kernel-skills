@@ -1,0 +1,2 @@
+OK: code matches original registration
+Credit balance is too low

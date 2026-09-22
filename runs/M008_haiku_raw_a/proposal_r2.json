@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "c2_01",
+      "statement": "Carrier ops response implies problem is with pickup slot assignment, not carrier collection capability",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "limitation": "Carrier ops does not explicitly identify the root cause; language is cautious and implies diagnosis incomplete"
+    },
+    {
+      "claim_id": "c2_02",
+      "statement": "Carrier feed lag is suspected; affected feed must be identified before corrections can be applied",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_owner"],
+      "limitation": "Specific affected feed not yet named; lag magnitude unknown"
+    },
+    {
+      "claim_id": "c2_03",
+      "statement": "All 186 stuck orders are flagged as split-reservation exceptions, suggesting systematic issue with how v18 allocates pickup slots for multi-node orders",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e10", "m8_r_owner"],
+      "limitation": "Exception details not yet examined; may be valid exceptions or indicate misconfiguration"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "audit_allocation_exceptions",
+    "kind": "diagnostic",
+    "rationale": "All stuck orders are split-reservation exceptions. Need to understand: (1) what makes these orders split-reservation exceptions? (2) do they have incompatible pickup slot assignments? (3) is there a systematic pattern in how v18 assigns slots that causes carrier feed incompatibility? This audit will determine if the root cause is allocation logic defect, pickup slot misconfiguration, or feed compatibility issue."
+  }
+}

@@ -1,0 +1,28 @@
+{
+ "claims": [
+  {
+   "claim_id": "c8",
+   "statement": "Allocation exception audit confirms 100% of the 186 held orders fall in scope EXC-0921 (split reservation under v18, routed to east node), and no order outside EXC-0921 is held.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_r_exceptions"],
+   "limitation": "Perfect correlation within the audited scope."
+  },
+  {
+   "claim_id": "c9",
+   "statement": "The EXC-0921 correlation is confounded: only rule-affected (split-reservation) orders were routed to the east node under v18, so the data cannot yet separate an allocation-rule defect (c5) from a node-specific handoff problem at the east node (dock capacity or carrier-side feed/confirmation lag, c7) that would affect any order landing there.",
+   "kind": "inference",
+   "status": "inferred",
+   "mechanism_tag": "unknown",
+   "sources": ["m8_r_exceptions", "m8_e09"],
+   "limitation": "This is an explicit limitation stated by the audit itself (m8_r_exceptions); it blocks promoting c5 to root_cause until discriminating evidence traces the handoff chain rather than just the allocation-time flag."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "trace_cohort_handoffs",
+  "kind": "diagnostic",
+  "rationale": "Scope EXC-0921 is now on record. Tracing the handoff chain (allocation -> pickup-slot creation -> carrier confirmation) for this cohort is the highest-information next step: it can show whether the break happens at allocation/reservation time (supporting allocation_rule_defect, c5) or later at pickup-slot/carrier handoff (supporting dock_capacity or carrier_feed_lag, c7), resolving the confound in c9 without touching any node-wide data that would still leave rule-effect vs node-effect entangled. Stays within read-only diagnostic authority."
+ }
+}

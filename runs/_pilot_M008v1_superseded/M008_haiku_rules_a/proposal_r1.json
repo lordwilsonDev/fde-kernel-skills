@@ -1,0 +1,102 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "186 orders allocated overnight to east node are stuck in 'allocated, awaiting pickup' state since 06:00; carriers are not collecting them",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "corroboration": "Incident channel (tier-2) + Observability alert (tier-1, distinct owner) confirm 9% held on east node only",
+      "limitation": "None for current observation"
+    },
+    {
+      "claim_id": "C2",
+      "statement": "All 186 held orders are flagged by the allocator as split-reservation exceptions",
+      "kind": "observation",
+      "status": "inferred",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Allocation exception audit (tier-1, Inventory Control) confirms 100% of held orders are in cohort EXC-0921 which was allocated under v18 with split reservation",
+      "limitation": "Audit does not explain why split-reservation exception causes pickup hold"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Allocation rule set v18 went live at 22:00 last night; it changed multi-node order reservation to prioritize east node first",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e03"],
+      "corroboration": "Change record (tier-1, verified) confirms v18 live 22:00; regression suite passed",
+      "limitation": "Regression suite does not cover production scaling or split-reservation interaction"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "No orders outside scope EXC-0921 are held; EXC-0921 is the complete set of v18-routed, split-reservation-flagged orders",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Exception audit (tier-1, Inventory Control) confirms 100% of held orders are in EXC-0921 and no held order outside it",
+      "limitation": "Cannot distinguish if issue is v18 rule defect or pre-existing east-node lane issue (confounding per audit limitation)"
+    },
+    {
+      "claim_id": "H1",
+      "statement": "Allocation rule v18's east-node-first reservation logic triggers split-reservation exception flag; this flag or its downstream consequences prevent carrier pickup execution for affected orders",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions"],
+      "corroboration": "v18 deployed 22:00; EXC-0921 (v18-routed orders) shows 100% correlation with held status; no held orders outside v18-affected cohort; other nodes normal (m8_e02)",
+      "limitation": "Causality confirmed but intent unknown: is split-reservation hold intended or a defect? Requires review of rule history"
+    },
+    {
+      "claim_id": "H2",
+      "statement": "Carrier pickup feed is lagging or unable to execute for 186 orders due to carrier-side or dock constraints",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e09", "m8_e01"],
+      "corroboration": "Observability gap prevents confirmation; Carrier ops on-call found nothing obvious",
+      "limitation": "Weakened by m8_r_exceptions: other nodes are normal and only v18-affected orders held; rules out carrier-wide or east-node dock issues as sole cause"
+    },
+    {
+      "claim_id": "H3",
+      "statement": "East node dock staging capacity is saturated, blocking carrier pickup for all orders routed there",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "dock_capacity",
+      "sources": [],
+      "corroboration": "Large cohort correlates with v18 routing priority",
+      "limitation": "Significantly weakened: non-v18 orders on east node are not held per m8_r_exceptions; suggests east-node capacity is not the blocker for non-v18 orders, so unlikely sole cause"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "H2",
+      "action": "downgrade"
+    },
+    {
+      "claim_id": "H3",
+      "action": "downgrade"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "Rule v18 history: what changed in split-reservation logic, is the exception flag intended to hold orders, or is hold a downstream defect?",
+      "reason": "Critical to determine if v18 is working as designed (not a defect) or if it contains a bug"
+    },
+    {
+      "capability": "Confirmation from carrier ops: did they receive pickup requests for EXC-0921 orders, and if so, why were they not executed?",
+      "reason": "If carrier received requests and can execute but is not, then v18 triggering is not the root cause. If they did not receive requests, then v18/allocation is holding them before handoff"
+    }
+  ],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "H1 is now inferred with discriminating evidence: 100% of held orders are v18-routed with split-reservation flag, and 0% of held orders are outside that cohort. Other nodes are unaffected. This perfectly discriminates v18 from carrier-wide or dock-capacity causes. The remaining unknown is whether v18's split-reservation hold is intended behavior or a defect. Reviewing rule history will show: (1) what split-reservation was designed to do, (2) whether v18 introduced or changed this behavior, (3) whether hold-until-resolution is documented. This determines if v18 is functioning as designed (not a defect, needs operational mitigation) or contains a bug (defect mitigation required).",
+    "expected_information_gain": "Clarify whether split-reservation hold is intended design or a bug in v18, narrowing the mitigation path"
+  }
+}

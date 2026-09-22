@@ -1,0 +1,24 @@
+{
+ "created_utc": "2026-09-21T23:57:11.464143+00:00",
+ "files_seen": {
+  "../.claude/settings.json": "80e88c2286b07e3b9ccaef6bdc861a8200996581a1e7fcb3c5c6c82d071e6707",
+  "blind_guard.py": "792d8d5067a173c8f05b7bd90686b1e7f42c9667815f36a8e8ffa292f30473dc",
+  "driver.py": "b5a8df17bf6a2f2f16dbed8565649d3bcf176619cda25cfaf7e8aeb8c26889c8",
+  "driver_m008.py": "50ac5f15d2eac2aaae6a83a7f779d565b14335e360561f3828b1e4bdde513c4b",
+  "inspect_run.py": "d7d4ee481300a1fb2d1728a266aa5fac173c86676984250e7194ed1f2dacf0ec",
+  "kernel.py": "5a045324b460dbdb7354dfd13ab2da58452ca852faa926a1ee0875f0b729a485",
+  "lint_scenario.py": "9df1e8a6d04939152fa95aa237d28f0891d8c57e63377c51a0122998f7aaacb2",
+  "manifest.py": "3997ac23929f87072678863bb32a3841ffc11ce575106f343a8ab2f2f5afc9a0",
+  "report.py": "5d46f4fb5515500dead394fd28ca3203529c834ec102cf0e2ba4945d8dd5bbed",
+  "run_blind_m008.sh": "188ef2384887b87bf898f80717cedff5052a427ca1b9b8a7f5b99b388f51e915",
+  "schema.sql": "bd4f9267fb0e246a28b47b8183d8618664e738d797f523bf77cc5d583dc6f8fc",
+  "simulator.py": "8d1886169b059f460c2e56df4bfe29b768ea94c5b827cda4a583c0838b4186ab",
+  "simulator_m008.py": "041e4648bcc4663c9dac7ef74fee73ee216bc2170da0e9b97580aab9e5951fed",
+  "tests/test_m008.py": "62bf5646f0839c96ebe56a21f582af68e6ef248a93ebcaa69e51b1ec2a19354b"
+ },
+ "kind": "deviation",
+ "prev_record_sha256": "f73c0132c6d0b1b861391c02fb29c8775712ed7e1f1832f73654f23deb0804a5",
+ "record_sha256": "3f037a98d71ec559fb4956dbffed23155711b096ea283772c1326c500c8891b2",
+ "seq": 1,
+ "text": "SUPERSEDED before confirmatory data collection (orchestrator, 2026-09-21). Truthful state: 2 model-arm pilot runs COMPLETED under this v1 registration (M008_haiku_kernel_a, M008_haiku_rules_a; subagents, prompt-blind, not hook-enforced; scored and read by the orchestrator) and 2 launch attempts failed on 'Credit balance is too low'. They are archived unmodified in runs/_pilot_M008v1_superseded/ and are NOT confirmatory data. Reasons for supersession: driver accepted malformed/duplicate init and proposals and mutated state on rejection, had no concurrency control, accepted fabricated evidence ids; the blind guard authorized by suffix regex (absolute-path, symlink, unicode-digit, trailing-newline escapes) and failed open on malformed payloads; the answer key was importable from the arm-facing simulator module; prereg.py addenda could silently re-freeze changed code. Any v2 must be written knowing the two pilot outcomes and must say so."
+}

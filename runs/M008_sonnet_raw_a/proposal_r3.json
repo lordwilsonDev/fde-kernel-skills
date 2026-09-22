@@ -1,0 +1,19 @@
+{
+ "claims": [
+  {
+   "claim_id": "c11",
+   "statement": "Carrier Operations (process owner for pickup scheduling and carrier integration) confirms a correction is possible and reversible, but sets two preconditions: (1) it must run only after the affected carrier feed and its lag are specifically identified, and (2) replaying held allocations is only safe after their pickup slots have been corrected first -- correction must precede replay, not the other way around.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_owner"],
+   "limitation": "Tier-1, owner-direct source. This sets the required sequencing and identification step before any mitigation action can be safely proposed."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "read_partition_offsets",
+  "kind": "diagnostic",
+  "rationale": "Carrier Operations (c11) requires the affected carrier feed and its lag to be specifically identified before any correction runs, and states the correction is 'limited to a single carrier feed' -- implying more than one feed exists and the fault must be pinned to the right one. Reading partition offsets is the read-only diagnostic that can identify which carrier feed is lagging and by how much, satisfying that precondition. This must happen before apply_slot_correction or replay_held_allocations can be responsibly proposed."
+ }
+}

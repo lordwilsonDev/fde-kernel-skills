@@ -1,0 +1,80 @@
+{
+ "claims": [
+  {
+   "claim_id": "c1",
+   "statement": "186 overnight-allocated orders on east-node lanes have been stuck in 'allocated, awaiting pickup' since about 06:00; stuck-order rate at east node is 9% of overnight allocations vs normal at other nodes.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "unknown",
+   "sources": ["m8_e01", "m8_e02"],
+   "limitation": "Alert cannot itself attribute a cause."
+  },
+  {
+   "claim_id": "c2",
+   "statement": "Allocation rule set v18 went live at 22:00 last night, changing multi-node orders to reserve stock from the east node first. Change review passed and regression suite was green.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03"],
+   "limitation": "Green regression suite does not guarantee no downstream pickup-handoff defect for split reservations."
+  },
+  {
+   "claim_id": "c3",
+   "statement": "Warehouse release w41 (label printer drivers, report exports) listed no allocation or scheduling changes, making it an unlikely contributor.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_e04"],
+   "limitation": "Relies on the release summary being complete."
+  },
+  {
+   "claim_id": "c4",
+   "statement": "Every held order was routed to the east node and flagged by the overnight allocator as a split-reservation exception, with reports starting about 06:00 and continuing.",
+   "kind": "observation",
+   "status": "reported",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e10"],
+   "limitation": "Single tier-2 source (customer_support, an unusual owner for an allocator-internal flag); not yet cross-confirmed against the allocator's own exception log."
+  },
+  {
+   "claim_id": "c5",
+   "statement": "Hypothesis: v18's east-node-first reservation logic is producing split-reservation exceptions on multi-node orders that leave stock allocated but never handed off to a carrier-collectible pickup state.",
+   "kind": "hypothesis",
+   "status": "hypothesized",
+   "mechanism_tag": "allocation_rule_defect",
+   "sources": ["m8_e03", "m8_e10"],
+   "limitation": "Temporal correlation (v18 at 22:00, exceptions from 06:00) plus lane match is suggestive but not discriminating; no direct trace yet linking a specific exception to a specific held order, and no confirmation of carrier-side receipt status."
+  },
+  {
+   "claim_id": "c6",
+   "statement": "Dashboards show order state only and cannot show whether a booked pickup was ever confirmed on the carrier's side; Inventory Control cannot see carrier-side records.",
+   "kind": "observation",
+   "status": "established",
+   "mechanism_tag": "other",
+   "sources": ["m8_e09"],
+   "limitation": "This is an observability gap, not evidence of a carrier-side fault by itself."
+  },
+  {
+   "claim_id": "c7",
+   "statement": "Hypothesis: carrier-side pickup confirmation/feed lag is an alternative or contributing mechanism, since carrier ops found nothing obvious on the dock schedule and the system cannot see carrier-side confirmation state.",
+   "kind": "hypothesis",
+   "status": "unknown",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_e01", "m8_e09"],
+   "limitation": "No positive evidence yet, only an observability blind spot and an inconclusive carrier-ops look; cannot rule in or out without carrier-side confirmation data."
+  }
+ ],
+ "contradictions": [
+  {
+   "id": "ct1",
+   "claim_a": "m8_e01",
+   "claim_b": "m8_e10",
+   "description": "Inventory Control reports allocation totals reconcile ('nothing looks wrong on our side'), while the fulfilment report says every held order was flagged as a split-reservation exception by the same overnight allocator. These are not necessarily contradictory (aggregate totals can reconcile while individual orders carry exception flags), but the discrepancy needs the allocator's own exception log to resolve."
+  }
+ ],
+ "next_action": {
+  "action": "audit_allocation_exceptions",
+  "kind": "diagnostic",
+  "rationale": "This is the single highest-information next step: it can directly confirm or refute claim c5 by checking whether the allocator's own exception log ties the held east-node orders to split-reservation exceptions introduced by v18, independent of the single tier-2 customer_support report (c4). It stays within read-only diagnostic authority and targets the most likely mechanism before considering any mitigation like a rule-set revert."
+ }
+}

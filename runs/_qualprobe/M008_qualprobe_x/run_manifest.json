@@ -1,0 +1,11 @@
+{
+ "schema_version": 1,
+ "experiment": "M008",
+ "run_id": "M008_qualprobe_x",
+ "world": "M008",
+ "arm": null,
+ "run_kind": "qualification",
+ "registration_hash": null,
+ "code_hashes": null,
+ "initialized_at": "2026-09-22T02:20:27.931042+00:00"
+}

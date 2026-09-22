@@ -1,0 +1,35 @@
+{
+  "claims": [
+    {
+      "claim_id": "c17_revert_worsened_problem",
+      "statement": "Reverting v18 to v17 did not resolve the 186 held orders; they remain stuck. Additionally, NEW allocations processed under v17 logic are also being held on east-node lanes. This demonstrates that the root cause is NOT a v18 rule defect, but rather a systemic issue in the east-node carrier confirmation process.",
+      "kind": "observation",
+      "status": "reported",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert"],
+      "limitation": "The revert also caused 3,900 allocations to be re-run with duplicate pick lists, introducing a secondary problem. The east-node confirmation latency persists regardless of which allocation rule set is active."
+    },
+    {
+      "claim_id": "c18_east_node_carrier_latency",
+      "statement": "The root cause is a systemic carrier confirmation latency on east-node allocations, not a defect in allocation rule set v18. The evidence shows: (1) split-reservation orders have median 47-minute confirmation latency while slots close at 30 minutes, (2) reverting v18 does not fix existing holds or prevent new holds, (3) new v17 allocations are also being held on the east node. The east-node carrier integration has a confirmation feed delay that affects all orders routed there, which v18 amplified by routing all split-reservation orders to the east node.",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_revert"],
+      "limitation": "The revert experiment reveals the east-node latency issue but does not identify the specific carrier feed or systemic cause. Reverting v18 is not a viable solution; it created secondary problems (duplicate pick lists) without fixing the primary issue."
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "contra_v18_causation",
+      "claim_a": "c16_v18_regression_link_established",
+      "claim_b": "c18_east_node_carrier_latency",
+      "description": "c16 proposed that v18 causes the issue and reverting it would stop new incidents. However, c18 shows that new v17 allocations are also held after revert, proving the root cause is not v18 but an east-node carrier system latency that v18 exposed by routing split-reservation orders to the east node."
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "The revert experiment proves the root cause is not allocation rule set v18, but a systemic carrier confirmation latency on east-node lanes that affects all orders. The allocation layer cannot fix this; Carrier Operations must investigate why east-node confirmation latencies are median 47 minutes when other nodes are normal, and correct the carrier feed or booking slot configuration. The revert has created secondary problems (duplicate pick lists) and should be rolled forward; v18 should be restored and the east-node carrier latency addressed at the carrier integration level."
+  }
+}

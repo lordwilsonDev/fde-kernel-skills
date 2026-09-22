@@ -1,0 +1,37 @@
+{
+  "claims": [
+    {
+      "claim_id": "C4",
+      "statement": "Allocation rule v18's change to east-node-first multi-node reservation creates split-reservation exception flags that mark orders as exceptions in our system; split-exception orders do not follow normal carrier pickup flow, breaking downstream integration with carrier systems",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_e10"],
+      "corroboration": "e03 confirms v18 changed reservation logic; e10 confirms every held order is flagged as split-exception. The coincidence of rule change + exception flag + carrier pickup failure is strong but requires discriminating evidence about whether split-exceptions break downstream logic.",
+      "limitation": "Hypothesis only; requires evidence that split-exception orders either (a) trigger broken downstream logic, or (b) are incompatible with carrier system expectations"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "review_rule_history",
+    "kind": "diagnostic",
+    "rationale": "Understand exactly what v18 changed in the allocation logic. If the change broke split-exception handling or created invalid reservation structures, that discriminates toward allocation-rule defect. If the change is logically correct but triggers a known compatibility issue with carrier systems, that narrows the root cause. This directly informs whether root cause is v18 defect vs carrier adaptation lag.",
+    "expected_information_gain": "Specific technical details of v18's reservation logic change; any known compatibility notes or warnings from the change review"
+  }
+}

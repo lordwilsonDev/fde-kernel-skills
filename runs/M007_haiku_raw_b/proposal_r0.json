@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "c001",
+      "statement": "The customer-records app has a local or in-memory entitlement cache that was not invalidated or refreshed after the overnight directory role sync completed at 02:10",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e08", "m7_e02", "m7_e11"],
+      "limitation": "Contractor log is unverified trust tier 4; only hints at version mismatch, does not confirm cache mechanism"
+    },
+    {
+      "claim_id": "c002",
+      "statement": "The directory role sync completed successfully and directory verification passed, so role assignments in the authoritative source are correct",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m7_e03"],
+      "limitation": "None; verified source from IT Identity"
+    },
+    {
+      "claim_id": "c003",
+      "statement": "Only the customer-records app exhibits authorization failures; other apps operate normally, indicating app-specific rather than identity-wide or network-wide issue",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m7_e02"],
+      "limitation": "None; verified observability data"
+    },
+    {
+      "claim_id": "c004",
+      "statement": "All support agents reporting the issue are among the 214 whose roles were changed overnight, indicating perfect correlation between role change and access loss",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m7_e11", "m7_e03"],
+      "limitation": "None; verified sources"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "pull_sampled_traces",
+    "kind": "diagnostic",
+    "rationale": "Sampled request traces from the customer-records app will reveal what entitlement version/cache state the app is consulting when it denies access. This will confirm whether the app is indeed serving stale cached entitlements (e.g., version 41 referenced in contractor log) or if the failure is happening at a different stage (e.g., ID provider claims, cache bypass, etc.). This is the highest-information diagnostic step: it produces concrete evidence to either confirm the stale cache hypothesis or rule it out and redirect investigation."
+  }
+}

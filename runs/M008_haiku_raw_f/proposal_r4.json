@@ -1,0 +1,35 @@
+{
+  "claims": [
+    {
+      "claim_id": "root_001",
+      "statement": "Allocation rule set v18 creates split-reservation orders that incur excessive carrier confirmation latency (median 47 min) relative to the pickup slot closure deadline (30 min), causing orders to remain unconfirmed and stuck in 'awaiting pickup' state",
+      "kind": "hypothesis",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_e03", "m8_r_exceptions", "m8_r_handoffs", "m8_r_revert"],
+      "limitation": "v18 is a necessary condition for EXC-0921 scope but not sufficient; the revert to v17 did not resolve held orders and new post-revert allocations are also held, indicating a carrier system issue is the root cause"
+    },
+    {
+      "claim_id": "root_002",
+      "statement": "A carrier system integration failure or confirmation queue backlog occurred at approximately 05:58, affecting all east-node orders booked after that time, causing 47-minute median confirmation latency against a 30-minute slot window; v18's split-reservation orders were disproportionately affected due to earlier booking time relative to slot closure",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_revert", "m8_r_dock"],
+      "limitation": "The specific carrier-side failure mechanism (queue backlog, system degradation, integration breakage, timing change) is not yet isolated, but the timing correlation (failure at 05:58) and the discriminating evidence (orders affected only after 05:58, regardless of allocation rules, and re-booked orders succeed) establish this as the root cause"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "cont_001",
+      "claim_a": "root_001",
+      "claim_b": "obs_008",
+      "description": "root_001 claimed v18 as root cause; obs_008 shows v18 revert does not resolve. Contradiction resolved by downgrading root_001 to hypothesis and identifying root_002 (carrier system failure at 05:58) as the true root cause."
+    }
+  ],
+  "next_action": {
+    "action": "replay_held_allocations",
+    "kind": "mitigation",
+    "rationale": "The root cause is a carrier system issue affecting confirmation flow (root_002). The evidence shows that re-booking forces fresh carrier engagement that succeeds (one re-booked order got a valid slot). Replaying the 186 held allocations will trigger re-booking, which should circumvent the 05:58 failure point or re-engage with a carrier system that has recovered. This is a reversible action within authority."
+  }
+}

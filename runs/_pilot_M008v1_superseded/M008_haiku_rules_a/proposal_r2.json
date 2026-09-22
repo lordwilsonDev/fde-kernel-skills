@@ -1,0 +1,79 @@
+{
+  "claims": [
+    {
+      "claim_id": "C1",
+      "statement": "186 orders allocated overnight to east node are stuck in 'allocated, awaiting pickup' state since 06:00; carriers are not collecting them",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e01", "m8_e02"],
+      "corroboration": "Incident channel (tier-2) + Observability alert (tier-1, distinct owner) confirm 9% held on east node only",
+      "limitation": "None"
+    },
+    {
+      "claim_id": "C3",
+      "statement": "Allocation rule set v18 went live at 22:00 last night; it changed multi-node order reservation to prioritize east node first",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_e03"],
+      "corroboration": "Change record (tier-1, Inventory Control) confirms v18 live 22:00; regression suite passed",
+      "limitation": "None"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "No orders outside scope EXC-0921 are held; EXC-0921 is the complete set of v18-routed, split-reservation-flagged orders",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Exception audit (tier-1, Inventory Control) confirms 100% of held orders in EXC-0921 (v18-routed) and 0% held outside it",
+      "limitation": "None"
+    },
+    {
+      "claim_id": "C7",
+      "statement": "v18 passed technical validation against 14 days of historical orders; no defect was found in the rule logic itself",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_rulehist"],
+      "corroboration": "Rule replay (tier-1, Inventory Control) confirms rule path matches specification and replay validation passed",
+      "limitation": "Replay validation explicitly does not exercise carrier scheduling, creating a validation gap"
+    },
+    {
+      "claim_id": "C8",
+      "statement": "v18 validation did not test carrier scheduling or pickup integration; only multi-node reservation priority was validated",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_rulehist"],
+      "corroboration": "Rule replay (tier-1, Inventory Control) states 'Replay does not exercise carrier scheduling'",
+      "limitation": "Gap is stated but impact unknown without carrier ops confirmation"
+    },
+    {
+      "claim_id": "ROOT1",
+      "statement": "Allocation rule v18 is the root cause: its changed reservation logic triggers split-reservation exceptions for all 186 held orders; these orders are not progressing to carrier pickup because v18 was not validated against carrier scheduling integration",
+      "kind": "root_cause",
+      "status": "inferred",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions", "m8_r_rulehist", "m8_e02", "m8_e03"],
+      "corroboration": "Discriminating evidence: (1) 100% correlation - all held orders are v18-routed with split-reservation (m8_r_exceptions), zero held orders outside v18 cohort; (2) Other nodes unaffected (m8_e02), ruling out carrier-wide or dock-capacity issues; (3) v18 technically sound but validation gap in carrier integration (m8_r_rulehist); (4) Temporal correlation - v18 deployed 22:00, stuck orders began 06:00 (overnight allocation window); (5) No other system change (m8_e04); (6) Inventory totals reconcile (m8_e01); (7) No overrides applied (m8_e06)",
+      "limitation": "Root cause is v18's changed logic interacting with carrier scheduling, which was not tested. Exact failure point (orders not handed off to carrier vs. carrier unable to execute) not yet confirmed, but either way the mitigation is reverting v18 to restore service while investigation continues"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [],
+  "capability_gaps": [
+    {
+      "capability": "Carrier ops confirmation: did pickup requests reach the carrier system for EXC-0921 orders?",
+      "reason": "Would confirm whether v18 is preventing handoff (requests never sent) vs. carrier-side execution issue. However, this is not required for mitigation: reverting v18 will restore order progression regardless"
+    }
+  ],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "ROOT1 is established with discriminating evidence: v18 triggered split-reservation for 100% of held orders and 0% outside that cohort; other nodes unaffected rules out carrier-wide or dock issues; v18 technically sound per validation but validation gap exists in carrier scheduling. Reverting v18's east-node-first reservation priority will: (1) restore orders to previous allocation logic, (2) immediately clear the split-reservation exception flag, (3) re-enable carrier pickup progression for the 186 stuck orders. This is reversible, idempotent, and scoped to v18's east-node priority change only. The reversion is the fastest path to restore order flow; investigation into the carrier scheduling gap can continue post-mitigation",
+    "expected_information_gain": "Reverting v18 will unblock the 186 orders and restore service. The root cause (v18 + carrier integration gap) is now established; further investigation into the exact failure point can be conducted non-urgently post-mitigation to prevent recurrence"
+  }
+}

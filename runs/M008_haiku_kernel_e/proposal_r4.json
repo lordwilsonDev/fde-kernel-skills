@@ -1,0 +1,34 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "All conditions met for human gate approval: root_cause C5 established at inferred status, citing discriminating evidence m8_r_exceptions (100% correlation to v18 allocations), no contradictions. The mitigation directly addresses the root cause: reverting v18's east-node reservation priority removes the split-reservation mechanism that is causing all 186 held orders. Reversible and idempotent per scope.",
+    "expected_information_gain": "Human gate decision on rule revert; if approved, orders allocated under v18 will be re-allocated under v17 rules, allowing pickup assignment to proceed"
+  }
+}

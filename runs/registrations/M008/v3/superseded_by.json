@@ -1,0 +1,9 @@
+{
+ "created_utc": "2026-09-22T11:31:06.703848+00:00",
+ "new_record_sha256": "c60df85f7bac64a0363bb3121e0e50492697ca0fbb60976debf98abe2972afc2",
+ "reason": "Wilson: add Qwen3-8B (local, via Ollama, already downloaded) as a real registered arm, run concurrently with the Claude arms. Widened driver_m008.py's ARM_NAME and report.py's NAME regex to accept model slug qwen38b (both frozen files, hence a new version); added fde/run_local_llm.py as the arm-launch mechanism (structurally blind by construction: no tool-use surface at all). Adds Qwen Kernel x8 / rules x8 / raw x8, mirroring the Haiku block. Registered with disclosure of one prior unscored qualification probe (non-exposure, non-productive looping, zero consequential actions) and a Qwen-specific reduced validity/early-stop rule because of it. Haiku/Sonnet arms, scenario, decoy mechanism, Kernel and scoring are unchanged from v3.",
+ "record_sha256": "cedb0650dc5fc701b66d0f58c540d3e5dfb4ba03de9aee6ba42f6e88834f799c",
+ "superseded_by": 4,
+ "version": 3,
+ "world": "M008"
+}

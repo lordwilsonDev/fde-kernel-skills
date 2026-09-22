@@ -1,0 +1,19 @@
+{
+ "claims": [
+  {
+   "claim_id": "c12",
+   "statement": "The specific affected carrier feed is identified: the pickup-window feed consumer for carrier partition 2 (east-node carriers) stalled at 05:58 and is 47 minutes behind and growing, while partitions 0 and 1 are current. This is why EXC-0921 slots were booked against stale (yesterday's) carrier availability -- confirming and pinning down the mechanism in root_cause c10 to this single feed/partition.",
+   "kind": "root_cause",
+   "status": "established",
+   "mechanism_tag": "carrier_feed_lag",
+   "sources": ["m8_r_offsets", "m8_r_handoffs", "m8_r_owner"],
+   "limitation": "Tier-1, owner-direct (carrier_ops) source, consistent with the independently observed 47-minute median confirmation delay in m8_r_handoffs (observability) and the 05:58/06:00 onset in c1/c8. Satisfies Carrier Operations' stated precondition (c11) of identifying the specific affected feed and its lag before any correction runs."
+  }
+ ],
+ "contradictions": [],
+ "next_action": {
+  "action": "apply_slot_correction",
+  "kind": "mitigation",
+  "rationale": "Carrier Operations (c11) confirmed a correction is reversible and safe once limited to the single identified feed, and c12 pins the fault to carrier partition 2's stalled feed consumer (stale slots booked against yesterday's availability). Applying a slot correction scoped to partition 2 / cohort EXC-0921 directly addresses the identified mechanism, is the precondition Carrier Operations requires before replay_held_allocations can safely run (c11: 'replaying held allocations is safe only after their pickup slots have been corrected'), and is a single reversible action eligible for human-gate approval per the authority boundary (m8_e07). It is scoped narrowly (one feed, one cohort) rather than the broader, less-targeted revert_allocation_ruleset suggested by the stale 2023 runbook (m8_e05), which does not match the now-identified mechanism."
+ }
+}

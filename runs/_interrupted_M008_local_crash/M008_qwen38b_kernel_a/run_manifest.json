@@ -1,0 +1,35 @@
+{
+ "schema_version": 1,
+ "experiment": "M008-v4",
+ "run_id": "M008_qwen38b_kernel_a",
+ "world": "M008",
+ "arm": {
+  "model": "qwen38b",
+  "mode": "kernel",
+  "replicate": "a"
+ },
+ "run_kind": "scored",
+ "registration_hash": "c60df85f7bac64a0363bb3121e0e50492697ca0fbb60976debf98abe2972afc2",
+ "code_hashes": {
+  "../.claude/settings.json": "80e88c2286b07e3b9ccaef6bdc861a8200996581a1e7fcb3c5c6c82d071e6707",
+  "blind_guard.py": "792d8d5067a173c8f05b7bd90686b1e7f42c9667815f36a8e8ffa292f30473dc",
+  "driver.py": "b5a8df17bf6a2f2f16dbed8565649d3bcf176619cda25cfaf7e8aeb8c26889c8",
+  "driver_m008.py": "bb7fe4992a24cbef6e8b66d97716d849e53b3a74946edd79f650d200eae0e8e6",
+  "evaluator_m008.py": "0a2916890ad0c2d6369e74483bd831e2145706e7139e5b34f850191e0d123c81",
+  "inspect_run.py": "cea97e861ce7ccdf501e445adfc1af6cad828217296ca8c0090c20b9daeb7f47",
+  "kernel.py": "5a045324b460dbdb7354dfd13ab2da58452ca852faa926a1ee0875f0b729a485",
+  "lint_scenario.py": "9df1e8a6d04939152fa95aa237d28f0891d8c57e63377c51a0122998f7aaacb2",
+  "manifest.py": "3997ac23929f87072678863bb32a3841ffc11ce575106f343a8ab2f2f5afc9a0",
+  "registry.py": "a1deddddee3cf22adc1805bdfc47d8b865919901437a4ab25abbac0a01d22297",
+  "report.py": "66921ea98ae44047d2dce41e8e3422d4adce09f344d9ab913138272b3e105cf1",
+  "run_blind_m008.sh": "188ef2384887b87bf898f80717cedff5052a427ca1b9b8a7f5b99b388f51e915",
+  "run_local_llm.py": "b508d2c46f82f451a4fbdd0620aa12fdc3ab09c440653046748cbc057dbbf31c",
+  "schema.sql": "bd4f9267fb0e246a28b47b8183d8618664e738d797f523bf77cc5d583dc6f8fc",
+  "scorer_m008.py": "d21ebcd671dba4e6e58062acf5025aba383633a5f803f2f2bf8b7b8481bcda83",
+  "simulator.py": "8d1886169b059f460c2e56df4bfe29b768ea94c5b827cda4a583c0838b4186ab",
+  "simulator_m008.py": "041e4648bcc4663c9dac7ef74fee73ee216bc2170da0e9b97580aab9e5951fed",
+  "tests/test_m008.py": "62bf5646f0839c96ebe56a21f582af68e6ef248a93ebcaa69e51b1ec2a19354b",
+  "tests/test_m008_hardening.py": "5951108f0ad8a647e2a1c940620f0bfff627f0ddbeaa43e5174df54cede26d5f"
+ },
+ "initialized_at": "2026-09-22T11:31:48.174642+00:00"
+}

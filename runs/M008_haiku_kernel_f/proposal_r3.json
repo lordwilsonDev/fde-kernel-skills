@@ -1,0 +1,30 @@
+{
+  "claims": [],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C001",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C002",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C003",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C004",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "revert_allocation_ruleset",
+    "kind": "mitigation",
+    "rationale": "All 186 held orders are in the v18 split-reservation scope (EXC-0921). v18 is the only production change since last week. Root cause is inferred with discriminating evidence (perfect correlation). The mitigation is reversible, idempotent, and scoped to east-node reservation priority only, matching the scope stated in human_gate.eligible_actions. This is the highest-information next step to resolve customer impact.",
+    "expected_information_gain": "Reversion will either resolve the held orders (confirming v18 rule defect) or leave them stuck (confirming carrier or inventory cause for further investigation)"
+  }
+}

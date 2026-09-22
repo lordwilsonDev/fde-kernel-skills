@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim_id": "C05",
+      "statement": "Release r7 increased the entitlement cache TTL from 3600 seconds (1 hour) to 86400 seconds (24 hours). When the directory sync at 02:10 updated to v42, the cached v41 entries were not expired; users retained v41 until the new 24-hour TTL expires, causing 403s when the app checks for v42 entitlements.",
+      "kind": "inference",
+      "status": "inferred",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": [
+        "m7_r_settings",
+        "m7_e04",
+        "m7_e03",
+        "m7_r_traces"
+      ],
+      "corroboration": "Settings artifact (m7_r_settings, tier 1, discriminating) shows TTL increased in r7. Timing: directory v42 sync at 02:10; cached v41 gets new 24-hour TTL; failures at 08:30 correlate to when users started hitting the app. Traces confirm v41 vs v42 mismatch. Release notes omit TTL change despite it being functional.",
+      "limitation": "Does not prove the TTL change was the intent; it may have been incidental to performance tuning."
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C01",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C02",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C03",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C04",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [],
+  "next_action": {
+    "action": "evict_entitlement_entries",
+    "kind": "mitigation",
+    "rationale": "Root cause (C04, inferred status, discriminating evidence m7_r_traces + m7_r_settings) is confirmed: version mismatch (v41 cached vs v42 in directory) caused by TTL increase in r7. Eviction is reversible, scoped to the 214 affected users, and directly clears the stale v41 cache. This will force the app to fetch v42 on next access, restoring authorization. Eligibility conditions met: root_cause with discriminating evidence, no contradiction, action within scope (version mismatch confirmed, affected users identified).",
+    "expected_information_gain": "Mitigation execution will provide feedback on success: if 403s drop after eviction, confirms fix; if failures persist, indicates secondary blocker (e.g., app logic bug, v42 role definition issue)."
+  }
+}

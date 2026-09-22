@@ -1,0 +1,36 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_010",
+      "statement": "Replaying held allocations without correcting closed pickup slots re-booked orders into expired slots; the 30-minute slot window had already closed by the time of replay execution",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_replay_ineff"],
+      "limitation": "Confirms that slot window closure is a critical constraint; replay requires the slots to be open or extended first"
+    },
+    {
+      "claim_id": "hyp_006",
+      "statement": "Extending the pickup slot closure window from 30 minutes to a duration accommodating the 47-minute median carrier confirmation latency will allow the held orders to receive carrier confirmation within their (extended) slot window when replayed",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_handoffs", "m8_r_replay_ineff"],
+      "limitation": "Assumes the carrier system continues to operate at 47-minute latency; if the carrier system recovers (confirmation latency improves), the extended slots provide additional margin but are not strictly necessary"
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "hyp_005",
+      "action": "refine",
+      "new_status": "inferred",
+      "rationale": "hyp_005 proposed re-booking as a workaround; obs_010 shows re-booking alone is insufficient without slot correction. Refined to acknowledge slot-dependent nature of the solution."
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "apply_slot_correction",
+    "kind": "mitigation",
+    "rationale": "The replay action failed because the 30-minute pickup slots had closed before re-booking execution. The root cause (carrier confirmation latency at 47 minutes) requires the slot window to remain open for confirmation to complete. Applying a slot correction will extend the closure window beyond the median carrier latency, allowing held orders to be re-booked and receive confirmation within the extended window. This is a reversible action within authority and directly enables the replay mitigation to succeed."
+  }
+}

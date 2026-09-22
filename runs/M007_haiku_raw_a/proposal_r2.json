@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "root_1",
+      "statement": "The customer-records app entitlement cache was not invalidated after the directory sync at 02:10, causing it to serve stale cached role assignments (version 41 instead of directory version 42), resulting in 403 denials for the 214 affected users",
+      "kind": "root_cause",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_e02", "m7_e03", "m7_r_traces", "m7_r_evict"],
+      "limitation": "Confirmed by traces, diagnosis, and successful mitigation resolving the incident"
+    },
+    {
+      "claim_id": "mitigation_1",
+      "statement": "Evicting entitlement entries for the 214 affected users forced the app to reload from the directory, serving correct version 42 and reducing authorization failures from 31% to 1% within 3 minutes",
+      "kind": "impact",
+      "status": "established",
+      "mechanism_tag": "stale_authz_cache",
+      "sources": ["m7_r_evict"],
+      "limitation": "Mitigation is reversible; incident resolved"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "final_assessment",
+    "kind": "final_assessment",
+    "rationale": "Root cause definitively identified and resolved: stale entitlement cache in customer-records app was serving pre-sync role data. Mitigation (cache eviction) successful, reducing error rate from 31% to 1%. No further action needed beyond normal post-incident review."
+  }
+}

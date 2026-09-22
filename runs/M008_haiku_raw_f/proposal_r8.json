@@ -1,0 +1,28 @@
+{
+  "claims": [
+    {
+      "claim_id": "obs_011",
+      "statement": "The slot correction was applied to the wrong feed and did not resolve the held-order condition",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "unknown",
+      "sources": ["m8_r_slot_ineff"],
+      "limitation": "Indicates our available corrective actions lack sufficient visibility into the multi-system carrier integration to fix the root cause unilaterally"
+    },
+    {
+      "claim_id": "inf_002",
+      "statement": "The 186 stuck orders require carrier system intervention; our available mitigations have each failed, indicating the root cause is on the carrier integration side and requires carrier-side diagnostics and fixes",
+      "kind": "inference",
+      "status": "established",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_r_revert", "m8_r_replay_ineff", "m8_r_slot_ineff"],
+      "limitation": "Evidence strongly suggests carrier system issue, but specific failure point requires carrier-side investigation"
+    }
+  ],
+  "contradictions": [],
+  "next_action": {
+    "action": "none",
+    "kind": "final_assessment",
+    "rationale": "Root cause established: carrier system integration failure (root_002) at approximately 05:58, causing 47-minute confirmation latency against 30-minute slot deadline. Three reversible mitigations attempted and failed: (1) revert allocation rules - ineffective, problem persists, (2) replay allocations - ineffective, slots already closed, (3) correct slot windows - ineffective, applied to wrong feed. The carrier system failure requires carrier-side investigation and remediation beyond our system visibility. Final status: 186 orders held, root cause identified as carrier_feed_lag, mitigation blocked without Carrier Operations intervention."
+  }
+}

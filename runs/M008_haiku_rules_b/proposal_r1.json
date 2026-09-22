@@ -1,0 +1,74 @@
+{
+  "claims": [
+    {
+      "claim_id": "C4",
+      "statement": "All 186 held orders belong to the EXC-0921 scope (split-reservation orders under rule set v18); no held orders exist outside this scope",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "allocation_rule_defect",
+      "sources": ["m8_r_exceptions"],
+      "corroboration": "Tier-1 audit confirms 100% overlap between held orders and EXC-0921 cohort",
+      "limitation": "Correlation: cannot yet distinguish whether v18 is the root cause or east-node lanes are experiencing a separate failure"
+    },
+    {
+      "claim_id": "C5",
+      "statement": "The inventory control report confirms allocation totals reconcile; inventory count is consistent with our records",
+      "kind": "observation",
+      "status": "established",
+      "mechanism_tag": "other",
+      "sources": ["m8_e01"],
+      "corroboration": "Inventory control team verified no discrepancies on our side",
+      "limitation": "Does not rule out that the allocation *logic* (v18) is incorrect; only rules out inventory drift as the cause"
+    },
+    {
+      "claim_id": "C6",
+      "statement": "The carrier operations on-call team reports no obvious issue in dock scheduling, but we have no visibility into carrier-side pickup slot confirmations due to observability gap",
+      "kind": "hypothesis",
+      "status": "hypothesized",
+      "mechanism_tag": "carrier_feed_lag",
+      "sources": ["m8_e01", "m8_e09"],
+      "corroboration": "Incident channel mentions ops 'looking at dock schedule'; observability explicitly confirms we cannot see carrier confirmations",
+      "limitation": "Absence of carrier visibility means we cannot rule in or rule out carrier feed lag; requires explicit confirmation"
+    }
+  ],
+  "contradictions": [],
+  "resolutions": [],
+  "dispositions": [
+    {
+      "claim_id": "C1",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C2",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C3",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C4",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C5",
+      "action": "preserve"
+    },
+    {
+      "claim_id": "C6",
+      "action": "preserve"
+    }
+  ],
+  "capability_gaps": [
+    {
+      "capability": "confirm_with_carrier_ops",
+      "reason": "Must determine if carrier has scheduled pickups for EXC-0921 orders or if feed lag is preventing integration; this discriminates allocation-rule defect from carrier-integration issue"
+    }
+  ],
+  "next_action": {
+    "action": "confirm_with_carrier_ops",
+    "kind": "diagnostic",
+    "rationale": "C4 establishes that the 186 held orders are all v18-affected; C5 rules out inventory drift. Now need to determine if carrier has acknowledged slots for these orders or if the issue is purely on the allocation rule side. This is the highest-information next step to narrow the root cause.",
+    "expected_information_gain": "If carrier confirms no pickup slots recorded for EXC-0921 orders, the defect is in v18 allocation logic. If carrier has slots on file, the issue is a feed integration lag on our side."
+  }
+}
