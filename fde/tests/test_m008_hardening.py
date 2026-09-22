@@ -224,7 +224,7 @@ class Concurrency(unittest.TestCase):
 
 
 class Fuzz(unittest.TestCase):
-    POOL = [None, 1, -1, 10 ** 12, True, "x", "", "a,b", "é日", "x" * 5000, [], [1], [None], {}, {"a": 1}, [[]], "M008", "diagnostic", "inferred"]
+    POOL: list = [None, 1, -1, 10 ** 12, True, "x", "", "a,b", "é日", "x" * 5000, [], [1], [None], {}, {"a": 1}, [[]], "M008", "diagnostic", "inferred"]
     def mutate(self, o, rng):
         o = copy.deepcopy(o); nodes = []
         def walk(x, path):

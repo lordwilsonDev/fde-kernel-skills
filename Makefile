@@ -7,7 +7,7 @@ test:
 lint:
 	@for w in M007 M008; do $(PY) fde/lint_scenario.py $$w || exit 1; done
 typecheck:
-	$(PY) -m mypy fde --ignore-missing-imports --exclude 'fde/tests'
+	$(PY) -m mypy fde --ignore-missing-imports
 verify:
 	@$(PY) fde/prereg.py verify M007 || exit 1
 	@$(PY) fde/registry.py status M008
