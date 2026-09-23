@@ -1,0 +1,20 @@
+# Files the format gate must NEVER touch: byte-pinned by the M008 v4 registration
+# (and/or the M007 baseline). Equality with the derived frozen set is enforced by
+# fde/tests/test_repo_hygiene.py — add a line ONLY when a registration freezes a file,
+# remove it only when a new registration version stops freezing it (M009).
+fde/blind_guard.py
+fde/driver.py
+fde/driver_m008.py
+fde/evaluator_m008.py
+fde/inspect_run.py
+fde/kernel.py
+fde/lint_scenario.py
+fde/manifest.py
+fde/registry.py
+fde/report.py
+fde/run_local_llm.py
+fde/scorer_m008.py
+fde/simulator.py
+fde/simulator_m008.py
+fde/tests/test_m008.py
+fde/tests/test_m008_hardening.py

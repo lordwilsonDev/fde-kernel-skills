@@ -1,0 +1,4 @@
+# Gate toolchain pins for `make fmt-check` / `make typecheck`.
+# Asserted against the INSTALLED tools by test_repo_hygiene — gate behavior cannot drift silently.
+black==25.12.0
+mypy==2.3.0

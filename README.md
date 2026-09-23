@@ -21,8 +21,8 @@ Config by environment: `FDE_VAULT` (default `~/Documents/Vault`), `FDE_RUNS`, `F
 
 ## Quick start
 ```bash
-make check                                                     # full gate: 221 tests + lints + prereg verify M007 + registry status M008
-python3 -W ignore -m unittest discover -s fde/tests          # tests only (221)
+make check                                                     # full gate: 231 tests + lints + prereg verify M007 + registry status M008 + fmt + typecheck
+python3 -W ignore -m unittest discover -s fde/tests          # tests only (231)
 python3 fde/lint_scenario.py M006                              # scenario leak linter (M006's flaw is HIGH)
 python3 fde/prereg.py new M005 --arms "haiku:kernel,rules,raw x3" --predictions predictions.md
 fde/run_blind.sh M005 kernel M005_haiku_kernel_a haiku         # init -> guard on -> headless Claude Code -> guard off -> score
@@ -48,7 +48,7 @@ python3 fde/manifest.py tree                          # deterministic tree hash 
 The blind guard is now an allowlist (current round's ctx/proposal only, proposals create-once, four literal driver commands, no search/web/MCP/sub-agents, fail-closed) and, when started with `driver_m008.py blind on <run>`, run-isolated. The orchestrating session is not blinded; only model-arm sessions are.
 
 ## Verified vs not verified
-- Verified: 221 tests incl. mutation checks (Kernel, loop, scenarios, guard, linter, pre-registration, registry, report); `make check` exit 0 on 2026-09-22.
+- Verified: 231 tests incl. mutation checks (Kernel, loop, scenarios, guard, linter, pre-registration, registry, report); `make check` exit 0 on 2026-09-22.
 - Verified (negative): the `PreToolUse` blind guard does **not** fire on Claude Code subagent tool calls (live probe, `runs/_qualprobe/`).
 - **Not verified:** the skills loading as `/skills` in a live Claude Code session, the hook firing in a top-level interactive session, and `fde/run_blind.sh` / `run_blind_m008.sh` end-to-end. The attempts stopped at "Credit balance is too low" (`claude -p` uses API credit, not the subscription).
 - Navigation cards for agents: `docs/nav/ABSTRACTIONS.md` (5 route cards, re-validated by `nav.py check` from the `navigation-layer` skill).
